@@ -167,3 +167,11 @@ Eseguire da `/home/rufio72/OpenSolomonsKey-master/decomp/` con `export DISPLAY=:
 - Domanda 3 (preferenza): accettata la proposta, estensione fino alla call successiva, limite segnalato nel rapporto.
 - Domanda 4 (scelta di progetto, confermata dall'utente): terza routine facoltativa, scelta dal classificatore; bastano 0x05B3 e 0x2402 se il tempo manca.
 - Domanda 5 (scelta di progetto, confermata dall'utente): sessione di 5500 frame.
+
+## Chiusura ciclo (chat principale, 2026-10-19)
+
+Esito: PASSATO con tre note del verificatore, nessuna imputabile al lavoro:
+- Verifica 3: destinazioni call/rst 119 o 124 contro le 115 del brief; differenza di definizione del conteggio, documentata dallo sviluppatore.
+- Verifica 4: 7815 byte eseguiti contro l'intervallo 9000-20000: il verificatore ha misurato sulla traccia da 1900 frame, l'intervallo del brief si riferisce ai 5500 frame (misurati 10183). La rilettura ha sovrascritto `out/numeri.txt` con i numeri a 1900 frame; i numeri a 5500 frame restano in RAPPORTO.md.
+- Verifica 12: la traccia da 244 MB era stata rigenerata dal verificatore stesso; cancellata dalla chat principale.
+Token: analista Fable 76k, sviluppatore Opus 74k, verificatore Sonnet 22k.
