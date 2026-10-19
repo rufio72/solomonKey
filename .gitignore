@@ -47,7 +47,8 @@ imgui.ini
 roms/*.zip
 roms/ext/
 __pycache__/
-decomp/out/
+decomp/out/*
+!decomp/out/snap_*
 decomp/harness/harness
 decomp/harness/sched_proto
 decomp/harness/*.o

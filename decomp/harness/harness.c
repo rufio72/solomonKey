@@ -1,56 +1,67 @@
-/* Banco di prova: ./harness <ENTRY>
- * Carica ../out/snap_<ENTRY>_prima.bin e i registri «prima», esegue la
+/* Banco di prova: ./harness <ENTRY> | --tutte
+ * Per ogni cattura della routine (snap_<ENTRY>_prima.bin, tag «base», e
+ * snap_<ENTRY>_<tag>_prima.bin) carica RAM e registri «prima», esegue la
  * routine tradotta e confronta RAM (c000-e5ff) e registri con lo stato «dopo»
- * misurato in MAME. Stampa OK <ENTRY> o FALLITO <ENTRY>. */
+ * misurato in MAME. Stampa OK/FALLITO per cattura e un RIEPILOGO finale. */
+#define _POSIX_C_SOURCE 200809L
+#include <glob.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ram.h"
+#include "routine.h"
 
 uint8_t ram[0x4000];
+uint8_t rom[0x10000];
 static uint8_t dopo[0x4000];
 
-struct voce {
-    const char *entry;
-    void (*fn)(struct z80 *);
-    uint16_t blocco_ini, blocco_fine;  /* intervallo da verificare in modo esplicito */
-};
-
-static const struct voce tabella[] = {
-    { "0x05B3", sub_05b3, 0xc8ee, 0xc94d },
-    { "0x2402", sub_2402, 0xe400, 0xe401 },
-    { "0x326C", sub_326c, 0xd880, 0xdfff },
-};
-
-/* Cartella delle catture: SNAP_DIR o ../out, poi out. */
-static FILE *apri(const char *entry, const char *suffisso, const char *modo)
+/* Carica main64.bin (ROM a indirizzi reali) da out/ o ../out/. */
+static void carica_rom(void)
 {
-    const char *dirs[] = { getenv("SNAP_DIR"), "out", "../out" };
-    char nome[512];
-    for (unsigned i = 0; i < 3; i++) {
-        if (!dirs[i]) continue;
-        snprintf(nome, sizeof nome, "%s/snap_%s%s", dirs[i], entry, suffisso);
-        FILE *f = fopen(nome, modo);
-        if (f) return f;
+    const char *nomi[] = { "out/main64.bin", "../out/main64.bin" };
+    for (unsigned i = 0; i < 2; i++) {
+        FILE *f = fopen(nomi[i], "rb");
+        if (!f) continue;
+        size_t n = fread(rom, 1, sizeof rom, f);
+        fclose(f);
+        if (n != sizeof rom) {
+            fprintf(stderr, "%s: lunghezza sbagliata\n", nomi[i]);
+            exit(2);
+        }
+        return;
     }
-    fprintf(stderr, "file snap_%s%s non trovato\n", entry, suffisso);
+    fprintf(stderr, "main64.bin non trovato in out/ né in ../out/\n");
     exit(2);
 }
 
-static void carica(const char *entry, const char *suffisso, uint8_t *dest)
+/* Carica 16 KB da <prefisso><suffisso>; 0 se il file manca o è corto. */
+static int carica(const char *prefisso, const char *suffisso, uint8_t *dest)
 {
-    FILE *f = apri(entry, suffisso, "rb");
-    if (fread(dest, 1, 0x4000, f) != 0x4000) {
-        fprintf(stderr, "snap_%s%s: lunghezza sbagliata\n", entry, suffisso);
-        exit(2);
+    char nome[512];
+    snprintf(nome, sizeof nome, "%s%s", prefisso, suffisso);
+    FILE *f = fopen(nome, "rb");
+    if (!f) {
+        printf("file %s non trovato\n", nome);
+        return 0;
     }
+    size_t n = fread(dest, 1, 0x4000, f);
     fclose(f);
+    if (n != 0x4000) {
+        printf("%s: lunghezza sbagliata\n", nome);
+        return 0;
+    }
+    return 1;
 }
 
-/* Legge una riga «prima|dopo PC=.. AF=.. ...» nei registri. */
-static void leggi_registri(const char *entry, const char *quale, struct z80 *z)
+/* Legge una riga «prima|dopo PC=.. AF=.. ...» nei registri; 0 se manca. */
+static int leggi_registri(const char *prefisso, const char *quale, struct z80 *z)
 {
-    FILE *f = apri(entry, "_regs.txt", "r");
+    char nome[512];
+    snprintf(nome, sizeof nome, "%s_regs.txt", prefisso);
+    FILE *f = fopen(nome, "r");
+    if (!f) {
+        printf("file %s non trovato\n", nome);
+        return 0;
+    }
     char riga[256];
     unsigned pc, af, bc, de, hl, ix, iy, sp;
     char fmt[128];
@@ -62,11 +73,12 @@ static void leggi_registri(const char *entry, const char *quale, struct z80 *z)
             SET_BC(z, bc); SET_DE(z, de); SET_HL(z, hl);
             z->ix = ix; z->iy = iy; z->sp = sp;
             fclose(f);
-            return;
+            return 1;
         }
     }
-    fprintf(stderr, "riga «%s» mancante in snap_%s_regs.txt\n", quale, entry);
-    exit(2);
+    fclose(f);
+    printf("riga «%s» mancante in %s\n", quale, nome);
+    return 0;
 }
 
 static int confronta_reg(const char *nome, unsigned c, unsigned mame)
@@ -76,25 +88,16 @@ static int confronta_reg(const char *nome, unsigned c, unsigned mame)
     return 1;
 }
 
-int main(int argc, char **argv)
+/* Prova una cattura (prefisso dei file senza suffisso); 1 se coincide. */
+static int prova(const struct voce_routine *v, const char *prefisso, const char *tag)
 {
-    if (argc != 2) {
-        fprintf(stderr, "uso: %s <ENTRY>   (es. 0x05B3)\n", argv[0]);
-        return 2;
-    }
-    const struct voce *v = NULL;
-    for (unsigned i = 0; i < sizeof tabella / sizeof tabella[0]; i++)
-        if (strcmp(argv[1], tabella[i].entry) == 0) v = &tabella[i];
-    if (!v) {
-        fprintf(stderr, "routine %s non tradotta\n", argv[1]);
-        return 2;
-    }
-
+    printf("cattura %s\n", tag);
     struct z80 z, atteso;
-    carica(v->entry, "_prima.bin", ram);
-    carica(v->entry, "_dopo.bin", dopo);
-    leggi_registri(v->entry, "prima", &z);
-    leggi_registri(v->entry, "dopo", &atteso);
+    if (!carica(prefisso, "_prima.bin", ram) || !carica(prefisso, "_dopo.bin", dopo) ||
+        !leggi_registri(prefisso, "prima", &z) || !leggi_registri(prefisso, "dopo", &atteso)) {
+        printf("FALLITO %s %s\n", v->entry, tag);
+        return 0;
+    }
 
     v->fn(&z);
 
@@ -117,13 +120,15 @@ int main(int argc, char **argv)
     if (pila_libera)
         printf("pila libera %04X-%04X: %d byte diversi, non confrontati\n",
                pila_ini, pila_fine - 1, pila_libera);
-    unsigned blocco = 0;
-    for (unsigned a = v->blocco_ini; a <= v->blocco_fine; a++)
-        blocco += (M(a) == dopo[a - 0xc000]);
-    unsigned attesi = v->blocco_fine - v->blocco_ini + 1;
-    printf("byte %04X-%04X coincidenti: %u su %u\n", v->blocco_ini, v->blocco_fine,
-           blocco, attesi);
-    if (blocco != attesi) errori++;
+    if (v->blocco_ini) {
+        unsigned blocco = 0;
+        for (unsigned a = v->blocco_ini; a <= v->blocco_fine; a++)
+            blocco += (M(a) == dopo[a - 0xc000]);
+        unsigned attesi = v->blocco_fine - v->blocco_ini + 1;
+        printf("byte %04X-%04X coincidenti: %u su %u\n", v->blocco_ini, v->blocco_fine,
+               blocco, attesi);
+        if (blocco != attesi) errori++;
+    }
 
     errori += confronta_reg("A", z.a, atteso.a);
     errori += confronta_reg("BC", BC(&z), BC(&atteso));
@@ -134,6 +139,76 @@ int main(int argc, char **argv)
     printf("registri C: A=%02X BC=%04X DE=%04X HL=%04X IX=%04X IY=%04X\n",
            z.a, BC(&z), DE(&z), HL(&z), z.ix, z.iy);
 
-    printf("%s %s\n", errori ? "FALLITO" : "OK", v->entry);
-    return errori ? 1 : 0;
+    printf("%s %s %s\n", errori ? "FALLITO" : "OK", v->entry, tag);
+    return !errori;
+}
+
+static int esiste(const char *nome)
+{
+    FILE *f = fopen(nome, "r");
+    if (f) fclose(f);
+    return f != NULL;
+}
+
+/* Prova tutte le catture di una routine nella prima cartella fra SNAP_DIR,
+ * out e ../out che ne contiene; 1 se almeno una e tutte coincidono. */
+static int prova_routine(const struct voce_routine *v)
+{
+    const char *dirs[] = { getenv("SNAP_DIR"), "out", "../out" };
+    char base[512], modello[512];
+    glob_t g = { 0 };
+    const char *dir = NULL;
+    for (unsigned i = 0; i < 3 && !dir; i++) {
+        if (!dirs[i]) continue;
+        snprintf(base, sizeof base, "%s/snap_%s_regs.txt", dirs[i], v->entry);
+        snprintf(modello, sizeof modello, "%s/snap_%s_*_regs.txt", dirs[i], v->entry);
+        globfree(&g);
+        memset(&g, 0, sizeof g);
+        int trovati = glob(modello, 0, NULL, &g) == 0 ? (int)g.gl_pathc : 0;
+        if (esiste(base) || trovati) dir = dirs[i];
+    }
+
+    unsigned n = 0, k = 0;
+    if (dir) {
+        char prefisso[512];
+        snprintf(prefisso, sizeof prefisso, "%s/snap_%s", dir, v->entry);
+        if (esiste(base)) {
+            n++;
+            k += prova(v, prefisso, "base");
+        }
+        size_t lp = strlen(prefisso);
+        for (size_t i = 0; i < g.gl_pathc; i++) {
+            /* tag = parte fra «snap_<ENTRY>_» e «_regs.txt» */
+            const char *p = g.gl_pathv[i];
+            size_t lt = strlen(p) - lp - 1 - strlen("_regs.txt");
+            char tag[128], pref_tag[640];
+            snprintf(tag, sizeof tag, "%.*s", (int)lt, p + lp + 1);
+            snprintf(pref_tag, sizeof pref_tag, "%s_%s", prefisso, tag);
+            n++;
+            k += prova(v, pref_tag, tag);
+        }
+    }
+    globfree(&g);
+    printf("RIEPILOGO %s: %u catture, %u OK\n", v->entry, n, k);
+    return n >= 1 && k == n;
+}
+
+int main(int argc, char **argv)
+{
+    if (argc != 2) {
+        fprintf(stderr, "uso: %s <ENTRY> | --tutte   (es. 0x05B3)\n", argv[0]);
+        return 2;
+    }
+    carica_rom();
+    if (strcmp(argv[1], "--tutte") == 0) {
+        int tutte = 1;
+        for (unsigned i = 0; i < num_routine; i++)
+            tutte &= prova_routine(&tabella_routine[i]);
+        return tutte ? 0 : 1;
+    }
+    for (unsigned i = 0; i < num_routine; i++)
+        if (strcmp(argv[1], tabella_routine[i].entry) == 0)
+            return prova_routine(&tabella_routine[i]) ? 0 : 1;
+    fprintf(stderr, "routine %s non tradotta\n", argv[1]);
+    return 2;
 }

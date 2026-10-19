@@ -7,7 +7,7 @@
 set -u
 cd "$(dirname "$0")"
 export DISPLAY="${DISPLAY:-:1}"
-MOPT="-rompath $(cd .. && pwd)/roms -video soft -sound none -window -nomaximize -skip_gameinfo -nothrottle"
+MOPT="-rompath $(cd .. && pwd)/roms -video none -sound none -skip_gameinfo -nothrottle"
 
 # sessione NOME: le variabili SESS_* arrivano dall'ambiente del chiamante
 sessione() {
