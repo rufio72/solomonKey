@@ -1,0 +1,52 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+build
+sprites
+res
+.gdb_history
+.vscode
+*.wav
+*.ogg
+*.sln
+glm
+incl
+*pdb
+.vs
+raw
+Makefile
+imgui.ini
+# ROM Tecmo e dati derivati (copyright): restano in locale, res/ si rigenera con tools/
+roms/
+tools/out/
+__pycache__/
+decomp/out/
