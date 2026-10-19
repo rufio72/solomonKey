@@ -315,3 +315,26 @@ Da `/home/rufio72/OpenSolomonsKey-master/decomp/` con `export DISPLAY=:1`,
 - Domanda 5 (preferenza): accettata, stub che applicano le scritture del log.
 - Domanda 1 (scelta di progetto, utente): niente coroutine; una funzione C per codice di attività, ciclo sui 64 slot uno a uno con 3AF3 (stesso ordine, stessa posta 0493, stesso indice c04f), stato in RAM; `coro.*` tolti, `sched_proto` con ciclo e stub, verifica sulla sequenza per frame invariata.
 - Domanda 2 (scelta di progetto, utente): sessioni `bonus` e `finale` fuori perimetro, rinviate; cancello di copertura senza di esse (atteso invariato: N > 129, obiettivo ≥ 270, attesa, non misurata).
+
+## Esito (sviluppatore, 2026-10-19) — GIRO DI COPERTURA INTERROTTO
+
+Il giro `sessioni.sh` è stato fermato dall'utente durante l'ultima sessione,
+`attract`, al frame ~7964 della prima finestra di traccia (7400-8200); la
+seconda finestra (19400-19900) non è stata raggiunta. Completate: tutte le 51
+stanze (00-51 tranne 49), `gameover`, `titolo`. La traccia parziale di
+`attract` è stata elaborata come `attract_parziale` e cancellata.
+
+Copertura delle 299 destinazioni statiche di `call` (`out/copertura_call_sessioni.txt`):
+- prima: 123 su 299 (41,1%) con la traccia a 1900 frame; 129 (43,1%) a 5500 frame;
+- dopo, unione delle sessioni raccolte: **195 su 299 (65,2%)**; sotto
+  l'obiettivo di 270, sopra il cancello di 129;
+- per sessione: stanze fra 107 (stanza_29) e 158 (stanza_50), tipicamente
+  115-130; gameover 80, titolo 93, attract_parziale 71, prova 90;
+- restano 104 destinazioni in `out/call_mai_osservate.txt`.
+Game over senza input: `FASE 7337 14 15` (verifica 4 passata). e603: solo il PC 0161.
+
+Scheduler: completato con `out/sched_log.txt` già su disco (misura prima
+dell'interruzione): `sched_proto` 106124 spedizioni, 0 differenze, 131 posta
+coincidenti (il brief attendeva 110: rimisurato 131, le voci per PC del brief
+non sommavano al totale 1298). La NMI posta attività (116 dei 131), a
+differenza di quanto scritto nei fatti del brief: vedi `decomp/SCHEDULER.md`.

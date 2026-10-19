@@ -7,7 +7,8 @@ Legge out/trace.txt in streaming e produce:
   out/chiamate.txt   chiamate eseguite: sito, destinazione, numero
   out/copertura.txt  intervalli contigui codice|dati su 0000-bfff e f000-ffff
   out/numeri.txt     i numeri del sondaggio
-Con --cancella elimina la traccia alla fine.
+Con --cancella elimina la traccia alla fine. Con --prefisso NOME i file
+diventano out/NOME_eseguiti.txt, out/NOME_istruzioni.txt e così via.
 """
 import argparse
 import os
@@ -81,6 +82,8 @@ def principale():
     ap.add_argument('--rom', default='out/main64.bin')
     ap.add_argument('--cancella', action='store_true',
                     help='cancella la traccia dopo l\'elaborazione')
+    ap.add_argument('--prefisso', default='',
+                    help='prefisso dei file in out/ (es. stanza_03)')
     arg = ap.parse_args()
 
     rom = open(arg.rom, 'rb').read()
@@ -179,23 +182,27 @@ def principale():
                 tabelle.add(a)
 
     os.makedirs('out', exist_ok=True)
-    with open('out/eseguiti.txt', 'w') as f:
+    pre = arg.prefisso + '_' if arg.prefisso else ''
+
+    def uscita(nome):
+        return os.path.join('out', pre + nome)
+    with open(uscita('eseguiti.txt'), 'w') as f:
         for pc in sorted(conteggio):
             f.write('%04X\n' % pc)
-    with open('out/istruzioni.txt', 'w') as f:
+    with open(uscita('istruzioni.txt'), 'w') as f:
         f.write('# pc\tesecuzioni\tistruzione\n')
         for pc in sorted(conteggio):
             f.write('%04X\t%d\t%s\n' % (pc, conteggio[pc], testo[pc]))
-    with open('out/chiamate.txt', 'w') as f:
+    with open(uscita('chiamate.txt'), 'w') as f:
         f.write('# sito\tdestinazione\tnumero\n')
         for (s, d), n in sorted(chiamate.items()):
             f.write('%04X\t%04X\t%d\n' % (s, d, n))
-    with open('out/copertura.txt', 'w') as f:
+    with open(uscita('copertura.txt'), 'w') as f:
         f.write('# intervalli contigui inizio-fine codice|dati (0000-bfff, f000-ffff)\n')
         for i, fi, s in intervalli:
             f.write('%04x-%04x %s\n' % (i, fi, s))
     dest_vere = {d for (_, d) in chiamate}
-    with open('out/numeri.txt', 'w') as f:
+    with open(uscita('numeri.txt'), 'w') as f:
         def scrivi(nome, valore):
             f.write('%s: %s\n' % (nome, valore))
         scrivi('righe di traccia', righe)
