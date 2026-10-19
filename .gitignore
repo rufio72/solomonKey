@@ -51,3 +51,18 @@ decomp/out/
 decomp/harness/harness
 decomp/harness/sched_proto
 decomp/harness/*.o
+
+# vecchio port OpenSolomonsKey: resta su disco per prove locali, non nel repository
+src/
+editor/
+page/
+res/
+tools/
+build/
+level_*.osk
+build*.sh
+build*.bat
+stb_image.h
+project.4coder
+final.txt
+LICENSE
