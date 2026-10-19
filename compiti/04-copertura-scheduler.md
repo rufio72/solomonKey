@@ -338,3 +338,9 @@ dell'interruzione): `sched_proto` 106124 spedizioni, 0 differenze, 131 posta
 coincidenti (il brief attendeva 110: rimisurato 131, le voci per PC del brief
 non sommavano al totale 1298). La NMI posta attività (116 dei 131), a
 differenza di quanto scritto nei fatti del brief: vedi `decomp/SCHEDULER.md`.
+
+## Chiusura ciclo (chat principale, 2026-10-19)
+
+Esito: PASSATO con riserva sulla copertura. Verificatore senza MAME (vietato dall'utente): scheduler confermato su log esistente (106124 spedizioni, 0 differenze; posta 131, il 110 del brief era sbagliato); harness tre OK; copertura 195/299 confermata ma sotto l'obiettivo 270, giro interrotto dall'utente nell'ultima sessione (demo). Verifica 13 non attendibile: `.inizio` ricreato dopo la perdita dei file.
+Incidente: la chat principale ha riscritto la cronologia git a ciclo in corso e ha perso sette file non committati; lo sviluppatore li ha ricreati dalla sua sessione. Regola da ora: nessuna operazione git distruttiva con un agente al lavoro.
+Token: sviluppatore Opus 107k, verificatore Sonnet 25k.
