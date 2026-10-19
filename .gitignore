@@ -32,10 +32,8 @@
 *.app
 build
 sprites
-res
 .gdb_history
 .vscode
-*.wav
 *.ogg
 *.sln
 glm
@@ -45,9 +43,9 @@ incl
 raw
 Makefile
 imgui.ini
-# ROM Tecmo e dati derivati (copyright): restano in locale, res/ si rigenera con tools/
-roms/
-tools/out/
+# Solo le ROM vere restano fuori; immagini, dump e dati derivati sono inclusi (vedi NOTICE.md)
+roms/*.zip
+roms/ext/
 __pycache__/
 decomp/out/
 decomp/harness/harness

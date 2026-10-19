@@ -1,4 +1,9 @@
 # OpenSolomonsKey
+
+> **Nota:** le immagini, i suoni e i dati in `res/`, `roms/decoded/` e `tools/out/`
+> derivano dalle ROM arcade di Solomon's Key (Tecmo, 1986) e **non sono di proprietà
+> dell'autore di questo repository**. Vedi [NOTICE.md](NOTICE.md). Le ROM non sono incluse.
+> Il codice del port in `src/` è il progetto OpenSolomonsKey originale, pubblico dominio.
 Linux and Windows Solomon's Key (1986) port.
 
 ![](page/banner.png)
