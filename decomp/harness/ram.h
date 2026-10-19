@@ -26,4 +26,14 @@ struct z80 {
 void sub_05b3(struct z80 *z);
 void sub_2402(struct z80 *z);
 
+/* Decodificatore del fondale e callee (fondale.c). */
+void sub_326c(struct z80 *z);
+void sub_23bb(struct z80 *z, int riporto);
+void sub_23cb(struct z80 *z);
+uint16_t sub_23ec(uint8_t riga);
+int sub_336c(uint8_t base, uint8_t attributi, uint8_t riga, uint8_t colonna);
+
+/* Protezione e603 (porte.c). */
+uint8_t leggi_e603(uint16_t pc);
+
 #endif

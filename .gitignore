@@ -50,3 +50,6 @@ roms/
 tools/out/
 __pycache__/
 decomp/out/
+decomp/harness/harness
+decomp/harness/sched_proto
+decomp/harness/*.o

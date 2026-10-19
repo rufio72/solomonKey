@@ -19,6 +19,7 @@ struct voce {
 static const struct voce tabella[] = {
     { "0x05B3", sub_05b3, 0xc8ee, 0xc94d },
     { "0x2402", sub_2402, 0xe400, 0xe401 },
+    { "0x326C", sub_326c, 0xd880, 0xdfff },
 };
 
 /* Cartella delle catture: SNAP_DIR o ../out, poi out. */
@@ -97,15 +98,25 @@ int main(int argc, char **argv)
 
     v->fn(&z);
 
-    int errori = 0, stampate = 0;
+    int errori = 0, stampate = 0, pila_libera = 0;
+    /* Pila libera sotto lo SP di ingresso: i push/call interni della routine
+     * vi lasciano residui che il C non riproduce, quindi non si confronta. */
+    unsigned pila_ini = (unsigned)z.sp - 0x40, pila_fine = z.sp;
     /* c000-e5ff: escluse le porte e la ROM f000 */
     for (unsigned i = 0; i < 0x2600; i++) {
+        if (0xc000 + i >= pila_ini && 0xc000 + i < pila_fine) {
+            pila_libera += (ram[i] != dopo[i]);
+            continue;
+        }
         if (ram[i] != dopo[i]) {
             if (stampate++ < 8)
                 printf("%04X: prima->%02X dopo %02X\n", 0xc000 + i, ram[i], dopo[i]);
             errori++;
         }
     }
+    if (pila_libera)
+        printf("pila libera %04X-%04X: %d byte diversi, non confrontati\n",
+               pila_ini, pila_fine - 1, pila_libera);
     unsigned blocco = 0;
     for (unsigned a = v->blocco_ini; a <= v->blocco_fine; a++)
         blocco += (M(a) == dopo[a - 0xc000]);
