@@ -1,0 +1,5 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+SNAP: occorrenza 1 scartata (NMI)
+SNAP: occorrenza 2 scartata (NMI)
+SNAP: catturata occorrenza 3 di 0x326C [gioco] al frame 1543, scartate 2
+Average speed: 2748.45% (25 seconds)

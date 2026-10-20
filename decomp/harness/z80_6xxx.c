@@ -16,3 +16,29 @@ void sub_673f(struct z80 *z)
     SET_BC(z, 0);
     SET_HL(z, TABELLA_ATTIVITA + LUNG_ATTIVITA);
 }
+
+/* 0x6771: scrive una stringa in due piani.
+ * Ingresso: HL sorgente (primo byte = attributo, poi caratteri fino a
+ * 0xff), DE destinazione. Per ogni carattere: (DE) = carattere, poi DE col
+ * bit 2 di D spento = attributo, e DE col bit 2 di D acceso avanza di 1
+ * (il codice si estende fino a 6784, oltre il ret a 677B).
+ * Uscita: A = 0xff, C = attributo, HL dopo il terminatore, DE = ultima
+ * destinazione. */
+void sub_6771(struct z80 *z)
+{
+    uint16_t src = HL(z), dst = DE(z);
+    z->c = leggi(src);
+    for (;;) {
+        uint8_t ch = leggi(++src);
+        if (ch == 0xff)
+            break;
+        M(dst) = ch;
+        dst &= ~0x0400;
+        M(dst) = z->c;
+        dst |= 0x0400;
+        dst++;
+    }
+    z->a = 0xff;
+    SET_HL(z, src + 1);
+    SET_DE(z, dst);
+}

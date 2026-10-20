@@ -7,6 +7,9 @@
 -- SNAP_INGRESSI: nessuno (predefinito) o traccia (moneta, start e input casuali
 -- dal frame 1900 come trace.lua, con math.randomseed(1)).
 -- SNAP_LIMITE: frame massimo senza cattura (predefinito 6000).
+-- SNAP_COND: condizione del breakpoint d'ingresso nella sintassi del debugger
+-- di MAME (es. a>=#10, decimale con #); vuota (predefinito) = nessuna. Le
+-- occorrenze contate da SNAP_N sono solo quelle che la soddisfano.
 local testo_entry = os.getenv("SNAP_ENTRY") or "0x05B3"
 local entry = tonumber(testo_entry)
 local voluta = tonumber(os.getenv("SNAP_N") or "1")
@@ -15,6 +18,7 @@ local da_frame = tonumber(os.getenv("SNAP_DA_FRAME") or "0")
 local tag = os.getenv("SNAP_TAG") or ""
 local ingressi = os.getenv("SNAP_INGRESSI") or "nessuno"
 local limite = tonumber(os.getenv("SNAP_LIMITE") or "6000")
+local cond = os.getenv("SNAP_COND") or ""
 local base = string.format("%s/snap_%s", dir, testo_entry)
 if tag ~= "" then base = base .. "_" .. tag end
 local testo_tag = (tag ~= "") and (" [" .. tag .. "]") or ""
@@ -73,7 +77,11 @@ end
 
 local function arma_ingresso()
   dbg:command("bpclear")
-  dbg:command(string.format("bpset %X", entry))
+  if cond ~= "" then
+    dbg:command(string.format("bpset %X,%s", entry, cond))
+  else
+    dbg:command(string.format("bpset %X", entry))
+  end
 end
 
 if da_frame == 0 then arma_ingresso() end

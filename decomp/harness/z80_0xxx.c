@@ -42,3 +42,13 @@ void sub_026c(struct z80 *z)
     M(TEMPO_CONTO + 1)++;
     SET_HL(z, TEMPO_CONTO + 1);
 }
+
+/* 0x0018 (rst 18): come rst 10 ma con DE e HL scambiati all'uscita.
+ * Uscita: HL = parola letta a HL (anche ROM), DE = HL d'ingresso + 2. */
+void sub_0018(struct z80 *z)
+{
+    sub_0010(z);
+    uint16_t de = DE(z);
+    SET_DE(z, HL(z));
+    SET_HL(z, de);
+}

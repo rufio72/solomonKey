@@ -30,4 +30,21 @@ void sub_4b0e(struct z80 *z);
 void sub_5c78(struct z80 *z);
 void sub_673f(struct z80 *z);
 
+/* Lotto 2 (compito 06). */
+void sub_0018(struct z80 *z);
+void sub_2368(struct z80 *z);
+void sub_23ac(struct z80 *z);
+void sub_23f8(struct z80 *z);
+void sub_240b(struct z80 *z);
+void sub_2457(struct z80 *z);
+void sub_34d4(struct z80 *z);
+void sub_380a(struct z80 *z);
+void sub_3a2e(struct z80 *z);
+void sub_4722(struct z80 *z);
+void sub_4dee(struct z80 *z);
+void sub_4e31(struct z80 *z);
+void sub_4e87(struct z80 *z);
+void sub_6771(struct z80 *z);
+void sub_7efe(struct z80 *z);
+
 #endif

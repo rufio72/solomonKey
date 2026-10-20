@@ -61,3 +61,64 @@ void sub_3f10(struct z80 *z)
     SET_DE(z, hl + 1);
     SET_HL(z, TEMPO_BCD + 3);
 }
+
+/* 0x34D4: azzera 10 byte da HL in due piani: per ogni byte scrive 0 a HL
+ * con il bit 2 di H spento e poi a HL con il bit 2 di H acceso (prima
+ * scrittura all'indirizzo d'ingresso, come nel codice).
+ * Uscita: B = 0, C = 0, HL avanzato di 10 col bit 2 di H acceso. */
+void sub_34d4(struct z80 *z)
+{
+    uint16_t hl = HL(z);
+    for (int i = 0; i < 10; i++) {
+        M(hl) = 0;
+        hl &= ~0x0400;
+        M(hl) = 0;
+        hl |= 0x0400;
+        hl++;
+    }
+    SET_BC(z, 0);
+    SET_HL(z, hl);
+}
+
+/* 0x380A: riempie 16 byte da HL con 0xff.
+ * Uscita: B = 0, C = 0xff, HL avanzato di 16. */
+void sub_380a(struct z80 *z)
+{
+    uint16_t hl = HL(z);
+    for (int i = 0; i < 16; i++)
+        M(hl++) = 0xff;
+    SET_BC(z, 0x00ff);
+    SET_HL(z, hl);
+}
+
+/* Tabelle ROM di coppie di byte. */
+#define TABELLA_8578 0x8578   /* indici 0..7 e 8, 9, 10 per A >= 0x40 */
+#define TABELLA_858E 0x858e   /* indici A-8 per 8 <= A < 0x40 */
+
+/* 0x3A2E: coppia di byte scelta da A.
+ * A < 8: indice A in 8578; A < 0x40: indice A-8 in 858E; altrimenti indice
+ * 8 (A < c0), 9 (A < f8) o 10 in 8578.
+ * Uscita: B, C = coppia, A = DE = indice, HL sul secondo byte. */
+void sub_3a2e(struct z80 *z)
+{
+    uint8_t a = z->a, indice;
+    uint16_t tabella = TABELLA_8578;
+    if (a < 0x08)
+        indice = a;
+    else if (a < 0x40) {
+        indice = a - 8;
+        tabella = TABELLA_858E;
+    } else if (a < 0xc0)
+        indice = 8;
+    else if (a < 0xf8)
+        indice = 9;
+    else
+        indice = 10;
+    z->a = indice;
+    SET_HL(z, tabella);
+    sub_0008(z);            /* rst 08: DE = indice, HL = tabella + 2·indice */
+    uint16_t hl = HL(z);
+    z->b = leggi(hl);
+    z->c = leggi(hl + 1);
+    SET_HL(z, hl + 1);
+}

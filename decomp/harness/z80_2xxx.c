@@ -76,3 +76,58 @@ void sub_24b1(struct z80 *z)
     z->b = z->c;
     z->a = 0;
 }
+
+/* 0x2368: valore di una tabella di byte moltiplicato per 12.
+ * Ingresso: HL base, A indice. Uscita: HL = 12·(HL+A), DE = 2·(HL+A)
+ * (byte letto anche in ROM); A invariato. */
+void sub_2368(struct z80 *z)
+{
+    uint16_t valore = leggi((uint16_t)(HL(z) + z->a));
+    SET_DE(z, 2 * valore);
+    SET_HL(z, 12 * valore);
+}
+
+/* 0x23AC: azzera il byte a DE e quello a D:(E+0x20) (stessa pagina, riga
+ * sotto in una griglia di 32 colonne).
+ * Uscita: A = 0, HL = D:(E+0x20), DE = DE+1. */
+void sub_23ac(struct z80 *z)
+{
+    uint16_t de = DE(z);
+    M(de) = 0;
+    z->l = (uint8_t)(z->e + 0x20);
+    z->h = z->d;
+    M(HL(z)) = 0;
+    z->a = 0;
+    SET_DE(z, de + 1);
+}
+
+/* 0x23F8: record di 3 byte in una tabella (rst 08 più un terzo di passo).
+ * Ingresso: HL base, A indice. Il record sta a HL + 3·A: DE = parola,
+ * C = terzo byte. Uscita: B = 0, A = 0, HL sul terzo byte. */
+void sub_23f8(struct z80 *z)
+{
+    uint16_t hl = (uint16_t)(HL(z) + 3 * z->a);
+    z->e = leggi(hl);
+    z->d = leggi(hl + 1);
+    z->c = leggi(hl + 2);
+    SET_HL(z, hl + 2);
+    z->b = 0;
+    z->a = 0;
+}
+
+/* 0x240B: HL = 48·A (il codice fa 2·A + A, poi quattro raddoppi).
+ * Uscita: BC = A, A invariato. */
+void sub_240b(struct z80 *z)
+{
+    SET_BC(z, z->a);
+    SET_HL(z, 48 * z->a);
+}
+
+/* 0x2457: separa i due nibble di E.
+ * Uscita: D = (E >> 4)·2 + 2, E = A = (E & 0x0f)·2 - 1 (0xff se nibble 0). */
+void sub_2457(struct z80 *z)
+{
+    uint8_t e = z->e;
+    z->d = (uint8_t)(((e & 0xf0) >> 3) + 2);
+    z->e = z->a = (uint8_t)(((e & 0x0f) << 1) - 1);
+}
