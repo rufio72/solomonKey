@@ -10,6 +10,9 @@
 -- SNAP_COND: condizione del breakpoint d'ingresso nella sintassi del debugger
 -- di MAME (es. a>=#10, decimale con #); vuota (predefinito) = nessuna. Le
 -- occorrenze contate da SNAP_N sono solo quelle che la soddisfano.
+-- SNAP_POKE, SNAP_POSTA: inneschi come SESS_POKE/SESS_POSTA di sessione.lua
+-- («frame:addr:val» e «frame:codice», separati da virgola, 0x ammesso): forzature
+-- di RAM e poste nel primo slot libero di c000-c03f al frame detto.
 local testo_entry = os.getenv("SNAP_ENTRY") or "0x05B3"
 local entry = tonumber(testo_entry)
 local voluta = tonumber(os.getenv("SNAP_N") or "1")
@@ -19,6 +22,17 @@ local tag = os.getenv("SNAP_TAG") or ""
 local ingressi = os.getenv("SNAP_INGRESSI") or "nessuno"
 local limite = tonumber(os.getenv("SNAP_LIMITE") or "6000")
 local cond = os.getenv("SNAP_COND") or ""
+local function inneschi(testo)
+  local t = {}
+  for voce in string.gmatch(testo or "", "[^,%s]+") do
+    local v = {}
+    for x in string.gmatch(voce, "[^:]+") do v[#v + 1] = assert(tonumber(x), "numero non valido: " .. x) end
+    t[#t + 1] = v
+  end
+  return t
+end
+local pokes = inneschi(os.getenv("SNAP_POKE"))
+local poste = inneschi(os.getenv("SNAP_POSTA"))
 local base = string.format("%s/snap_%s", dir, testo_entry)
 if tag ~= "" then base = base .. "_" .. tag end
 local testo_tag = (tag ~= "") and (" [" .. tag .. "]") or ""
@@ -59,6 +73,26 @@ local function muovi_ingressi()
   end
 end
 
+local function applica_inneschi()
+  for _, p in ipairs(pokes) do
+    if p[1] == frames then
+      mem:write_u8(p[2], p[3])
+      print(string.format("POKE %d %04X %02X", frames, p[2], p[3]))
+    end
+  end
+  for _, p in ipairs(poste) do
+    if p[1] == frames then
+      for a = 0xc000, 0xc03f do
+        if mem:read_u8(a) == 0 then
+          mem:write_u8(a, p[2])
+          print(string.format("POSTA %d %02X %02X", frames, a - 0xc000, p[2]))
+          break
+        end
+      end
+    end
+  end
+end
+
 local function registri(nome)
   local s = nome
   for _, r in ipairs(REG) do
@@ -90,6 +124,7 @@ dbg:command("go")
 emu.register_frame_done(function()
   frames = frames + 1
   muovi_ingressi()
+  applica_inneschi()
   if da_frame > 0 and frames == da_frame then arma_ingresso() end
   if frames >= limite and fase ~= "fatto" then
     print(string.format("SNAP: limite di %d frame raggiunto senza cattura", limite))

@@ -8,6 +8,10 @@ Stampa la copertura per ogni file e per l'unione e scrive
   out/eseguiti_unione.txt    PC eseguiti in almeno una sessione
   out/call_mai_osservate.txt destinazioni mai osservate, con il sito della
                              prima call statica che le raggiunge
+Con --classifica aggiunge a out/call_mai_osservate.txt la colonna
+sito_eseguito (SI/NO: il PC della prima call statica è nell'unione); NO vuol
+dire probabile dato disassemblato come codice, o codice raggiungibile solo da
+zone a loro volta mai eseguite.
 """
 import argparse
 import re
@@ -48,6 +52,8 @@ def principale():
     ap = argparse.ArgumentParser(description='Copertura delle destinazioni di call')
     ap.add_argument('eseguiti', nargs='+', help='file *_eseguiti.txt')
     ap.add_argument('--dasm', default='out/main48.dasm')
+    ap.add_argument('--classifica', action='store_true',
+                    help='colonna sito_eseguito SI/NO in call_mai_osservate.txt')
     arg = ap.parse_args()
 
     dest = destinazioni(arg.dasm)
@@ -68,9 +74,15 @@ def principale():
             f.write('%04X\n' % p)
     mancano = sorted(d for d in dest if d not in unione)
     with open('out/call_mai_osservate.txt', 'w') as f:
-        f.write('# destinazione\tprima call statica\n')
+        if arg.classifica:
+            f.write('# destinazione\tprima call statica\tsito_eseguito\n')
+        else:
+            f.write('# destinazione\tprima call statica\n')
         for d in mancano:
-            f.write('%04X\t%04X\n' % (d, dest[d]))
+            if arg.classifica:
+                f.write('%04X\t%04X\t%s\n' % (d, dest[d], 'SI' if dest[d] in unione else 'NO'))
+            else:
+                f.write('%04X\t%04X\n' % (d, dest[d]))
     if file_letti > 1:
         print(riga('unione', tot - len(mancano), tot))
 

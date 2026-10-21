@@ -91,3 +91,76 @@ di 3B10) e la tabella di 3B68 finisce a 3B76. 8C93, A497, A4A8 sono in zona dati
 `e603.lua` (5500 frame, input casuali di trace.lua): una sola chiave,
 PC 015E valore 00, 5435 letture. 4CED e 62BE non letti. `leggi_e603()` in
 `harness/porte.c` restituisce 0 con un avviso per PC non in tabella.
+
+## Avanzamento di stanza e stanze nascoste
+
+Brief 16 (2026-10-21), da disassemblato e dalle sessioni `porta`, `bonus_04`,
+`bonus_42`, `finale`, `finale2` di `sessioni.sh` (blocco `lotto12`).
+
+### Tabella 8DD4
+
+52 record da 4 byte, uno per stanza `c243`, copiati da **34FA** (passo 1
+dell'attività 07, a ogni carico di quadro) in c24a-c24d se il bit 0 di c24e
+è 0:
+
+| byte | RAM | significato |
+|---|---|---|
+| 0 | c24a | indice (0-2) della candidata scelta fra le tre seguenti |
+| 1-3 | c24b-c24d | stanze candidate; FF = assente; bit 7 = stanza nascosta (bonus) |
+
+Dopo la copia 34FA scorre la lista delle stanze visitate (c251…, chiusa da
+FF) e mette FF al posto delle candidate già viste; se la voce scelta è FF
+prende la prima non-FF. Il percorso normale è lineare (voce scelta =
+c243+1) tranne dove salta le nascoste: 4 → 6, 14 → 16, 21 → 23, 24 → 26,
+34 → 36, 41 → 44 (le stanze 42 e 43 si raggiungono solo dalla nascosta 42,
+il cui record sceglie già 0xAB). Candidate nascoste:
+
+| record (stanza di partenza) | voce | byte | stanza nascosta |
+|---|---|---|---|
+| 4 | 0 | 0x85 | 5 |
+| 14 | 0 | 0x8F | 15 |
+| 21 | 0 | 0x96 | 22 |
+| 24 | 0 | 0x99 | 25 |
+| 34 | 0 | 0xA3 | 35 |
+| 41 | 0 | 0xAA | 42 |
+| 42 | 2 (voce scelta di default) | 0xAB | 43 |
+
+Finale: record 49 = `02 ff ff 32`, candidata 0x32 (non una stanza giocabile
+del percorso: innesca l'attività 24). Record 50 = `02 00 ff ff`, 51 =
+`01 01 00 ff`.
+
+### Stato in RAM
+
+| indirizzo | ruolo |
+|---|---|
+| c243 | stanza corrente 0-51 (scrittori 404B avanzamento, 7630 demo, 78FE/7CD0 = 0, 7A11/7B46 = 0x32 schermate attract) |
+| c24a | indice della candidata; 4A87 lo ruota sulle voci non-FF di c24b-c24d per gli oggetti 8-0F (instradamento alle nascoste) |
+| c24b-c24d | le tre candidate della stanza corrente |
+| c24e | bit 0 = stanza già visitata (34FA non ricopia il record; 358F altera le celle), bit 1 = entrati in una nascosta, bit 7 = finale |
+| c24f | contatore delle stanze nascoste raggiunte (`inc` a 403D) |
+| c246 | contatore delle stanze normali (`inc` nel ramo senza bit 7) |
+| c251… | lista delle stanze visitate, chiusa da FF (4000 vi accoda c243) |
+| c05b… | coda degli oggetti speciali, slot da 2 byte (valore di cella, parametro E), scritta da 12BD-12CF e letta dall'attività 22 (12D6) |
+| c19d, c19e | passo e sotto-passo condivisi dagli spedidori a passi (1C, 24, 07): vanno azzerati prima di postare 1C o 24 a mano |
+
+### 4000-405E (uscita dalla porta)
+
+Posta 14; se `c045 & 6 == 0` posta 17 ed esce. Altrimenti E = M(c24b +
+c24a); accoda c243 alla lista c251; se E = 0x32 → C = 0x24 e `set 7,(c24e)`;
+se bit 7 di E → `set 1,(c24e)` e `inc (c24f)` (403D), altrimenti
+`inc (c246)`; `c243 = E & 0x7f`; posta C (07 = carico quadro normale, 24 =
+finale); azzera c299 e c19d; c248 = FF.
+
+### Attività 1C (porta) e 24 (finale)
+
+- **1C**, ingresso 3F40: spedidore a passi su c19d, tabella inline a 3F46
+  (9 voci): 40E1 41A8 40A7 405F 3F58 41A8 3F93 41B2 3FF7; 3FF7 prosegue in
+  4000. Posta statica unica a 133A (porta aperta, valore di cella 2, da 12AB
+  via 1332). L'attività 1D (3F39) chiama 349F e diventa codice 05.
+- **24**, ingresso 2C72: spedidore a passi su c19d, tabella inline a 2C78
+  (sito rst 2C77, 19 voci): 3861 2DEE 37D7 358F 3225 3A7D 2E89 2C9E 2E5D
+  2DCE 2E9C 3709 3829 321E 31C5 2EF5 2E6D 2F1A 2E1E, cioè i passi del carico
+  quadro (sito 2CD2) più 2C9E. Nella sessione `finale` la 24 compare al frame
+  2578 (postata da 4000 dopo la 1C forzata) e la partita prosegue nella
+  stanza finale; la catena 3DC9 (posta 14), 3DCE (posta 25 → 3B77), 3E47
+  (posta 26 → 3B63) chiude il gioco.

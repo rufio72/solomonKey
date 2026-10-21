@@ -1,11 +1,15 @@
 #!/bin/sh
 # Sessioni guidate per la copertura del Z80 principale (brief 04).
-# Uso (da decomp/): sh sessioni.sh > out/sessioni.log 2>&1
+# Uso (da decomp/): sh sessioni.sh [lotto12] > out/sessioni.log 2>&1
+# Senza argomento esegue tutto (sessioni storiche, poi il blocco lotto12);
+# con argomento lotto12 solo le sessioni del brief 16 (porta, stanze
+# nascoste, finale, oggetti, attract completa, attività mai spedite).
 # Ogni sessione traccia solo le sue finestre e poi coverage.py ne ricava
-# out/<nome>_*.txt cancellando la traccia. Le sessioni bonus e finale sono
-# fuori perimetro (rinviate).
+# out/<nome>_*.txt cancellando la traccia.
 set -u
 cd "$(dirname "$0")"
+PATH="$PATH:/usr/games"
+BLOCCO="${1:-tutto}"
 export DISPLAY="${DISPLAY:-:1}"
 MOPT="-rompath $(cd .. && pwd)/roms -video none -sound none -skip_gameinfo -nothrottle"
 
@@ -22,6 +26,7 @@ sessione() {
     fi
 }
 
+storiche() {
 # stanze 0..51 tranne 49 (indice 0-based; la stanza 50 non carica)
 n=0
 while [ $n -le 51 ]; do
@@ -42,5 +47,69 @@ SESS_ROOM= SESS_INPUT=nessuno SESS_TRACE_DA=0 SESS_TRACE_A=1500 sessione titolo
 # attract senza moneta: fasi 07/16 dopo la demo
 SESS_ROOM= SESS_INPUT=nessuno SESS_MONETA=0 SESS_TRACE_DA=7400,19400 SESS_TRACE_A=8200,19900 \
     sessione attract
+}
+
+# Brief 16: inneschi con forzature di RAM (SESS_POKE) e poste di attività
+# (SESS_POSTA); c19d/c19e (passo e sotto-passo degli spedidori a passi)
+# azzerati prima di postare 1C o 24. Le finestre seguono le stampe FASE di
+# corse di prova senza traccia.
+lotto12() {
+    # a) porta: sequenza 1C (3F40) -> 4000, avanzamento alla stanza 1
+    SESS_ROOM= SESS_INPUT=casuale SESS_CASUALE_DA=1600 \
+    SESS_POKE=2250:0xc19d:0,2250:0xc19e:0 SESS_POSTA=2300:0x1c \
+    SESS_TRACE_DA=2250 SESS_TRACE_A=3300 sessione porta
+
+    # b) stanze nascoste: record 4 voce 0 = 0x85 (stanza 5), record 42 = 0xAB (43)
+    SESS_ROOM=4 SESS_INPUT=casuale SESS_CASUALE_DA=1600 \
+    SESS_POKE=2250:0xc19d:0,2250:0xc19e:0,2250:0xc24a:0 SESS_POSTA=2300:0x1c \
+    SESS_TRACE_DA=2250 SESS_TRACE_A=3300 sessione bonus_04
+    SESS_ROOM=42 SESS_INPUT=casuale SESS_CASUALE_DA=1600 \
+    SESS_POKE=2250:0xc19d:0,2250:0xc19e:0 SESS_POSTA=2300:0x1c \
+    SESS_TRACE_DA=2250 SESS_TRACE_A=3300 sessione bonus_42
+
+    # c) finale: candidate tutte 0x32, 4032 posta da solo la 24 (frame 2578);
+    # la partita nella stanza finale prosegue (16 a 5269, 06/18 fino al 6800,
+    # di nuovo 1C a 7788, poi 06 23 07 0F fino al 9300): finale2 la copre
+    POKE_FIN=2250:0xc24b:0x32,2250:0xc24c:0x32,2250:0xc24d:0x32,2250:0xc19d:0,2250:0xc19e:0
+    SESS_ROOM= SESS_INPUT=casuale SESS_CASUALE_DA=1600 \
+    SESS_POKE=$POKE_FIN SESS_POSTA=2300:0x1c \
+    SESS_TRACE_DA=2250 SESS_TRACE_A=4500 sessione finale
+    SESS_ROOM= SESS_INPUT=casuale SESS_CASUALE_DA=1600 \
+    SESS_POKE=$POKE_FIN SESS_POSTA=2300:0x1c \
+    SESS_TRACE_DA=4500,7700 SESS_TRACE_A=6900,9400 sessione finale2
+
+    # d) oggetti speciali: coda c05b (oggetto, parametro) e posta 22 (12D6),
+    # oggetti 08, 0B, 0E a 400 frame di distanza
+    SESS_ROOM= SESS_INPUT=casuale SESS_CASUALE_DA=1600 \
+    SESS_POKE=2250:0xc05b:0x08,2250:0xc05c:0,2250:0xc05d:0,2650:0xc05b:0x0b,2650:0xc05c:0,2650:0xc05d:0,3050:0xc05b:0x0e,3050:0xc05c:0,3050:0xc05d:0 \
+    SESS_POSTA=2300:0x22,2700:0x22,3100:0x22 \
+    SESS_TRACE_DA=2250 SESS_TRACE_A=3300 sessione oggetti
+
+    # e) attract completa senza moneta (attività 16 a 6496)
+    SESS_ROOM= SESS_INPUT=nessuno SESS_MONETA=0 SESS_TRACE_DA=7400,19400 SESS_TRACE_A=8200,19900 \
+        sessione attract2
+
+    # f) attività il cui ingresso resta fuori dall'unione dopo a-e
+    for voce in 0F:640E 12:426A 13:6480 19:3792 1A:411D 1B:4111 1D:3F39 25:3B77 26:3B63 27:62B6; do
+        cod=${voce%%:*}
+        ing=${voce##*:}
+        # unione ricalcolata a ogni giro: sessione() la riscrive col solo file nuovo
+        python3 copertura_call.py $(ls out/*_eseguiti.txt | grep -v unione) | tail -1
+        if grep -qx "$ing" out/eseguiti_unione.txt; then
+            echo "attività $cod ($ing) già eseguita: nessuna corsa dedicata"
+            continue
+        fi
+        SESS_ROOM= SESS_INPUT=casuale SESS_CASUALE_DA=1600 \
+        SESS_POKE=2250:0xc19d:0,2250:0xc19e:0 SESS_POSTA=2300:0x$cod \
+        SESS_TRACE_DA=2250 SESS_TRACE_A=2800 sessione "att_$cod"
+    done
+    python3 copertura_call.py $(ls out/*_eseguiti.txt | grep -v unione) | tail -1
+}
+
+case "$BLOCCO" in
+    lotto12) lotto12 ;;
+    tutto) storiche; lotto12 ;;
+    *) echo "ERRORE: blocco sconosciuto $BLOCCO (lotto12 o nessun argomento)"; exit 2 ;;
+esac
 
 echo "=== fine ($(date +%H:%M:%S))"

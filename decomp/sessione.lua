@@ -13,6 +13,12 @@
 --   SESS_CASUALE_DA frame da cui partono gli input casuali (predefinito 1900)
 --   SESS_MONETA    1 = moneta e start ai frame 1510-1580 (predefinito), 0 = nessuna
 --                  moneta (attract, oppure -playback dove gli input vengono dal file)
+--   SESS_POKE      forzature di RAM: elenco «frame:addr:val» separati da virgola
+--                  (esadecimali con 0x ammessi, es. 2250:0xc19d:0); scritte con
+--                  mem:write_u8 a fine frame, stampa «POKE <frame> <addr> <val>»
+--   SESS_POSTA     poste di attività: elenco «frame:codice»; al frame detto scrive
+--                  il codice nel primo slot libero (= 0) di c000-c03f e stampa
+--                  «POSTA <frame> <slot> <codice>» (slot assente se la tabella è piena)
 -- Stampa «FASE <frame> <codici>» a ogni cambio dei codici non nulli in c000-c03f
 -- (in ordine di slot) e scrive out/<nome>_e603.txt («PC valore conteggio», PC del tap
 -- = PC dopo l'istruzione, come e603.lua).
@@ -30,6 +36,18 @@ local function lista(testo)
   for x in string.gmatch(testo or "", "%d+") do t[#t + 1] = tonumber(x) end
   return t
 end
+-- elenco «a:b[:c],...» -> lista di tabelle di numeri (tonumber accetta 0x..)
+local function inneschi(testo)
+  local t = {}
+  for voce in string.gmatch(testo or "", "[^,%s]+") do
+    local v = {}
+    for x in string.gmatch(voce, "[^:]+") do v[#v + 1] = assert(tonumber(x), "numero non valido: " .. x) end
+    t[#t + 1] = v
+  end
+  return t
+end
+local pokes = inneschi(os.getenv("SESS_POKE"))
+local poste = inneschi(os.getenv("SESS_POSTA"))
 local trace_da = lista(os.getenv("SESS_TRACE_DA"))
 local trace_a = lista(os.getenv("SESS_TRACE_A"))
 assert(#trace_da == #trace_a and #trace_da > 0, "SESS_TRACE_DA e SESS_TRACE_A: stesse quantità, almeno una")
@@ -130,6 +148,26 @@ emu.register_frame_done(function()
   end
   if da_file[frames] then
     for _, v in ipairs(da_file[frames]) do v[1]:set_value(v[2]) end
+  end
+  for _, p in ipairs(pokes) do
+    if p[1] == frames then
+      mem:write_u8(p[2], p[3])
+      print(string.format("POKE %d %04X %02X", frames, p[2], p[3]))
+    end
+  end
+  for _, p in ipairs(poste) do
+    if p[1] == frames then
+      local slot = nil
+      for a = 0xc000, 0xc03f do
+        if mem:read_u8(a) == 0 then slot = a break end
+      end
+      if slot then
+        mem:write_u8(slot, p[2])
+        print(string.format("POSTA %d %02X %02X", frames, slot - 0xc000, p[2]))
+      else
+        print(string.format("POSTA %d piena %02X", frames, p[2]))
+      end
+    end
   end
   controlla_fase()
   for i = 1, #trace_da do
