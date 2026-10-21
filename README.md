@@ -41,9 +41,10 @@ Il metodo è una decompilazione guidata dall'esecuzione, con MAME come oracolo:
   scheduler riprodotto a funzioni, copertura con sessioni guidate su tutte le
   stanze: 195 destinazioni su 299 (bonus e finale fuori perimetro per
   decisione in sospeso).
-- **Fase 2, traduzione in lotti, quasi chiusa** (brief 05-15): al 2026-10-21
-  sono tradotte **107 routine su 120 osservate**, 98 verificate con doppia
-  cattura MAME; il lotto finale del perimetro osservato è in corso. Tra le
+- **Fase 2, traduzione in lotti, chiusa** (brief 05-15): al 2026-10-21 il
+  perimetro osservato è completo — **116 routine in ROUTINE.md, 104
+  verificate** con doppia cattura MAME, banco a 112 confronti e 0 falliti;
+  9 candidate escluse con motivazione e rinviate ai filoni futuri. Tra le
   cose fatte: il motore per-oggetto della NMI, la NMI stessa (`0066`) con lo
   scheduler `0493` e lo stato di Dana, e le porte hardware come funzioni di
   piattaforma (`porte.c`, censimento in `compiti/12-filone-porte.md`). I
