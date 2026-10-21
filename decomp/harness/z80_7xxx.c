@@ -34,3 +34,17 @@ void sub_7efe(struct z80 *z)
     z->b = z->d;
     SET_HL(z, hl);
 }
+
+/* Tabella ROM delle destinazioni a video delle stringhe d'esito. */
+#define TAB_ESITI_7E3A 0x7e3a
+
+/* 0x7E32: destinazione numero A dalla tabella di parole 7E3A.
+ * Uscita: DE = parola, HL invariato (push/pop); A invariato. */
+void sub_7e32(struct z80 *z)
+{
+    uint16_t hl = HL(z);
+    SET_HL(z, TAB_ESITI_7E3A);
+    sub_0008(z);               /* rst 08 */
+    sub_0010(z);               /* rst 10: DE = parola */
+    SET_HL(z, hl);
+}

@@ -195,3 +195,27 @@ avanzamento:                           /* 0842 */
         SET_DE(z, dst); SET_HL(z, campo6);
     }
 }
+
+/* Coda di richieste audio/effetti c054-c056 (3 slot). */
+#define CODA_C054 0xc054
+
+/* 0x004F: scrive C nel primo slot libero (byte 0) fra c054-c056; se sono
+ * tutti occupati scrive comunque a c057. Uscita: HL = slot scritto,
+ * A = ultimo byte letto, B = slot restanti al momento della scrittura. */
+void sub_004f(struct z80 *z)
+{
+    uint16_t hl = CODA_C054;
+    uint8_t a = 0, b = 3;
+    for (;;) {
+        a = M(hl);
+        if (a == 0)
+            break;
+        hl++;
+        if (--b == 0)
+            break;
+    }
+    M(hl) = z->c;
+    z->a = a;
+    z->b = b;
+    SET_HL(z, hl);
+}

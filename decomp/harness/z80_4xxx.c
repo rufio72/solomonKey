@@ -390,3 +390,50 @@ void sub_4d87(struct z80 *z)
     SET_DE(z, src);
     SET_HL(z, dst);
 }
+
+/* 0x4398: registra un gestore in uno di due banchi di record: con il bit 4
+ * di A spento tabella 43B9 e maschera a c09b, acceso tabella 43C5 e c0b5;
+ * record da 3 byte all'indice A & 0x0f (parola di destinazione, bit di
+ * maschera). OR del terzo byte in (BC), (c464) alla parola, 0 alla
+ * parola+2. Uscita: A = 0, BC = maschera, DE = parola+2, HL = record+2. */
+void sub_4398(struct z80 *z)
+{
+    uint16_t tab = 0x43b9, bc = 0xc09b;
+    if (z->a & 0x10) {
+        tab = 0x43c5;
+        bc = 0xc0b5;
+    }
+    uint16_t rec = (uint16_t)(tab + 3 * (z->a & 0x0f));
+    uint16_t de = (uint16_t)(leggi(rec) | (leggi(rec + 1) << 8));
+    M(bc) = (uint8_t)(M(bc) | leggi(rec + 2));
+    M(de) = M(0xc464);
+    M(de + 2) = 0;
+    z->a = 0;
+    SET_BC(z, bc);
+    SET_DE(z, de + 2);
+    SET_HL(z, rec + 2);
+}
+
+/* 0x4D05: cifre del punteggio c239/c23b a c061 (sub_4d37); se c045 & 6 le
+ * ricopia a video con sub_4d87 (da d44a, o d45f col bit 0 di c045 acceso),
+ * attributo 0x71. Uscita: A = 0 e C = c045 se nessuna copia; altrimenti
+ * registri di sub_4d87 con C = 0x71. */
+void sub_4d05(struct z80 *z)
+{
+    SET_DE(z, (uint16_t)(M(0xc23b) | (M(0xc23c) << 8)));
+    SET_HL(z, (uint16_t)(M(0xc239) | (M(0xc23a) << 8)));
+    sub_4d37(z);
+    uint8_t a = M(0xc045);
+    z->c = a;
+    if ((a & 6) == 0) {
+        z->a = 0;              /* and 006h */
+        return;
+    }
+    z->a = (uint8_t)(a & 6);
+    uint8_t cy = (uint8_t)(z->c & 1);          /* rrc c */
+    z->c = (uint8_t)((z->c >> 1) | (cy << 7));
+    SET_HL(z, cy ? 0xd45f : 0xd44a);
+    SET_DE(z, 0xc061);
+    z->c = 0x71;
+    sub_4d87(z);
+}

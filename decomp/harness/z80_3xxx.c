@@ -289,3 +289,176 @@ void sub_36bd(struct z80 *z)
         sub_2402(z);
     while (z->a != 0);
 }
+
+/* Centro e parametri del cerchio del titolo. */
+#define CERCHIO_Y     0xc2c2   /* byte alto del centro */
+#define CERCHIO_X     0xc2c4   /* byte basso del centro */
+#define CERCHIO_FASE  0xc2c5   /* angolo del primo oggetto */
+#define CERCHIO_RAGGIO 0xc2c6  /* scala dei seni */
+
+/* 0x3097: dispone 16 oggetti (c46e, passo 0x30) su un cerchio: per ogni
+ * slot y = centro ± seno(E)·raggio e x = centro ± seno(0x20-E)·raggio
+ * (sub_30ef = tabella seno, sub_3101 = prodotto; segni dai bit 6 di E e
+ * E+0x20), (IX+0) = 0xc5, E avanza di 8. Uscita: HL = centro, B = 0,
+ * DE = (0, fase+0x80), A = E finale, IX = c46e + 16·0x30. */
+void sub_3097(struct z80 *z)
+{
+    uint16_t ix = 0xc46e;
+    uint16_t centro = (uint16_t)((M(CERCHIO_Y) << 8) | M(CERCHIO_X));
+    uint8_t e = M(CERCHIO_FASE);
+    uint8_t c = M(CERCHIO_RAGGIO);
+    z->c = c;
+    for (int b = 0x10; b > 0; b--) {
+        z->b = (uint8_t)b;
+        z->a = e;
+        sub_30ef(z);
+        z->l = z->a;
+        z->h = c;
+        sub_3101(z);
+        uint8_t a = z->h;
+        if (e & 0x40)
+            a = (uint8_t)(-a);
+        M(ix + 0x0e) = (uint8_t)(a + (centro >> 8));
+        z->a = (uint8_t)(0x20 - (e & 0x3f));
+        sub_30ef(z);
+        z->l = z->a;
+        z->h = c;
+        sub_3101(z);
+        a = z->h;
+        if ((uint8_t)(e + 0x20) & 0x40)
+            a = (uint8_t)(-a);
+        M(ix + 0x15) = (uint8_t)(a + (centro & 0xff));
+        M(ix) = 0xc5;
+        e = (uint8_t)(e + 8);
+        ix = (uint16_t)(ix + 0x30);
+    }
+    z->a = e;
+    z->b = 0;
+    z->d = 0;
+    z->e = e;
+    SET_HL(z, centro);
+    z->ix = ix;
+}
+
+/* 0x31E9: barra di avanzamento a df80: B = min(A, 6) colonne di tile
+ * 0x80/0x81 (due righe, attributo 0x60), poi 6-B chiamate a sub_23ac per
+ * pulire le colonne restanti. Uscita: B = 0, C = A = colonne pulite;
+ * HL e DE dall'ultima scrittura o da sub_23ac. */
+void sub_31e9(struct z80 *z)
+{
+    uint8_t b = z->a;
+    uint8_t c;
+    if (b <= 6) {
+        c = (uint8_t)(6 - b);
+    } else {
+        b = 6;
+        c = 0;
+    }
+    uint16_t de = 0xdf80;
+    for (uint8_t i = b; i > 0; i--) {
+        M(de) = 0x80;
+        M(de & ~0x0400) = 0x60;
+        de |= 0x0400;
+        uint16_t giu = (uint16_t)((de & 0xff00) | (uint8_t)(de + 0x20));
+        M(giu) = 0x81;
+        giu &= ~0x0400;
+        M(giu) = 0x60;
+        SET_HL(z, giu);
+        z->a = (uint8_t)((uint8_t)de + 0x20);
+        de++;
+    }
+    z->b = 0;
+    z->c = c;
+    SET_DE(z, de);
+    z->a = c;
+    if (c == 0)
+        return;
+    for (uint8_t i = c; i > 0; i--)
+        sub_23ac(z);
+}
+
+/* 0x349F: tabellone a destra: pulisce df8e/dfae (sub_34d4), scrive 0x90
+ * alla colonna L = 0x97 (sub_34e1), poi per C = (c259) posizioni il
+ * carattere 0x82 + 2·(coppia di bit alti di DE = parola c25c, estratti
+ * con due scorrimenti), chiuso da 0x92. Uscita: B = 0, C = 0, DE = parola
+ * scorsa; A, H, L dall'ultima sub_34e1. */
+void sub_349f(struct z80 *z)
+{
+    SET_HL(z, 0xdf8e);
+    sub_34d4(z);
+    SET_HL(z, 0xdfae);
+    sub_34d4(z);
+    z->l = 0x97;
+    z->a = 0x90;
+    uint16_t de = (uint16_t)(M(0xc25c) | (M(0xc25d) << 8));
+    sub_34e1(z);
+    z->l--;
+    uint8_t c = M(0xc259);
+    do {
+        uint8_t a = 0;
+        a = (uint8_t)((a << 1) | (de >> 15));
+        de = (uint16_t)(de << 1);
+        a = (uint8_t)((a << 1) | (de >> 15));
+        de = (uint16_t)(de << 1);
+        z->a = (uint8_t)(a * 2 + 0x82);
+        sub_34e1(z);
+        z->l--;
+        c--;
+    } while (c != 0);
+    z->a = 0x92;
+    sub_34e1(z);
+    z->c = 0;
+    SET_DE(z, de);
+}
+
+/* 0x3678: palette di prova: riempie e400 con quattro passate di sub_36bd
+ * (HL prosegue fra le chiamate; BC = passo del valore) e copia 10 byte
+ * della tabella ROM 36B3 a e496. Uscita: A = 0, BC = 0, DE = e4a0,
+ * HL = 36bd. */
+void sub_3678(struct z80 *z)
+{
+    SET_HL(z, 0xe400);
+    SET_BC(z, 0x0001); SET_DE(z, 0x0000); z->a = 0x10; sub_36bd(z);
+    z->a = 0x10; SET_DE(z, 0x0000); SET_BC(z, 0x0010); sub_36bd(z);
+    z->a = 0x10; SET_DE(z, 0x0000); SET_BC(z, 0x0100); sub_36bd(z);
+    z->a = 0x10; SET_DE(z, 0x0000); SET_BC(z, 0x0111); sub_36bd(z);
+    for (int i = 0; i < 10; i++)               /* ldir 36B3 → e496 */
+        M(0xe496 + i) = leggi(0x36b3 + i);
+    SET_BC(z, 0);
+    SET_DE(z, 0xe496 + 10);
+    SET_HL(z, 0x36b3 + 10);
+}
+
+/* 0x36C3: palette e tavolozze di base: quattro ldir dalla ROM
+ * (80D3 → e400 per 0x200, 8199 → c96e per 0x26, 80D3 → c994 per 0x20,
+ * 82A7 → c9b4 per 0x16). Uscita: BC = 0, DE = c9ca, HL = 82bd. */
+void sub_36c3(struct z80 *z)
+{
+    for (int i = 0; i < 0x200; i++)
+        M(0xe400 + i) = leggi(0x80d3 + i);
+    for (int i = 0; i < 0x26; i++)
+        M(0xc96e + i) = leggi(0x8199 + i);
+    for (int i = 0; i < 0x20; i++)
+        M(0xc994 + i) = leggi(0x80d3 + i);
+    for (int i = 0; i < 0x16; i++)
+        M(0xc9b4 + i) = leggi(0x82a7 + i);
+    SET_BC(z, 0);
+    SET_DE(z, 0xc9b4 + 0x16);
+    SET_HL(z, 0x82a7 + 0x16);
+}
+
+/* Griglia FG in RAM (vedi DATI.md). */
+#define GRIGLIA_C0BD 0xc0bd
+
+/* 0x36F0: coordinate in pixel (H = y, L = x) → indirizzo della cella
+ * nella griglia FG: offset = ((~H - 0x10) & 0xf0) + (((L+8) >> 4) & 0x0f).
+ * Uscita: HL = c0bd + offset, DE = offset, A = offset; solo registri. */
+void sub_36f0(struct z80 *z)
+{
+    uint8_t h = (uint8_t)((uint8_t)(~z->h - 0x10) & 0xf0);
+    uint8_t a = (uint8_t)((((uint8_t)(z->l + 8)) >> 4) & 0x0f);
+    a = (uint8_t)(a + h);
+    z->a = a;
+    SET_DE(z, a);
+    SET_HL(z, GRIGLIA_C0BD + a);
+}

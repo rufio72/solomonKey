@@ -170,3 +170,48 @@ void sub_2b08(struct z80 *z)
     SET_DE(z, src);
     SET_HL(z, dest);
 }
+
+/* 0x2AF5 (test RAM/titolo): stampa 8 righe di testo con sub_2b08.
+ * A è un vettore di bit ruotato col riporto in ingresso (`rra` con
+ * push/pop af attorno a ogni chiamata): il bit estratto sceglie la
+ * stringa C = 0x0c (riporto) o 0x0d; B va da 0x80 a 0x88, quindi
+ * sub_2b08 usa sempre HL del chiamante come destinazione (che avanza
+ * di riga in riga). Uscita: B = 0x88, C ultima stringa, A ruotato. */
+void sub_2af5(struct z80 *z)
+{
+    uint8_t cy = (uint8_t)(z->f & 1);
+    z->b = 0x80;
+    do {
+        uint8_t bit = (uint8_t)(z->a & 1);     /* rra */
+        z->a = (uint8_t)((cy << 7) | (z->a >> 1));
+        cy = bit;
+        uint8_t a_sal = z->a;                  /* push af */
+        uint8_t b_sal = z->b;
+        z->c = (uint8_t)(cy ? 0x0c : 0x0d);
+        sub_2b08(z);
+        z->a = a_sal;                          /* pop af */
+        z->b = (uint8_t)(b_sal + 1);           /* inc b */
+    } while (!(z->b & 0x08));                  /* bit 3,b */
+}
+
+/* 0x2FF3: differenze di coordinate in passi di griglia.
+ * Ingresso: HL e DE = due coppie (y, x). Uscita: HL = (L-H d'appoggio)·4,
+ * DE = (L-E)·4, entrambe col segno dal prestito della sottrazione
+ * (passato a sub_3000 come riporto in ingresso); A = seconda differenza. */
+void sub_2ff3(struct z80 *z)
+{
+    uint8_t a = z->l;
+    int prestito = a < z->e;
+    z->a = (uint8_t)(a - z->e);
+    z->e = z->h;
+    z->f = (uint8_t)((z->f & ~1) | prestito);
+    sub_3000(z);
+    uint16_t t = HL(z);                        /* ex de,hl */
+    SET_HL(z, DE(z));
+    SET_DE(z, t);
+    a = z->l;
+    prestito = a < z->h;
+    z->a = (uint8_t)(a - z->h);
+    z->f = (uint8_t)((z->f & ~1) | prestito);
+    sub_3000(z);
+}
