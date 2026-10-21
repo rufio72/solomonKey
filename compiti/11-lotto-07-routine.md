@@ -163,3 +163,16 @@ e le istruzioni eseguite con
    prima occorrenza per frame è quasi sempre lo slot vuoto, banale);
    nessun suffisso, il tag resta `titolo`/`gioco`. Risolta con la proposta
    dell'analista. «preferenza»
+
+## Chiusura ciclo (chat principale, 2026-10-21)
+
+Esito: PASSATO. Primo lotto «di confini»: ciclo intero in sessione cloud
+collegata a GitHub (branch lotto-07, PR #1), con mappa dei grappoli e scelta
+del motore per-oggetto della NMI (0602 + smistamento 08A2/08CE + 6 gestori).
+Verifica locale: 18 catture rigenerate con MAME 0.264, bin e regs identici
+bit a bit al branch; 11 verifiche passate (deviazioni ammesse: sched_log
+storico 106124 con differenze 0; 08D8 con 3 catture, la terza condizionata
+sul ramo che scrive). I 9 gestori mai eseguiti restano NULL nello
+smistamento, rinviati al filone «zone mai eseguite».
+Totale: 74 righe in ROUTINE.md, 71 verificate.
+Token: ciclo in cloud su Fable 5 (crediti cloud); verificatore locale Sonnet 18k.
