@@ -13,7 +13,7 @@ MOPT="-rompath $(cd .. && pwd)/roms -video none -sound none -skip_gameinfo -noth
 sessione() {
     nome="$1"
     echo "=== sessione $nome ($(date +%H:%M:%S))"
-    SESS_NOME="$nome" mame solomon $MOPT -debug -debugger none -autoboot_script sessione.lua
+    SESS_NOME="$nome" SDL_VIDEODRIVER=dummy mame solomon $MOPT -debug -debugger none -autoboot_script sessione.lua
     if [ -f "out/${nome}_trace.txt" ]; then
         python3 coverage.py --traccia "out/${nome}_trace.txt" --prefisso "$nome" --cancella
         python3 copertura_call.py "out/${nome}_eseguiti.txt"

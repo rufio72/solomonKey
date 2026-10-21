@@ -30,6 +30,7 @@ for F in $FRAMES; do
     rm -f out/snap_${ENTRY}_${TAG}_prima.bin out/snap_${ENTRY}_${TAG}_dopo.bin \
           out/snap_${ENTRY}_${TAG}_regs.txt
     SNAP_ENTRY=$ENTRY SNAP_TAG=$TAG SNAP_INGRESSI=$INGRESSI SNAP_DA_FRAME=$F SNAP_N=$N \
+        SDL_VIDEODRIVER=dummy \
         mame solomon -rompath "$ROMPATH" -video none -sound none \
         -skip_gameinfo -nothrottle -debug -debugger none -autoboot_script snap.lua \
         > out/snap_${ENTRY}_${TAG}.log 2>&1
