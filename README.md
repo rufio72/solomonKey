@@ -36,18 +36,26 @@ Il metodo è una decompilazione guidata dall'esecuzione, con MAME come oracolo:
 
 - **Sondaggio di fattibilità** (`decomp/RAPPORTO.md`): fattibile con riserve.
   Codice pulito, nessun codice in RAM né salti indiretti; 250-300 routine stimate.
-- **Fase 1, in corso:**
-  - tabelle inline dell'idioma `rst $20` estratte e tradotte in dati C;
-  - protezione hardware `e603` tabellata (un solo punto di lettura, valore fisso);
-  - formato dei livelli nella ROM decodificato (`decomp/DATI.md`): sfondo e
-    palette identici all'originale su tutte le 52 stanze, oggetti su 38;
-  - tre routine tradotte e verificate, fra cui il decodificatore degli sfondi;
-  - scheduler del ciclo principale: un giro su 64 slot di attività, ognuna una
-    funzione a passi con stato in RAM; viene riprodotto uno a uno con funzioni C;
-  - copertura del codice con sessioni guidate su tutte le stanze.
-- **Dopo:** traduzione in lotti delle routine, routine di interrupt, strato
-  hardware (video, sprite, palette, input) per rendere giocabile il risultato,
-  pulizia finale. Il Z80 audio resta emulato o sostituito da campioni.
+- **Fase 1, chiusa** (brief 01-04): tabelle `rst $20` estratte, protezione
+  `e603` tabellata, formato dei livelli decodificato (`decomp/DATI.md`),
+  scheduler riprodotto a funzioni, copertura con sessioni guidate su tutte le
+  stanze: 195 destinazioni su 299 (bonus e finale fuori perimetro per
+  decisione in sospeso).
+- **Fase 2, traduzione in lotti, quasi chiusa** (brief 05-15): al 2026-10-21
+  sono tradotte **107 routine su 120 osservate**, 98 verificate con doppia
+  cattura MAME; il lotto finale del perimetro osservato è in corso. Tra le
+  cose fatte: il motore per-oggetto della NMI, la NMI stessa (`0066`) con lo
+  scheduler `0493` e lo stato di Dana, e le porte hardware come funzioni di
+  piattaforma (`porte.c`, censimento in `compiti/12-filone-porte.md`). I
+  lotti dal 3 in poi girano in sessioni cloud di Claude Code che consegnano
+  su branch con pull request; ogni lotto viene riverificato in locale
+  rigenerando le catture (finora identiche bit a bit, salvo una condizionata
+  che varia tra build di MAME ed è stata validata con entrambe le coppie).
+- **Dopo:** copertura delle zone mai eseguite (bonus e finale inclusi, se la
+  decisione in sospeso verrà sciolta), strato hardware (video, sprite,
+  palette, input) per rendere giocabile il risultato, pulizia finale. Il Z80
+  audio resta emulato o sostituito da campioni, salvo decisione di
+  decompilare anche lui.
 
 ## Contenuto del repository
 
