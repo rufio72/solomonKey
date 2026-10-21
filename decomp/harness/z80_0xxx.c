@@ -371,3 +371,39 @@ void sub_0043(struct z80 *z)
     }
     sub_004f(z);
 }
+
+/* 0x0028 (gestore di `rst $28`, chiamato da 04AC e da 12 siti esterni):
+ * accoda il suono C alla coda c054-c057 via sub_0043 (che in attract lo
+ * filtra sul bit 0 di DSW1) conservando AF, BC e HL (push/pop). Uscita:
+ * A, BC, HL, DE come all'ingresso (sub_0043 non tocca DE). */
+void sub_0028(struct z80 *z)
+{
+    uint8_t a = z->a, b = z->b, c = z->c, h = z->h, l = z->l;
+    sub_0043(z);
+    z->a = a;
+    z->b = b;
+    z->c = c;
+    z->h = h;
+    z->l = l;
+}
+
+/* 0x0493: la primitiva di posta dello scheduler (brief 04): cerca da c04e
+ * il primo slot libero della tabella attività c000-c03f (indice & 3f,
+ * c04e incrementato a ogni esame) e vi scrive il codice A. Già modellata
+ * come posta_attivita in sched.c (che resta il modello dello spedidore):
+ * questa è la traduzione registrata nel banco per i chiamanti.
+ * Uscita: A = codice, DE = c000 + slot, HL = c04e, BC intatti. */
+void sub_0493(struct z80 *z)
+{
+    uint8_t codice = z->a;
+    uint8_t indice;
+    do {
+        indice = (uint8_t)(M(0xc04e) & 0x3f);
+        M(0xc04e)++;
+    } while (M(0xc000 + indice) != 0);
+    M(0xc000 + indice) = codice;
+    z->a = codice;
+    z->d = 0xc0;
+    z->e = indice;
+    SET_HL(z, 0xc04e);
+}

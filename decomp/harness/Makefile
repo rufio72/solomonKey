@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra -O0
-SORGENTI = harness.c routine.c fondale.c porte.c routine_tab.c $(wildcard z80_*.c)
+SORGENTI = harness.c routine.c fondale.c porte.c nmi.c nmi_oggetti.c routine_tab.c $(wildcard z80_*.c)
 SORGENTI_SCHED = sched.c sched_proto.c
 
 all: harness sched_proto
