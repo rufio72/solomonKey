@@ -285,3 +285,16 @@ inline), **smistatori/0038** (4F0F, 37B4, 4767), **zone mai eseguite**
 (sessioni guidate; lì anche il raccordo dello stub 03EE con sub_3a54 e
 l'e603 al PC 4CF0), **audio** (Z80 secondario, fuori perimetro fin dal
 sondaggio). Token: ciclo intero in sessione cloud su Fable 5.
+
+## Chiusura ciclo (chat principale, 2026-10-21)
+
+Esito: PASSATO. Ciclo in sessione cloud interrotto per esaurimento crediti
+dopo il salvataggio urgente: il branch lotto-11 è arrivato completo (brief,
+9 routine tradotte, 14 catture, 9 escluse motivate e rinviate ai filoni
+strutturale e zone mai eseguite). In locale: 14 catture rigenerate
+identiche bit a bit; verificatore con 13 verifiche passate nella sostanza
+(sched_log storico 106124 con differenze 0; prima=dopo dove il brief lo
+prevede per routine di sola lettura). IL PERIMETRO OSSERVATO È CHIUSO:
+116 righe in ROUTINE.md, 104 verificate, banco a 112 RIEPILOGO e 0 falliti.
+Token: ciclo in cloud su Fable 5 (crediti cloud, esauriti a fine lotto);
+verificatore locale Sonnet 20k.
