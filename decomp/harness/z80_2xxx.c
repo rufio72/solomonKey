@@ -482,3 +482,21 @@ void sub_2f57(struct z80 *z)
     M(0xc467) = 0;
     sub_4398(z);
 }
+
+/* 0x2551 (7650; altri siti in zone future): record di 3 byte all'indice
+ * BC della tabella HL (anche ROM: il chiamante osservato passa HL=765B);
+ * incrementa il contatore a DE+1 e lo confronta col byte del record.
+ * Uscita: A = byte del record, DE = HL + 3·BC, HL = DE d'ingresso + 1;
+ * riporto = byte ≥ contatore incrementato (il banco non confronta F ma
+ * serve al chiamante, emulato su z->f). */
+void sub_2551(struct z80 *z)
+{
+    uint16_t record = (uint16_t)(HL(z) + 3 * BC(z));
+    uint16_t contatore = (uint16_t)(DE(z) + 1);
+    M(contatore)++;
+    z->a = leggi(record);
+    uint8_t riporto = (uint8_t)(z->a >= M(contatore));  /* cp + ccf */
+    z->f = (uint8_t)((z->f & ~1) | riporto);
+    SET_DE(z, record);
+    SET_HL(z, contatore);
+}

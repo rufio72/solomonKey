@@ -139,4 +139,16 @@ void sub_04ac(struct z80 *z);
 void sub_0ce6(struct z80 *z);
 void sub_1288(struct z80 *z);
 
+/* Lotto 11 (compito 15): chiusura del perimetro osservato. 05B5 è il
+ * secondo ingresso di sub_05b3 (delega). */
+void sub_05b5(struct z80 *z);
+void sub_2551(struct z80 *z);
+void sub_322a(struct z80 *z);
+void sub_3a54(struct z80 *z);
+void sub_5507(struct z80 *z);
+void sub_6c2c(struct z80 *z);
+void sub_7379(struct z80 *z);
+void sub_7eca(struct z80 *z);
+void sub_7f2d(struct z80 *z);
+
 #endif

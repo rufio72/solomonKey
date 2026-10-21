@@ -483,3 +483,69 @@ void sub_3569(struct z80 *z)
     SET_DE(z, (uint16_t)(dst + n));
     SET_BC(z, 0);
 }
+
+/* Tabella ROM dei fondali: un record di 4 byte per stanza (c243):
+ * parola 1 = flusso per il decodificatore, parola 2 = coppia di codici
+ * di sovrapposizione (byte alto e basso, 0 = nessuna). */
+#define TAB_FONDALI_F068 0xf068
+
+/* 0x322A (3225, 7901, 7CD3): carico completo del fondale della stanza
+ * c243: azzera la palette di stanza (sub_33aa), azzera e802, decodifica
+ * il flusso del record (sub_326c, BC = 1000), applica le sovrapposizioni
+ * del byte alto e poi del byte basso della parola 2 (sub_325e), carica la
+ * palette (sub_33ba, C = 1). Il `push de`/`ex (sp),hl`/`pop hl`
+ * dell'originale gira solo sulla parola appena spinta: qui è la variabile
+ * `sovrapposizioni`. Registri d'uscita da sub_33ba. */
+void sub_322a(struct z80 *z)
+{
+    sub_33aa(z);
+    z->a = 0;                       /* xor a */
+    scrivi_porta(0xe802, 0);        /* e802: non mappato in MAME, no-op */
+    z->a = (uint8_t)(M(0xc243) * 2);
+    SET_HL(z, TAB_FONDALI_F068);
+    sub_0008(z);                    /* rst 08: HL = f068 + 4·c243 */
+    sub_0010(z);                    /* rst 10: DE = flusso */
+    uint16_t flusso = DE(z);        /* push de */
+    sub_0018(z);                    /* rst 18: HL = parola 2 */
+    uint16_t sovrapposizioni = HL(z);   /* ex (sp),hl */
+    SET_HL(z, DE(z));               /* ex de,hl (HL aveva già il flusso) */
+    SET_DE(z, flusso);
+    SET_BC(z, 0x1000);
+    sub_326c(z);
+    SET_HL(z, sovrapposizioni);     /* pop hl */
+    z->a = z->h;
+    if (z->a != 0) {                /* sovrapposizione del byte alto */
+        SET_HL(z, 0xf138);
+        sub_325e(z);
+        SET_HL(z, sovrapposizioni); /* push hl / pop hl */
+    }
+    z->a = z->l;
+    if (z->a != 0)                  /* sovrapposizione del byte basso */
+        sub_325e(z);
+    z->c = 1;
+    sub_33ba(z);
+}
+
+/* Piani video del fondale: tile a d400, attributi a d000 (−0x400). */
+#define PIANO_TILE_D400 0xd400
+
+/* 0x3A54 (29DA, 2F52, 2FA0, 3851, 4621, 4BBA; altri siti statici in zone
+ * mai eseguite): riquadro di 2×2 tile alla cella (D = riga, E = colonna):
+ * tile B, B+1 / B+2, B+3 sul piano d400 e attributo C nelle 4 posizioni
+ * del piano d000. Uscita: B += 3, A −= 3, HL e DE conservati (push/pop). */
+void sub_3a54(struct z80 *z)
+{
+    uint16_t hl0 = HL(z), de0 = DE(z);
+    sub_2418(z);                    /* HL = 32·D + E, D = 0 */
+    uint16_t tile = (uint16_t)(HL(z) + PIANO_TILE_D400);
+    M(tile) = z->b;
+    M(tile + 1) = (uint8_t)(z->b + 1);
+    M(tile + 0x20) = (uint8_t)(z->b + 2);
+    M(tile + 0x21) = (uint8_t)(z->b + 3);
+    uint16_t attr = (uint16_t)(tile - 0x400);
+    M(attr) = M(attr + 1) = M(attr + 0x20) = M(attr + 0x21) = z->c;
+    z->b = (uint8_t)(z->b + 3);
+    z->a = (uint8_t)(z->a - 3);
+    SET_DE(z, de0);
+    SET_HL(z, hl0);
+}

@@ -407,3 +407,13 @@ void sub_0493(struct z80 *z)
     z->e = indice;
     SET_HL(z, 0xc04e);
 }
+
+/* 0x05B5 (2F16): secondo ingresso della tabella sprite sub_05b3
+ * (routine.c): 05B3 è il solo `ld c,000h` e prosegue in 05B5, ma quel C
+ * è morto (riassegnato a 05C4/05CA prima d'ogni uso), quindi i due
+ * ingressi sono semanticamente identici. Il PC 05B5 è attraversato anche
+ * dalla NMI a ogni frame (via 05B3). */
+void sub_05b5(struct z80 *z)
+{
+    sub_05b3(z);
+}

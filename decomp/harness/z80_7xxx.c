@@ -142,3 +142,88 @@ void sub_7c84(struct z80 *z)
     z->c = 0x0e;
     SET_HL(z, 0xddca + 0x0e);
 }
+
+/* I 17 slot da 0x18 byte c2c1-c458; la ricerca parte dall'ultimo. */
+#define ULTIMO_SLOT_C441 0xc441
+#define PASSO_SLOT       0x18
+
+/* 0x7379 (373F, 56AB; molti siti statici in zone mai eseguite): cerca uno
+ * slot libero (bit 7 del byte 0 spento) fra i 17 slot c2c1 partendo
+ * dall'ultimo (c441) all'indietro. Trovato (coda privata 2540): azzera il
+ * byte +1, A = indice dello slot (0..16), HL = slot, riporto 1. Esauriti
+ * (738A, mai eseguito nelle tracce): A = 1, B = 0, riporto 0. Il riporto
+ * serve al chiamante (il banco non confronta F), emulato su z->f. */
+void sub_7379(struct z80 *z)
+{
+    uint16_t hl = ULTIMO_SLOT_C441;
+    for (uint8_t b = 0x11; b > 0; b--, hl -= PASSO_SLOT) {
+        if (!(M(hl) & 0x80)) {                 /* coda 2540-2547 */
+            M(hl + 1) = 0;
+            z->a = (uint8_t)(b - 1);
+            z->b = b;
+            z->c = 0xe8;
+            SET_HL(z, hl);
+            z->f = (uint8_t)(z->f | 1);        /* scf */
+            return;
+        }
+    }
+    /* nessuno slot libero: mai eseguito nelle tracce */
+    z->a = 1;
+    z->b = 0;
+    z->c = 0xe8;
+    SET_HL(z, ULTIMO_SLOT_C441 - 0x11 * PASSO_SLOT);
+    z->f = (uint8_t)(z->f & ~1);               /* or a */
+}
+
+/* 0x7ECA (790F, 7CDB): cornice del pannello di gioco: due file di 14
+ * caratteri consecutivi (04-11 a ddaa e 12-1F a ddca, sub_7f2d) e i bordi
+ * a celle con sub_7efe: attributo 2 su 11 righe × 16 colonne, attributo 3
+ * su 11 righe × 5 colonne. */
+void sub_7eca(struct z80 *z)
+{
+    SET_BC(z, 0x0e04);
+    SET_HL(z, 0xddaa);
+    sub_7f2d(z);
+    z->b = 0x0e;
+    SET_HL(z, 0xddca);
+    sub_7f2d(z);
+    z->c = 0x02;
+    z->d = 0x0b;
+    do {
+        z->e = 0x0f;
+        do {
+            sub_7efe(z);
+            z->e--;
+        } while (!(z->e & 0x80));              /* dec e; bit 7,e */
+        z->d--;
+    } while (z->d != 0);
+    z->c = 0x03;
+    z->d = 0x0b;
+    do {
+        z->e = 0x04;
+        do {
+            sub_7efe(z);
+            z->e--;
+        } while (!(z->e & 0x80));
+        z->d--;
+    } while (z->d != 0);
+}
+
+/* 0x7F2D (7ED0, 7ED8, dentro 7ECA): scrive B caratteri consecutivi a
+ * partire da C da HL in avanti, con l'attributo 60 sull'altro piano
+ * (res 2,h). Uscita: C += B d'ingresso, B = 0, HL avanzato di B. */
+void sub_7f2d(struct z80 *z)
+{
+    uint16_t hl = HL(z);
+    uint8_t c = z->c;
+    uint8_t b = z->b;
+    do {
+        M(hl) = c;
+        M(hl & ~0x0400) = 0x60;
+        c++;
+        hl++;
+    } while (--b);                             /* djnz */
+    z->b = 0;
+    z->c = c;
+    SET_HL(z, hl);
+}
