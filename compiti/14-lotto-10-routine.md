@@ -267,3 +267,19 @@ Attenzione: la traccia di controllo non esegue 0405-0468; lì fanno fede
    resta il modello dello spedidore): nessuna unificazione in questo
    lotto, un futuro lotto di pulizia potrà farla. Risolta con la proposta
    dell'analista. «preferenza»
+
+## Chiusura ciclo (chat principale, 2026-10-21)
+
+Esito: PASSATO. Ciclo in sessione cloud (branch lotto-10, PR verso main):
+la catena della NMI con dentro lo scheduler 0493, il gestore rst 28 e lo
+stato di Dana; nmi.c e nmi_oggetti.c nuovi, regola delle 800 righe
+rispettata. In locale: 23 catture rigenerate, 22 identiche bit a bit; la
+condizionata di 03FB (pieno) differisce nei registri a parita di frame e
+occorrenza — non-determinicita fine tra la build Ubuntu di MAME della VM e
+quella locale — ma il banco passa con entrambe le coppie, quindi vale come
+verifica indipendente aggiuntiva; tenuta la coppia del cloud committata.
+Verificatore: 13 verifiche, passate nella sostanza (sched_log storico
+106124 con differenze 0; il punto 8 era da leggere al contrario: prima.bin
+tutte diverse e l'esito atteso). Totale: 107 righe in ROUTINE.md, 98
+verificate; il perimetro osservato si chiude col lotto 11 (~13 routine).
+Token: ciclo in cloud su Fable 5 (crediti cloud); verificatore locale Sonnet 20k.
