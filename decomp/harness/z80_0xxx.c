@@ -196,6 +196,140 @@ avanzamento:                           /* 0842 */
     }
 }
 
+/* Un asse del moto dell'oggetto (0602, ramo 06A7): 7 byte da `base`:
+ * +0 accelerazione (segnata a 8 bit), +1/+2 velocità massima, +3/+4
+ * velocità corrente, +5/+6 posizione (sottopixel, pixel). La velocità
+ * nuova = corrente + accelerazione; se supera la massima (confronto col
+ * segno del Z80: la massima è negata quando la velocità è negativa e il
+ * riporto della `sbc` è ribaltato) resta la corrente; la posizione avanza
+ * della velocità scelta. */
+static void sub_0602_asse(uint16_t base)
+{
+    uint16_t vel = (uint16_t)(M(base + 3) | (M(base + 4) << 8));
+    uint16_t bc = (uint16_t)(vel + (int16_t)(int8_t)M(base));
+    uint16_t massima = (uint16_t)(M(base + 1) | (M(base + 2) << 8));
+    if (bc & 0x8000)
+        massima = (uint16_t)-massima;
+    int superata = massima < bc;           /* riporto della sbc hl,bc */
+    if (bc & 0x8000)
+        superata = !superata;              /* ccf */
+    if (!superata) {
+        M(base + 3) = (uint8_t)bc;
+        M(base + 4) = (uint8_t)(bc >> 8);
+    } else {
+        bc = vel;
+    }
+    uint16_t pos = (uint16_t)((M(base + 5) | (M(base + 6) << 8)) + bc);
+    M(base + 5) = (uint8_t)pos;
+    M(base + 6) = (uint8_t)(pos >> 8);
+}
+
+/* 0x0602 (chiamata dalla NMI, 0126, per ognuno dei 24 slot oggetto da
+ * 0x30 byte a partire da c46e, con HL = IX = slot): motore per-oggetto.
+ * Se (HL) < c0 esce (slot non attivo). Altrimenti: (IX+6) = 4·(IX+1D) +
+ * (IX+1E); aggiorna il sottorecord +4..+7 (due coppie valore/bersaglio):
+ * se cambiate, sincronizza le copie e carica i campi del moto (+08..+13)
+ * dal record parola(a746 + 2·(+4)) + 3·(+6), coi bit 7..2 del primo byte
+ * a scegliere i campi (bit 1: puntatore ulteriore scelto da (+4) & 3);
+ * se stabili, integra i due assi del moto (sub_0602_asse). Poi copia i
+ * 4 margini del riquadro dal record ROM 9495 + 8·A (A = (IX+4), o (IX+3)
+ * se ≥ 9) in +16..+19, raccoglie in C i bit 7 delle 6 celle della griglia
+ * c0bd attorno al pixel ((IX+0E), (IX+15)) coi margini (bit 0-2 di B dai
+ * cambi di riga/colonna), scrive C in +1A, chiama sub_08a2 (urti) e
+ * prosegue in sub_07de (+1B..: animazione). Uscita: registri di sub_07de. */
+void sub_0602(struct z80 *z)
+{
+    uint16_t o = HL(z);
+    z->a = M(o);
+    if (z->a < 0xc0)
+        return;
+    M(z->ix + 0x06) = (uint8_t)(4 * M(z->ix + 0x1d) + M(z->ix + 0x1e));
+
+    /* sottorecord +4..+7: coppie (valore, copia) ai byte +4/+5 e +6/+7 */
+    uint8_t v0 = M(o + 4), v1 = M(o + 6);
+    if (M(o + 4) == M(o + 5) && M(o + 6) == M(o + 7)) {
+        /* coppie stabili (06A7): integrazione del moto sui due assi */
+        sub_0602_asse(o + 0x08);           /* asse Y: +08..+0E */
+        sub_0602_asse(o + 0x0f);           /* asse X: +0F..+15 */
+    } else {
+        /* coppie cambiate (0627/062C): si sincronizzano le copie e si
+         * caricano i campi del moto dal record in ROM */
+        M(o + 5) = v0;
+        M(o + 7) = v1;
+        uint16_t rec = (uint16_t)((leggi(0xa746 + 2 * v0)
+                                   | (leggi(0xa747 + 2 * v0) << 8)) + 3 * v1);
+        uint8_t scelta = leggi(rec);
+        uint16_t p = (uint16_t)(leggi(rec + 1) | (leggi(rec + 2) << 8));
+        if (scelta & 0x02) {               /* puntatore ulteriore da (+4) & 3 */
+            uint16_t q = (uint16_t)(p + 2 * (v0 & 3));
+            p = (uint16_t)(leggi(q) | (leggi(q + 1) << 8));
+        }
+        /* campi del moto scelti dai bit 7..2: bit 7 → +08; 6 → +09, +0A;
+         * 5 → +0B, +0C; 4 → +0F; 3 → +10, +11; 2 → +12, +13 */
+        static const struct { uint8_t bit, campo; } copie[10] = {
+            { 0x80, 0x08 }, { 0x40, 0x09 }, { 0x40, 0x0a },
+            { 0x20, 0x0b }, { 0x20, 0x0c }, { 0x10, 0x0f },
+            { 0x08, 0x10 }, { 0x08, 0x11 }, { 0x04, 0x12 }, { 0x04, 0x13 },
+        };
+        for (unsigned i = 0; i < 10; i++, p++)
+            if (scelta & copie[i].bit)
+                M(o + copie[i].campo) = leggi(p);
+    }
+
+    /* margini del riquadro dal record ROM 9495 + 8·A in +16..+19 */
+    uint8_t a = M(z->ix + 0x04);
+    if (a >= 9)
+        a = M(z->ix + 0x03);
+    uint16_t marg = (uint16_t)(0x9495 + 8 * a);
+    for (unsigned i = 0; i < 4; i++)
+        M(o + 0x16 + i) = leggi((uint16_t)(marg + i));
+
+    /* celle della griglia c0bd attorno al riquadro: B = sconfinamenti
+     * (bit 0: il bordo alto cade a inizio riga; bit 1: il riquadro copre
+     * due righe; bit 2: due colonne), C = bit 7 delle 6 celle lette */
+    uint8_t b = 0;
+    uint8_t alto = (uint8_t)(M(z->ix + 0x0e) + M(o + 0x16));
+    if (((uint8_t)(alto - 1) ^ alto) & 0xf0)
+        b |= 0x01;
+    uint8_t sin = (uint8_t)(M(z->ix + 0x15) + M(o + 0x17) - 8);
+    if (((uint8_t)(sin + M(o + 0x18)) ^ sin) & 0xf0)
+        b |= 0x04;
+    sin += 8;
+    if (((uint8_t)(alto + M(o + 0x19)) ^ alto) & 0xf0)
+        b |= 0x02;
+    uint8_t riga = (uint8_t)((uint8_t)(~alto - 0x10) & 0xf0);
+    uint8_t spiazzo = (uint8_t)(riga + (((uint8_t)(sin + 8) >> 4) & 0x0f));
+    uint16_t cella = (uint16_t)(0xc0bd + spiazzo);
+
+    uint16_t pa = (uint16_t)(cella + ((b & 0x01) ? 0x10 : 0));
+    uint8_t celle = (uint8_t)(M(pa) >> 7);
+    if (b & 0x04)
+        pa++;
+    celle = (uint8_t)((celle << 1) | (M(pa) >> 7));
+    uint16_t pb = cella;
+    celle = (uint8_t)((celle << 1) | (M(pb) >> 7));
+    if (b & 0x04)
+        pb++;
+    celle = (uint8_t)((celle << 1) | (M(pb) >> 7));
+    uint16_t pc = pb;                      /* ex de,hl: si prosegue da pb */
+    if (b & 0x02)
+        pc -= 0x10;
+    celle = (uint8_t)((celle << 1) | (M(pc) >> 7));
+    if (b & 0x04)
+        pc--;
+    celle = (uint8_t)((celle << 1) | (M(pc) >> 7));
+
+    M(o + 0x1a) = celle;
+    z->a = celle;
+    z->b = b;
+    z->c = celle;
+    SET_DE(z, pa);
+    SET_HL(z, o + 0x1a);
+    sub_08a2(z);                           /* urti (07D9) */
+    SET_HL(z, o + 0x1b);
+    sub_07de(z);                           /* prosecuzione a 07DE */
+}
+
 /* Coda di richieste audio/effetti c054-c056 (3 slot). */
 #define CODA_C054 0xc054
 

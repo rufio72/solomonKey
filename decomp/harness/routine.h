@@ -88,4 +88,16 @@ void sub_7e24(struct z80 *z);
 void sub_2f74(struct z80 *z);
 void sub_7dea(struct z80 *z);
 
+/* Lotto 7 (compito 11): il grappolo 0602 (motore per-oggetto della NMI).
+ * Lo smistatore 08CE non ha prototipo: è il salto in tabella dentro
+ * sub_08a2 (z80_08xx.c). */
+void sub_0602(struct z80 *z);
+void sub_08a2(struct z80 *z);
+void sub_08d8(struct z80 *z);
+void sub_094d(struct z80 *z);
+void sub_0a98(struct z80 *z);
+void sub_0ac3(struct z80 *z);
+void sub_0af9(struct z80 *z);
+void sub_0b57(struct z80 *z);
+
 #endif
