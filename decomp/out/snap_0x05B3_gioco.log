@@ -1,3 +1,5 @@
+error: XDG_RUNTIME_DIR is invalid or not set in the environment.
 Warning: -video none doesn't make much sense without -seconds_to_run
+ALSA lib seq_hw.c:528:(snd_seq_hw_open) open /dev/snd/seq failed: No such file or directory
 SNAP: catturata occorrenza 1 di 0x05B3 [gioco] al frame 2402, scartate 0
-Average speed: 2419.22% (39 seconds)
+Average speed: 2308.65% (39 seconds)

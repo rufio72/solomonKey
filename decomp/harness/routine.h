@@ -47,4 +47,21 @@ void sub_4e87(struct z80 *z);
 void sub_6771(struct z80 *z);
 void sub_7efe(struct z80 *z);
 
+/* Lotto 3 (compito 07). */
+void sub_01c5(struct z80 *z);
+void sub_07de(struct z80 *z);
+void sub_2b08(struct z80 *z);
+void sub_3000(struct z80 *z);
+void sub_3101(struct z80 *z);
+void sub_31ce(struct z80 *z);
+void sub_325e(struct z80 *z);
+void sub_33aa(struct z80 *z);
+void sub_33ba(struct z80 *z);
+void sub_34e1(struct z80 *z);
+void sub_36bd(struct z80 *z);
+void sub_452b(struct z80 *z);
+void sub_472e(struct z80 *z);
+void sub_4d37(struct z80 *z);
+void sub_4d87(struct z80 *z);
+
 #endif

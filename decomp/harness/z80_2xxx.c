@@ -131,3 +131,42 @@ void sub_2457(struct z80 *z)
     z->d = (uint8_t)(((e & 0xf0) >> 3) + 2);
     z->e = z->a = (uint8_t)(((e & 0x0f) << 1) - 1);
 }
+
+/* Tabelle ROM di 0x2B08: destinazioni video (indice B) e stringhe (indice C). */
+#define TAB_DEST_2B29  0x2b29
+#define TAB_TESTI_2B61 0x2b61
+
+/* 0x2B08 (test RAM e titolo): copia la stringa numero C (tabella 2B61,
+ * terminata da 0xff) nel piano alto della destinazione numero B (tabella
+ * 2B29), attributo 0x40 nel piano basso; con il bit 7 di B acceso la
+ * destinazione è HL del chiamante. Uscita: A = 0, DE sul terminatore,
+ * HL dopo l'ultimo carattere scritto; B e C invariati. */
+void sub_2b08(struct z80 *z)
+{
+    uint8_t b = z->b, c = z->c;
+    if (!(b & 0x80)) {
+        z->a = b;
+        SET_HL(z, TAB_DEST_2B29);
+        sub_0008(z);           /* rst 08 */
+        sub_0018(z);           /* rst 18: HL = parola della tabella */
+    }
+    uint16_t dest = HL(z);
+    z->a = c;
+    SET_HL(z, TAB_TESTI_2B61);
+    sub_0008(z);               /* rst 08 */
+    sub_0010(z);               /* rst 10: DE = inizio della stringa */
+    uint16_t src = DE(z);
+    for (;;) {
+        uint8_t ch = leggi(src);
+        if (ch == 0xff)
+            break;
+        M(dest) = ch;
+        M(dest & ~0x0400) = 0x40;
+        dest = (uint16_t)((dest | 0x0400) + 1);
+        src++;
+    }
+    z->a = 0;                  /* inc a sul terminatore */
+    z->b = b; z->c = c;
+    SET_DE(z, src);
+    SET_HL(z, dest);
+}

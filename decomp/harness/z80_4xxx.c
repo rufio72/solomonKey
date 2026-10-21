@@ -225,3 +225,168 @@ void sub_4e87(struct z80 *z)
     z->a = M(STATO_GIOCO) |= z->e;
     SET_HL(z, STATO_GIOCO);
 }
+
+/* 0x452B: programma un canale di coppie (registro, valore).
+ * Ingresso: HL = tabella dei record da 3 byte (numero di coppie,
+ * destinazione), B = indice del record, D = codice scritto in (IX+0),
+ * IX = canale (+2 contatore, +3 limite, +4/5 lista delle coppie).
+ * Legge la coppia numero contatore dalla lista (0xff come secondo byte =
+ * riavvolgimento alla testa della lista) e la copia nella destinazione,
+ * per «numero di coppie» volte. Uscita: A = contatore prima
+ * dell'incremento, HL dopo l'ultima coppia letta; BC e DE invariati. */
+void sub_452b(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    M(ix + 0) = z->d;
+    uint16_t rec = (uint16_t)(HL(z) + 3 * z->b);   /* rst 08 + add hl,de */
+    uint8_t coppie = leggi(rec);
+    uint16_t dest = (uint16_t)(leggi(rec + 1) | (leggi(rec + 2) << 8));
+    uint8_t contatore = M(ix + 2);
+    M(ix + 2) = (uint8_t)(contatore + 1);
+    if (contatore == M(ix + 3))
+        M(ix + 2) = 0;
+    uint16_t lista = (uint16_t)(M(ix + 4) | (M(ix + 5) << 8));
+    uint16_t p = (uint16_t)(lista + 2 * contatore);
+    for (unsigned resto = coppie ? coppie : 256; resto > 0; ) {
+        uint8_t reg = leggi(p);
+        uint8_t val = leggi(p + 1);
+        p += 2;
+        if (val == 0xff) {     /* riavvolgimento, non consuma il conteggio */
+            p = lista;
+            continue;
+        }
+        M(dest) = reg;
+        M(dest + 1) = val;
+        dest += 2;
+        resto--;
+    }
+    z->a = contatore;
+    SET_HL(z, p);
+}
+
+/* Tabelle ROM di 0x472E: record per indice C, parole per c2ae, oggetti. */
+#define TAB_RECORD_488D  0x488d
+#define TAB_PAROLE_8B2D  0x8b2d
+#define TAB_OGGETTI_48AF 0x48af
+
+/* 0x472E: inizializza il record numero C (tabella 488D): campo +4 = 0x7f,
+ * campi +1 e +8 = 0, parola della tabella 8B2D (indice = bit 5-7 di c2ae)
+ * nei campi +9/+10; poi IX = parola della tabella 48AF (indice C) e
+ * HL d'ingresso salvato in (IX+0E)/(IX+15).
+ * Uscita: A = C, HL invariato, DE = IX = parola di 48AF; BC invariati. */
+void sub_472e(struct z80 *z)
+{
+    uint16_t hl_in = HL(z);
+    z->a = z->c;
+    SET_HL(z, TAB_RECORD_488D);
+    sub_0008(z);               /* rst 08 */
+    sub_0010(z);               /* rst 10: DE = record */
+    uint16_t rec = DE(z);
+    M(rec + 4) = 0x7f;
+    M(rec + 1) = 0;
+    M(rec + 8) = 0;
+    z->a = (uint8_t)((M(0xc2ae) >> 5) & 7);    /* rlca ×3, and 7 */
+    SET_HL(z, TAB_PAROLE_8B2D);
+    sub_0008(z);
+    sub_0010(z);               /* DE = parola */
+    M(rec + 9) = z->e;
+    M(rec + 10) = z->d;
+    z->a = z->c;
+    SET_HL(z, TAB_OGGETTI_48AF);
+    sub_0008(z);
+    sub_0010(z);               /* DE = oggetto */
+    z->ix = DE(z);
+    M(z->ix + 0x0e) = (uint8_t)(hl_in >> 8);
+    M(z->ix + 0x15) = (uint8_t)hl_in;
+    SET_HL(z, hl_in);
+}
+
+/* Cifre a video del punteggio/tempo e contatori associati. */
+#define CIFRE_C061 0xc061
+#define AZZERA_C239 0xc239
+
+/* 0x4D37: converte il valore a 32 bit DE:HL in cifre decimali a c061
+ * (meno significativa per prima, terminatore 0xff): per ogni cifra una
+ * divisione per 10 con 32 scorrimenti. Con più di 9 cifre azzera
+ * c239-c23c e scrive solo il terminatore. Uscita normale: A = L = ultima
+ * cifra (quoziente finale), DE = 0, B = 0, C = cifre scritte,
+ * IX sul terminatore. */
+void sub_4d37(struct z80 *z)
+{
+    uint16_t ix = CIFRE_C061;
+    uint8_t conta = 0;
+    uint32_t v = ((uint32_t)DE(z) << 16) | HL(z);
+    for (;;) {
+        if (conta >= 9) {      /* troppe cifre */
+            for (int i = 0; i < 4; i++)
+                M(AZZERA_C239 + i) = 0;
+            M(CIFRE_C061) = 0xff;
+            z->a = 0xff;
+            z->b = 0;
+            z->c = conta;
+            SET_DE(z, (uint16_t)(v >> 16));
+            SET_HL(z, AZZERA_C239 + 4);
+            z->ix = ix;
+            return;
+        }
+        uint8_t resto = 0;     /* divisione per 10: v = v/10, resto in A */
+        for (int b = 0; b < 32; b++) {
+            uint8_t alto = (uint8_t)(v >> 31);
+            v <<= 1;
+            resto = (uint8_t)((resto << 1) | alto);
+            if (resto >= 10) { /* sub 10 senza prestito: bit del quoziente */
+                resto -= 10;
+                v |= 1;
+            }
+        }
+        M(ix) = resto;
+        ix++;
+        conta++;
+        if (v >= 10)
+            continue;
+        if (v != 0) {          /* ultima cifra non nulla */
+            M(ix) = (uint8_t)v;
+            ix++;
+        }
+        M(ix) = 0xff;
+        z->a = (uint8_t)v;
+        z->b = 0;
+        z->c = conta;
+        SET_DE(z, 0);
+        SET_HL(z, (uint16_t)v);
+        z->ix = ix;
+        return;
+    }
+}
+
+/* 0x4D87: scrive 8 byte letti in avanti da (DE) in (HL) all'indietro,
+ * nel piano alto con +0x30 e attributo C nel piano basso; dal
+ * terminatore 0xff in poi azzera il piano alto (senza attributo).
+ * Uscita: A = ultimo carattere + 0x30 oppure 0xff, B = 0,
+ * DE e HL avanzati/arretrati di conseguenza. */
+void sub_4d87(struct z80 *z)
+{
+    uint16_t src = DE(z), dst = HL(z);
+    uint8_t a = 0;
+    int b = 8;
+    while (b > 0) {
+        a = leggi(src);
+        src++;
+        if (a == 0xff)
+            break;
+        a = (uint8_t)(a + 0x30);
+        M(dst) = a;
+        M(dst & ~0x0400) = z->c;
+        dst = (uint16_t)((dst | 0x0400) - 1);  /* set 2,h; dec hl */
+        b--;
+    }
+    while (b > 0) {            /* coda 4D9C: azzera il resto */
+        M(dst) = 0;
+        dst--;
+        b--;
+    }
+    z->a = a;
+    z->b = 0;
+    SET_DE(z, src);
+    SET_HL(z, dst);
+}
