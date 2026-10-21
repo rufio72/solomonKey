@@ -41,4 +41,14 @@ int sub_336c(uint8_t base, uint8_t attributi, uint8_t riga, uint8_t colonna);
 /* Protezione e603 (porte.c). */
 uint8_t leggi_e603(uint16_t pc);
 
+/* Porte mappate in memoria (porte.c; solomon.cpp, MAME 0.264): e600 P1 /
+ * maschera NMI; e601 P2; e602 SYSTEM (start 1-2 bit 0-1, coin 1-2 bit
+ * 2-3); e603 protezione (solo via leggi_e603(pc)); e604 DSW1 /
+ * ribaltamento schermo; e605 DSW2; e606 lettura a vuoto (0). Nei dump di
+ * snap.lua ram[a - 0xc000] è il valore vivo all'istante della cattura
+ * (proposta A del brief 12). Nel C tradotto i siti porta usano queste
+ * funzioni con l'indirizzo esplicito, mai M(). */
+uint8_t leggi_porta(uint16_t a);           /* e600-e606: ram[a - 0xc000] */
+void scrivi_porta(uint16_t a, uint8_t v);  /* scrive ram[a - 0xc000] */
+
 #endif

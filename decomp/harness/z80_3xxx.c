@@ -19,49 +19,6 @@ void sub_30ef(struct z80 *z)
     z->a = leggi(hl);
 }
 
-/* 0x3A1C: due cifre ASCII di A (0..99 atteso).
- * Uscita: D = '0' + A/10, E = '0' + A%10, A = D. */
-void sub_3a1c(struct z80 *z)
-{
-    uint8_t decine = z->a / 10, unita = z->a % 10;
-    z->d = (uint8_t)('0' + decine);
-    z->e = (uint8_t)('0' + unita);
-    z->a = z->d;
-}
-
-/* Tempo in BCD (3 byte, cifre basse prima) e sue cifre separate. */
-#define TEMPO_BCD    0xc093
-#define TEMPO_CIFRE  0xc061   /* 6 cifre, meno significativa prima, poi terminatore */
-#define FINE_CIFRE   0xff
-
-/* 0x3F10: scompone le 3 parole BCD di c093-c095 in 6 cifre a c061-c066 e
- * scrive 0xff subito dopo la cifra non nulla più significativa (dopo
- * c061 se sono tutte zero).
- * Uscita: A = 0xff, B = posizione (1..6, 0 se tutte zero), C = byte c095,
- * DE = indirizzo del terminatore, HL = c096. */
-void sub_3f10(struct z80 *z)
-{
-    for (int i = 0; i < 3; i++) {
-        uint8_t c = M(TEMPO_BCD + i);
-        M(TEMPO_CIFRE + 2 * i) = c & 0x0f;
-        M(TEMPO_CIFRE + 2 * i + 1) = c >> 4;
-        z->c = c;
-    }
-    /* dall'ultima cifra verso la prima, la prima non nulla */
-    uint8_t b = 6;
-    uint16_t hl = TEMPO_CIFRE + 5;
-    for (; b > 0; b--, hl--)
-        if (M(hl) != 0)
-            break;
-    if (b == 0)
-        hl = TEMPO_CIFRE;   /* nessuna cifra non nulla: si ferma su c061 */
-    M(hl + 1) = FINE_CIFRE;
-    z->b = b;
-    z->a = FINE_CIFRE;
-    SET_DE(z, hl + 1);
-    SET_HL(z, TEMPO_BCD + 3);
-}
-
 /* 0x34D4: azzera 10 byte da HL in due piani: per ogni byte scrive 0 a HL
  * con il bit 2 di H spento e poi a HL con il bit 2 di H acceso (prima
  * scrittura all'indirizzo d'ingresso, come nel codice).
@@ -78,49 +35,6 @@ void sub_34d4(struct z80 *z)
     }
     SET_BC(z, 0);
     SET_HL(z, hl);
-}
-
-/* 0x380A: riempie 16 byte da HL con 0xff.
- * Uscita: B = 0, C = 0xff, HL avanzato di 16. */
-void sub_380a(struct z80 *z)
-{
-    uint16_t hl = HL(z);
-    for (int i = 0; i < 16; i++)
-        M(hl++) = 0xff;
-    SET_BC(z, 0x00ff);
-    SET_HL(z, hl);
-}
-
-/* Tabelle ROM di coppie di byte. */
-#define TABELLA_8578 0x8578   /* indici 0..7 e 8, 9, 10 per A >= 0x40 */
-#define TABELLA_858E 0x858e   /* indici A-8 per 8 <= A < 0x40 */
-
-/* 0x3A2E: coppia di byte scelta da A.
- * A < 8: indice A in 8578; A < 0x40: indice A-8 in 858E; altrimenti indice
- * 8 (A < c0), 9 (A < f8) o 10 in 8578.
- * Uscita: B, C = coppia, A = DE = indice, HL sul secondo byte. */
-void sub_3a2e(struct z80 *z)
-{
-    uint8_t a = z->a, indice;
-    uint16_t tabella = TABELLA_8578;
-    if (a < 0x08)
-        indice = a;
-    else if (a < 0x40) {
-        indice = a - 8;
-        tabella = TABELLA_858E;
-    } else if (a < 0xc0)
-        indice = 8;
-    else if (a < 0xf8)
-        indice = 9;
-    else
-        indice = 10;
-    z->a = indice;
-    SET_HL(z, tabella);
-    sub_0008(z);            /* rst 08: DE = indice, HL = tabella + 2·indice */
-    uint16_t hl = HL(z);
-    z->b = leggi(hl);
-    z->c = leggi(hl + 1);
-    SET_HL(z, hl + 1);
 }
 
 /* 0x3000: estensione con segno e moltiplicazione per 4.
@@ -479,4 +393,93 @@ void sub_3045(struct z80 *z)
         z->ix = (uint16_t)(z->ix + 0x30);
         z->d--;
     } while (z->d != 0);
+}
+
+/* 0x33EB (avvio 2C31/2C37 e 7620): prepara lo stato del tabellone:
+ * azzera c237-c267 (49 byte), c244 = 0xff, copia i 6 byte della tabella
+ * ROM 3427 in c258; prosegue senza ret in sub_3404. */
+void sub_33eb(struct z80 *z)
+{
+    for (int i = 0; i < 0x31; i++)
+        M(0xc237 + i) = 0;
+    M(0xc244) = 0xff;
+    for (int i = 0; i < 6; i++)                /* ldir 3427 → c258 */
+        M(0xc258 + i) = leggi(0x3427 + i);
+    SET_HL(z, 0x3427 + 6);
+    SET_DE(z, 0xc258 + 6);
+    SET_BC(z, 0);
+    z->a = 0xff;
+    sub_3404(z);                               /* prosecuzione a 3404 */
+}
+
+/* 0x3404 (coda di 33EB, mai chiamata direttamente): c237 = c04d (vite
+ * iniziali), ridisegna il tabellone (sub_349f), carica il puntatore del
+ * Bonus Life (sub_342d); se c045 & 6 (partita in corso) azzera dc55-dc57;
+ * c24e = 4. Uscita: A = 4, gli altri da sub_342d (o HL = dc58, B = C = 0
+ * nel ramo che azzera). */
+void sub_3404(struct z80 *z)
+{
+    M(0xc237) = M(0xc04d);
+    sub_349f(z);
+    sub_342d(z);
+    z->a = (uint8_t)(M(0xc045) & 0x06);
+    if (z->a != 0) {
+        for (int i = 0; i < 3; i++)
+            M(0xdc55 + i) = 0;
+        SET_HL(z, 0xdc55 + 3);
+        SET_BC(z, 0);
+    }
+    z->a = 4;
+    M(0xc24e) = 4;
+}
+
+/* Tabella ROM dei puntatori del Bonus Life (8 parole). */
+#define TAB_BONUS_343F 0x343f
+
+/* 0x342D (340D, da 3404): legge e605 (DSW2, bit 5-7 = Bonus Life) e copia
+ * la parola della tabella 343F a quell'indice in c23d-c23e.
+ * Uscita: A = indice, DE = parola, HL = 343f + 2·indice + 2. */
+void sub_342d(struct z80 *z)
+{
+    uint8_t dsw2 = leggi_porta(0xe605);        /* DSW2: bit 5-7 = Bonus Life */
+    z->a = (uint8_t)(((dsw2 << 3) | (dsw2 >> 5)) & 0x07);   /* rlca ×3 */
+    SET_HL(z, TAB_BONUS_343F);
+    sub_0008(z);                               /* rst 08 */
+    sub_0010(z);                               /* rst 10: DE = parola */
+    M(0xc23d) = z->e;
+    M(0xc23e) = z->d;
+}
+
+/* Tabella ROM dei record della stanza-bonus (4 byte per voce). */
+#define TAB_BONUS_355D 0x355d
+
+/* 0x354B (3547): copia il record di 4 byte della stanza-bonus c24a
+ * (tabella 355D) nella destinazione del record 0 di 3574 (sub_3569 con
+ * A = 0). Uscita: registri di sub_3569. */
+void sub_354b(struct z80 *z)
+{
+    SET_HL(z, (uint16_t)(TAB_BONUS_355D + 4 * M(0xc24a)));
+    z->a = 0;
+    sub_3569(z);
+}
+
+/* Tabella ROM delle copie fisse: record da 3 byte (parola di destinazione,
+ * lunghezza), indice in A. */
+#define TAB_COPIE_3574 0x3574
+
+/* 0x3569 (3559, 3F8A): copia generica: il record A della tabella 3574 dà
+ * destinazione e lunghezza (sub_23f8, verificata), la sorgente è HL
+ * (anche ROM). Uscita: A = 0, BC = 0, DE e HL dopo l'ultimo byte. */
+void sub_3569(struct z80 *z)
+{
+    uint16_t src = HL(z);
+    SET_HL(z, TAB_COPIE_3574);
+    sub_23f8(z);                   /* DE = destinazione, C = lunghezza */
+    uint16_t dst = DE(z);
+    uint8_t n = z->c;
+    for (uint8_t i = 0; i < n; i++)            /* ldir */
+        M(dst + i) = leggi((uint16_t)(src + i));
+    SET_HL(z, (uint16_t)(src + n));
+    SET_DE(z, (uint16_t)(dst + n));
+    SET_BC(z, 0);
 }
