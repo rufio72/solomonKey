@@ -1,0 +1,4 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+ALSA lib seq_hw.c:528:(snd_seq_hw_open) open /dev/snd/seq failed: No such file or directory
+SNAP: catturata occorrenza 1 di 0x2551 [titolo] al frame 1060, scartate 0
+Average speed: 1147.28% (17 seconds)

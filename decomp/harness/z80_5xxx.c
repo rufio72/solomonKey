@@ -58,3 +58,29 @@ void sub_5c32(struct z80 *z)
     M(hl) = z->c;
     SET_HL(z, hl);
 }
+
+/* 0x5507 (5648; 54EC, 553A, 5569 statici): prossimità e direzione per i
+ * corpi di fase dei nemici (IX = slot, IY = oggetto). A = doppio del
+ * valore assoluto di (IX+4); se A ≥ C esce col riporto 0; altrimenti
+ * A = 2·(((IY+1E) ruotato a destra) XOR (IX+5)) e il riporto è il bit 7
+ * del XOR. Solo registri; il riporto serve al chiamante (il banco non
+ * confronta F), emulato su z->f. Secondo ingresso 550A mai osservato. */
+void sub_5507(struct z80 *z)
+{
+    uint8_t a = M(z->ix + 4);
+    uint8_t riporto = (uint8_t)(a >> 7);       /* add a,a */
+    a = (uint8_t)(a << 1);
+    if (riporto)                               /* neg */
+        a = (uint8_t)(-a);
+    if (a >= z->c) {                           /* cp c; ret nc */
+        z->a = a;
+        z->f = (uint8_t)(z->f & ~1);
+        return;
+    }
+    a = M(z->iy + 0x1e);
+    a = (uint8_t)((a >> 1) | (a << 7));        /* rrca */
+    a ^= M(z->ix + 5);
+    riporto = (uint8_t)(a >> 7);               /* add a,a */
+    z->a = (uint8_t)(a << 1);
+    z->f = (uint8_t)((z->f & ~1) | riporto);
+}
