@@ -51,11 +51,16 @@ Il metodo è una decompilazione guidata dall'esecuzione, con MAME come oracolo:
   su branch con pull request; ogni lotto viene riverificato in locale
   rigenerando le catture (finora identiche bit a bit, salvo una condizionata
   che varia tra build di MAME ed è stata validata con entrambe le coppie).
-- **Dopo:** copertura delle zone mai eseguite (bonus e finale inclusi, se la
-  decisione in sospeso verrà sciolta), strato hardware (video, sprite,
-  palette, input) per rendere giocabile il risultato, pulizia finale. Il Z80
-  audio resta emulato o sostituito da campioni, salvo decisione di
-  decompilare anche lui.
+- **Dopo, in ordine previsto:**
+  - **stanze bonus e sequenza finale** (decisione sciolta il 2026-10-21: si
+    fanno): copertura con sessioni guidate o partita tracciata, poi
+    traduzione in lotti come il resto;
+  - copertura delle altre zone mai eseguite (rami rari, morti particolari),
+    con forzature di RAM e ricerca di copertura a input automatici;
+  - strato hardware (video, sprite, palette, input) per rendere giocabile il
+    risultato, e pulizia finale;
+  - Z80 audio: per ora emulato o sostituito da campioni, decompilazione da
+    valutare a nucleo chiuso.
 
 ## Contenuto del repository
 

@@ -344,3 +344,11 @@ differenza di quanto scritto nei fatti del brief: vedi `decomp/SCHEDULER.md`.
 Esito: PASSATO con riserva sulla copertura. Verificatore senza MAME (vietato dall'utente): scheduler confermato su log esistente (106124 spedizioni, 0 differenze; posta 131, il 110 del brief era sbagliato); harness tre OK; copertura 195/299 confermata ma sotto l'obiettivo 270, giro interrotto dall'utente nell'ultima sessione (demo). Verifica 13 non attendibile: `.inizio` ricreato dopo la perdita dei file.
 Incidente: la chat principale ha riscritto la cronologia git a ciclo in corso e ha perso sette file non committati; lo sviluppatore li ha ricreati dalla sua sessione. Regola da ora: nessuna operazione git distruttiva con un agente al lavoro.
 Token: sviluppatore Opus 107k, verificatore Sonnet 25k.
+
+## Aggiornamento della decisione in sospeso (chat principale, 2026-10-21)
+
+Le sessioni `bonus` e `finale` entrano nelle cose da fare (decisione
+dell'utente): la copertura si farà con sessioni guidate o partita tracciata,
+poi traduzione in lotti. Il vincolo «non vanno tentate» resta in vigore per
+i lotti di traduzione correnti e cade solo nel futuro lotto di copertura
+dedicato, che aggiornerà anche i cancelli.
