@@ -203,3 +203,21 @@ su e800 vale il costo. B solo come ripiego se A rivelasse sorprese.
    basta): raccomandazione rinviare al filone zone mai eseguite ed
    estendere allora `leggi_e603` con il parametro BC, documentando il
    comportamento MAME. «scelta di progetto»
+
+## Decisioni (chat principale con l'utente, 2026-10-21)
+
+- Domande 1-3 (preferenze): accettate con la proposta dell'analista.
+- Domanda 4 (scelta di progetto): adottata la proposta A — funzioni di
+  piattaforma `leggi_porta`/`scrivi_porta` in `porte.c` sui dump esistenti.
+  La proposta C (log degli accessi) resta come estensione futura per NMI
+  strutturale e audio; la B è scartata.
+- e603 / PC 4CF0: rinviata al filone «zone mai eseguite», come raccomandato.
+
+## Chiusura ciclo di analisi (chat principale, 2026-10-21)
+
+Esito: PASSATO. Sola analisi in sessione cloud (branch lotto-08-analisi,
+PR #2), nessun codice toccato. Verifiche del censimento rifatte in locale:
+31 accessi diretti, 45 righe totali, 11 in/out letterali mai eseguiti,
+DSW1=02 nel dump di 2368 — tutte conformi. Il lotto 9 implementerà la
+proposta A.
+Token: analisi in cloud su Fable 5 (crediti cloud); verifica locale diretta.
