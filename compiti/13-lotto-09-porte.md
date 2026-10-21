@@ -206,3 +206,15 @@ lì fanno fede le `*_istruzioni.txt`.
    su `z->f` con commento (il banco non confronta F; servono ai chiamanti
    del filone strutturale). Risolta con la proposta dell'analista.
    «preferenza»
+
+## Chiusura ciclo (chat principale, 2026-10-21)
+
+Esito: PASSATO. Ciclo in sessione cloud (branch lotto-09, PR verso main) con
+sotto-agenti per analista e sviluppatore; brief corretto dal censimento
+(contenitori in realta piccoli) e verificato a campione prima dello
+sviluppo. In locale: 36 catture rigenerate, bin e regs identici bit a bit;
+verifiche essenziali rifatte in linea: make 0 warning, banco 93 RIEPILOGO e
+0 FALLITO, 95 righe in ROUTINE.md di cui 87 verificate, nessun file sopra
+le 800 righe (z80_3xxx.c spezzato in z80_38xx.c). porte.c secondo la
+proposta A, e603 da tabella misurata.
+Token: ciclo in cloud su Fable 5 (crediti cloud); verifica locale in linea.
