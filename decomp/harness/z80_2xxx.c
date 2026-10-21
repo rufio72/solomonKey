@@ -215,3 +215,24 @@ void sub_2ff3(struct z80 *z)
     z->f = (uint8_t)((z->f & ~1) | prestito);
     sub_3000(z);
 }
+
+/* 0x2F74: aggancia una cella a video a un oggetto: salva H/L in
+ * (IX+0E)/(IX+15), (IX+3) = 0x0a, inizializza i campi fissi con sub_4af6
+ * (A = 0xc0 stato, E = 0x0a), poi passa all'oggetto dopo.
+ * Uscita: A = L = L d'ingresso + 0x10, D = 0, E = 0x30, IX += 0x30;
+ * B, C e H invariati. */
+void sub_2f74(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    M(ix + 0x0e) = z->h;
+    M(ix + 0x15) = z->l;
+    M(ix + 0x03) = 0x0a;
+    z->d = 0;
+    z->e = 0x0a;
+    z->a = 0xc0;
+    sub_4af6(z);
+    z->a = (uint8_t)(z->l + 0x10);
+    z->l = z->a;
+    z->e = 0x30;
+    z->ix = (uint16_t)(ix + 0x30);
+}

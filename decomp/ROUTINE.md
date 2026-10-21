@@ -30,6 +30,7 @@ i frame sono quelli della cattura riuscita.
 | 0x24B1 | sub_24b1 | z80_2xxx.c | 13 | (HL+1..3) = E, A ruotato col riporto, C; E = B, B = C = C+1 | verificata | 2 | gioco, tardo | gioco f2402 (scrive), tardo f4002; usa il riporto in ingresso |
 | 0x2AF5 | sub_2af5 | z80_2xxx.c | 19 | 8 righe di testo via sub_2b08 (stringa 0c/0d dal bit di A ruotato col riporto in ingresso) | verificata | 2 | titolo, titolo_n2 | solo titolo/test RAM (s = g = 0): occorrenze 1 (f153) e 2 (f154) |
 | 0x2B08 | sub_2b08 | z80_2xxx.c | 33 | stringa C (tab. 2B61) nella destinazione B (tab. 2B29, o HL col bit 7 di B), attributo 40 | verificata | 2 | titolo, titolo_n2 | solo titolo/test RAM (s = g = 0): occorrenze 1 (f152) e 2 (f153) |
+| 0x2F74 | sub_2f74 | z80_2xxx.c | 27 | aggancia una cella a un oggetto: H/L in (IX+0E)/(IX+15), (IX+3)=0a, sub_4af6 (A=c0, E=0a), poi L+=10 e IX+=30 | verificata | 2 | titolo, gioco | titolo f1464, gioco f1838 (scrivono) |
 | 0x2FF3 | sub_2ff3 | z80_2xxx.c | 13 | HL e DE = differenze di coordinate ×4 col segno (prestito a sub_3000) | verificata | 2 | titolo, gioco | titolo f1305, gioco f1774; solo registri |
 | 0x3000 | sub_3000 | z80_3xxx.c | 9 | HL = A·4 con segno dal riporto in ingresso | verificata | 2 | titolo, gioco | titolo f1305, gioco f1774; solo registri; usa il riporto in ingresso |
 | 0x3045 | sub_3045 | z80_3xxx.c | 26 | inizializza i 16 oggetti c46e con sub_4af6 (A=45, E=40, B=4, C=0) | verificata | 2 | titolo, gioco | titolo f1399, gioco f1774 (scrivono) |
@@ -69,6 +70,7 @@ i frame sono quelli della cattura riuscita.
 | 0x5C78 | sub_5c78 | z80_5xxx.c | 22 | classe del byte a DE in C (0..3) | verificata | 2 | gioco, tardo | gioco f2462, tardo f4002 |
 | 0x673F | sub_673f | z80_6xxx.c | 11 | azzera la tabella attività c000-c03f | verificata | 2 | titolo, gioco | titolo f3403, gioco f1534 |
 | 0x6771 | sub_6771 | z80_6xxx.c | 20 | stringa fino a ff da HL+1 in due piani da DE, attributo (HL) | verificata | 2 | titolo, gioco | titolo f1189, gioco f1534 (scrivono); estensione reale 6771-6784 |
+| 0x7DEA | sub_7dea | z80_7xxx.c | 25 | le tre stringhe dell'esito di fine partita via sub_7e1d (A=3/4/5) | tradotta | 1 | gioco | gioco f1542, occorrenza unica entro 6000 frame (N=2, titolo e tardo falliti) |
 | 0x7E1D | sub_7e1d | z80_7xxx.c | 7 | stringa d'esito: destinazione dalla tabella 7E3A (sub_7e32) e sub_6771 | verificata | 2 | gioco, gioco_n2 | occorrenze 1 (f1542) e 2 (f1543); tardo senza occorrenze entro 6000 frame |
 | 0x7E24 | sub_7e24 | z80_7xxx.c | 14 | come 7E1D più un carattere saltato e la stringa fissa 7EA3 | verificata | 2 | gioco, gioco_n2 | occorrenze 1 (f1542) e 2 (f1543); tardo senza occorrenze entro 6000 frame |
 | 0x7E32 | sub_7e32 | z80_7xxx.c | 8 | DE = parola della tabella 7E3A all'indice A, HL conservato | verificata | 2 | gioco, gioco_n2 | occorrenze 1 (f1542) e 2 (f1543); tardo e titolo senza occorrenze; solo registri |

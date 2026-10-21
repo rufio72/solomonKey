@@ -67,3 +67,18 @@ void sub_7e24(struct z80 *z)
     SET_HL(z, 0x7ea3);
     sub_6771(z);
 }
+
+/* 0x7DEA: le tre stringhe dell'esito di fine partita, ognuna con
+ * sub_7e1d: (A=3, 7E76), (A=4, 7E85), (A=5, 7E94). */
+void sub_7dea(struct z80 *z)
+{
+    z->a = 3;
+    SET_HL(z, 0x7e76);
+    sub_7e1d(z);
+    z->a = 4;
+    SET_HL(z, 0x7e85);
+    sub_7e1d(z);
+    z->a = 5;
+    SET_HL(z, 0x7e94);
+    sub_7e1d(z);
+}
