@@ -3,6 +3,7 @@
  * Si riproducono l'effetto sulla RAM e i registri A, BC, DE, HL, IX, IY
  * all'uscita (le bandiere F no). IX = oggetto (slot da 0x30 byte a c46e). */
 #include <stddef.h>
+#include <stdio.h>
 
 #include "routine.h"
 
@@ -218,4 +219,18 @@ void sub_08a2(struct z80 *z)
     SET_DE(z, (uint16_t)(leggi(voce) | (leggi(voce + 1) << 8)));
     if (gestori_08ae[e])
         gestori_08ae[e](z);
+}
+
+/* 0x0CE6 (dalla NMI, 0114): stati della chiave. IX = c4ce, IY = c299;
+ * con il bit 7 di c4ce spento esce subito (sempre, nelle tracce). La
+ * continuazione 0CF3 (smistamento `jp (hl)` sulla tabella 0D18) non è
+ * traducibile staticamente: avviso su stderr, stato invariato. */
+void sub_0ce6(struct z80 *z)
+{
+    z->ix = 0xc4ce;
+    z->iy = 0xc299;
+    if (!(M(0xc4ce) & 0x80))
+        return;                            /* ret z: sempre nelle tracce */
+    fprintf(stderr,
+            "0ce6: continuazione 0CF3 (tabella 0D18) non tradotta: nessun effetto\n");
 }

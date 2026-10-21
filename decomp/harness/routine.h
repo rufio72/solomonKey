@@ -124,4 +124,19 @@ void sub_75aa(struct z80 *z);
 void sub_797e(struct z80 *z);
 void sub_7c84(struct z80 *z);
 
+/* Lotto 10 (compito 14): la catena della NMI (nmi.c, nmi_oggetti.c,
+ * z80_0xxx.c, z80_08xx.c, z80_1xxx.c). Lo stub 03EE è statico in nmi.c. */
+void sub_0028(struct z80 *z);
+void sub_0066(struct z80 *z);
+void sub_01d5(struct z80 *z);
+void sub_0219(struct z80 *z);
+void sub_027c(struct z80 *z);
+void sub_03fb(struct z80 *z);
+void sub_042f(struct z80 *z);
+void sub_0469(struct z80 *z);
+void sub_0493(struct z80 *z);
+void sub_04ac(struct z80 *z);
+void sub_0ce6(struct z80 *z);
+void sub_1288(struct z80 *z);
+
 #endif
