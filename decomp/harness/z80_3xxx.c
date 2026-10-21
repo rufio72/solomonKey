@@ -462,3 +462,21 @@ void sub_36f0(struct z80 *z)
     SET_DE(z, a);
     SET_HL(z, GRIGLIA_C0BD + a);
 }
+
+/* 0x3045: inizializza i 16 oggetti da c46e (passo 0x30) con sub_4af6
+ * (A = 0x45, E = 0x40, B = 4, C = 0: stato, y di riposo e campi fissi).
+ * Uscita: A = 0x45, BC = 0x0400, DE = 0x0040, HL = 0x0030, IX = c76e. */
+void sub_3045(struct z80 *z)
+{
+    z->ix = 0xc46e;
+    SET_BC(z, 0x0400);
+    SET_HL(z, 0x0030);
+    z->a = 0x45;
+    z->d = 0x10;
+    z->e = 0x40;
+    do {
+        sub_4af6(z);
+        z->ix = (uint16_t)(z->ix + 0x30);
+        z->d--;
+    } while (z->d != 0);
+}

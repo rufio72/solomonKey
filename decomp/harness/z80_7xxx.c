@@ -48,3 +48,22 @@ void sub_7e32(struct z80 *z)
     sub_0010(z);               /* rst 10: DE = parola */
     SET_HL(z, hl);
 }
+
+/* 0x7E1D: stampa la stringa d'esito: destinazione numero A dalla tabella
+ * 7E3A (sub_7e32), stringa a HL in due piani (sub_6771). */
+void sub_7e1d(struct z80 *z)
+{
+    sub_7e32(z);
+    sub_6771(z);
+}
+
+/* 0x7E24: come 0x7E1D, poi salta un carattere e accoda la stringa fissa
+ * a 7EA3 (sub_6771). */
+void sub_7e24(struct z80 *z)
+{
+    sub_7e32(z);
+    sub_6771(z);
+    SET_DE(z, DE(z) + 1);
+    SET_HL(z, 0x7ea3);
+    sub_6771(z);
+}

@@ -78,4 +78,10 @@ void sub_4398(struct z80 *z);
 void sub_4d05(struct z80 *z);
 void sub_7e32(struct z80 *z);
 
+/* Lotto 5 (compito 09). */
+void sub_3045(struct z80 *z);
+void sub_5c32(struct z80 *z);
+void sub_7e1d(struct z80 *z);
+void sub_7e24(struct z80 *z);
+
 #endif

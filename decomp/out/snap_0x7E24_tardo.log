@@ -1,0 +1,5 @@
+error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+Warning: -video none doesn't make much sense without -seconds_to_run
+ALSA lib seq_hw.c:528:(snd_seq_hw_open) open /dev/snd/seq failed: No such file or directory
+SNAP: limite di 6000 frame raggiunto senza cattura
+Average speed: 2089.69% (99 seconds)
