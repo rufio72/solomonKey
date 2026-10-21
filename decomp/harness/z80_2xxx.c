@@ -236,3 +236,249 @@ void sub_2f74(struct z80 *z)
     z->e = 0x30;
     z->ix = (uint16_t)(ix + 0x30);
 }
+
+/* 0x234A (da 2980): deposita una coppia e estrae il campo Lives.
+ * (HL) = C, (HL+1) = A; A = bit 6-7 di B (con B = DSW1 a nibble scambiati
+ * sono i bit 2-3 di DSW1 = Lives). Uscita: HL = HL+1. */
+void sub_234a(struct z80 *z)
+{
+    uint16_t hl = HL(z);
+    M(hl) = z->c;
+    M(hl + 1) = z->a;
+    SET_HL(z, hl + 1);
+    z->a = (uint8_t)(((z->b << 2) | (z->b >> 6)) & 0x03);   /* rlca ×2, and 3 */
+}
+
+/* Tabelle ROM dei crediti per i campi monete di DSW1 (4 byte ciascuna). */
+#define TAB_MONETE_29C7 0x29c7
+#define TAB_VITE_29CB   0x29cb
+
+/* 0x2980 (avvio, 28F4/28FA): estrae i campi di DSW1 nelle celle credito.
+ * Azzera c046-c04b; legge e604 (DSW1: bit 4-5 Coin B, bit 6-7 Coin A,
+ * bit 2-3 Lives); se Coin A = Coin B scrive 0x80 in c048-c049; c04a/c04b =
+ * tabella 29C7 ai valori di Coin A e Coin B (via sub_234a), c04d =
+ * tabella 29CB al valore di Lives.
+ * Uscita: A = c04d, B = DSW1 a nibble scambiati, C = 29C7[Coin A],
+ * DE = Lives, HL = 29CB + Lives. */
+void sub_2980(struct z80 *z)
+{
+    for (int i = 0; i < 6; i++)
+        M(0xc046 + i) = 0;
+    uint8_t dsw1 = leggi_porta(0xe604);        /* DSW1 */
+    uint8_t b = (uint8_t)((dsw1 << 4) | (dsw1 >> 4));      /* rlca ×4 */
+    z->b = b;
+    uint8_t coin_a = (uint8_t)(((b >> 2) | (b << 6)) & 0x03);
+    if (((((b >> 2) | (b << 6)) ^ b) & 0x03) == 0) {
+        M(0xc048) = 0x80;
+        M(0xc049) = 0x80;
+    }
+    z->d = 0;
+    z->e = coin_a;
+    z->c = leggi((uint16_t)(TAB_MONETE_29C7 + coin_a));
+    uint8_t coin_b = (uint8_t)(b & 0x03);
+    z->e = coin_b;
+    z->a = leggi((uint16_t)(TAB_MONETE_29C7 + coin_b));
+    SET_HL(z, 0xc04a);
+    sub_234a(z);                               /* c04a, c04b; A = Lives */
+    z->e = z->a;
+    SET_HL(z, (uint16_t)(TAB_VITE_29CB + z->e));
+    z->a = leggi(HL(z));
+    M(0xc04d) = z->a;
+}
+
+/* 0x2AE2 (attract, 2AAA): disegna gli 8 bit di e604 (DSW1) in d765 e di
+ * e605 (DSW2) in d785 (riga video di servizio) via sub_2af5 (verificata).
+ * Uscita: registri della seconda sub_2af5. */
+void sub_2ae2(struct z80 *z)
+{
+    uint8_t dsw1 = leggi_porta(0xe604);        /* DSW1 */
+    z->a = dsw1;
+    SET_HL(z, 0xd765);
+    sub_2af5(z);
+    /* il riporto lasciato da sub_2af5 (ultimo bit estratto = bit 7 di
+     * DSW1) entra nella rotazione della seconda chiamata */
+    z->f = (uint8_t)((z->f & ~1) | (dsw1 >> 7));
+    z->a = leggi_porta(0xe605);                /* DSW2 */
+    SET_HL(z, 0xd785);
+    sub_2af5(z);
+}
+
+/* 0x2BC3 (attract, 29EB/2AAD; coda esclusiva 2353-2367): lettura degli
+ * ingressi di avvio: A = ((P1 | P2) & 0x3f) | (SYSTEM & 0x03), cioè i sei
+ * tasti dei due giocatori più i due start.
+ * Uscita: C = (P1 | P2) & 0x3f, HL = e602. */
+void sub_2bc3(struct z80 *z)
+{
+    uint8_t c = (uint8_t)((leggi_porta(0xe600) |   /* P1 */
+                           leggi_porta(0xe601)) &  /* P2 */
+                          0x3f);
+    z->c = c;
+    z->a = (uint8_t)((leggi_porta(0xe602) & 0x03) | c);   /* SYSTEM */
+    SET_HL(z, 0xe602);
+}
+
+/* 0x2C1A (da 2BC9/2BF3; l'ingresso è anche il ciclo): riempie BC byte da
+ * HL con il pattern rotante D; a ogni byte una lettura a vuoto di e602
+ * (A subito sovrascritto: probabile watchdog).
+ * Uscita: A = 0, BC = 0, HL avanzato, D ruotato di BC posizioni. */
+void sub_2c1a(struct z80 *z)
+{
+    uint16_t hl = HL(z), bc = BC(z);
+    uint8_t d = z->d;
+    do {
+        M(hl) = d;
+        d = (uint8_t)((d << 1) | (d >> 7));    /* rlc d */
+        hl++;
+        bc--;
+        (void)leggi_porta(0xe602);             /* SYSTEM a vuoto: watchdog */
+    } while (bc != 0);
+    z->a = 0;                                  /* ld a,b; or c con BC = 0 */
+    z->d = d;
+    SET_HL(z, hl);
+    SET_BC(z, 0);
+}
+
+/* 0x2BC9 (test RAM d'avvio, 2892/289E): per gli 8 pattern E = 1, 2, ...,
+ * 0x80 riempie BC byte da HL con sub_2c1a e li rilegge a coppie: il primo
+ * byte intero, del secondo solo il nibble basso (RAM video a 4 bit).
+ * Il riporto d'uscita è l'esito (1 = sana, 0 = guasta, coda 2C16): il
+ * banco non confronta F ma serve al chiamante, emulato su z->f.
+ * Uscita: HL e BC d'ingresso; A = 0 e E = 1 se sana, A = byte in errore
+ * e E = pattern se guasta; D = pattern di lavoro. */
+void sub_2bc9(struct z80 *z)
+{
+    uint16_t hl0 = HL(z), bc0 = BC(z);
+    uint8_t e = 1, d;
+    for (;;) {
+        z->d = e;
+        sub_2c1a(z);                           /* riempie col pattern */
+        SET_HL(z, hl0);                        /* pop hl / pop bc */
+        SET_BC(z, bc0);
+        d = e;
+        uint16_t hl = hl0, bc = bc0;
+        for (;;) {
+            z->a = d;
+            if (M(hl) != d)
+                goto guasto;
+            d = (uint8_t)((d << 1) | (d >> 7));
+            hl++;
+            bc--;
+            z->a = (uint8_t)((d ^ M(hl)) & 0x0f);
+            if (z->a != 0)
+                goto guasto;
+            hl++;
+            bc--;
+            d = (uint8_t)((d << 1) | (d >> 7));
+            if (bc == 0)
+                break;
+        }
+        z->a = 0;                              /* ld a,b; or c */
+        uint8_t riporto = (uint8_t)(e >> 7);   /* rlc e */
+        e = (uint8_t)((e << 1) | riporto);
+        if (riporto) {
+            z->d = d;
+            z->e = e;
+            z->f = (uint8_t)(z->f | 1);        /* riporto 1: RAM sana */
+            return;
+        }
+    }
+guasto:                                        /* coda 2C16: or a; pop; ret */
+    z->d = d;
+    z->e = e;
+    SET_HL(z, hl0);
+    SET_BC(z, bc0);
+    z->f = (uint8_t)(z->f & ~1);               /* riporto 0: RAM guasta */
+}
+
+/* 0x2BF3 (test RAM d'avvio, 5 siti in 2843-28AD): come 2BC9 ma la
+ * rilettura confronta ogni byte intero; nel ciclo di confronto una lettura
+ * a vuoto di e602 per byte (watchdog). Riporto d'uscita come 2BC9.
+ * Uscita: HL e BC d'ingresso; A = 0 e E = 1 se sana, A = byte in errore
+ * e E = pattern se guasta; D = pattern di lavoro. */
+void sub_2bf3(struct z80 *z)
+{
+    uint16_t hl0 = HL(z), bc0 = BC(z);
+    uint8_t e = 1, d;
+    for (;;) {
+        z->d = e;
+        sub_2c1a(z);
+        SET_HL(z, hl0);
+        SET_BC(z, bc0);
+        d = e;
+        uint16_t hl = hl0, bc = bc0;
+        for (;;) {
+            z->a = d;
+            if (M(hl) != d)
+                goto guasto;
+            hl++;
+            bc--;
+            d = (uint8_t)((d << 1) | (d >> 7));
+            (void)leggi_porta(0xe602);         /* SYSTEM a vuoto: watchdog */
+            z->a = (uint8_t)(bc >> 8);         /* ld a,b; or c */
+            if (bc == 0)
+                break;
+        }
+        z->a = 0;
+        uint8_t riporto = (uint8_t)(e >> 7);   /* rlc e */
+        e = (uint8_t)((e << 1) | riporto);
+        if (riporto) {
+            z->d = d;
+            z->e = e;
+            z->f = (uint8_t)(z->f | 1);        /* riporto 1: RAM sana */
+            return;
+        }
+    }
+guasto:                                        /* coda 2C16 condivisa */
+    z->d = d;
+    z->e = e;
+    SET_HL(z, hl0);
+    SET_BC(z, bc0);
+    z->f = (uint8_t)(z->f & ~1);               /* riporto 0: RAM guasta */
+}
+
+/* 0x2E11 (corpi di fase 2DFF/2E0B): c19e = 0 e confronto della stanza
+ * corrente con quella chiesta. Lo Z del cp finale serve al chiamante
+ * (il banco non confronta F): emulato su z->f insieme al riporto.
+ * Uscita: A = c248, C = c249. */
+void sub_2e11(struct z80 *z)
+{
+    M(0xc19e) = 0;
+    z->c = M(0xc249);
+    z->a = M(0xc248);
+    z->f = (uint8_t)((z->a == z->c ? 0x40 : 0) | (z->a < z->c ? 1 : 0));
+}
+
+/* 0x2E90 (trampolino 2E8B dei corpi di fase): conto alla rovescia di un
+ * cancello: decrementa (HL); se il contatore c467 non ha raggiunto C
+ * ritorna, altrimenti azzera c467 e rincrementa (HL) (annulla il passo).
+ * Uscita: A = c467 letto (0 nel ramo che annulla). */
+void sub_2e90(struct z80 *z)
+{
+    uint16_t hl = HL(z);
+    M(hl)--;
+    z->a = M(0xc467);
+    if (z->a < z->c)
+        return;                                /* cp c; ret c */
+    z->a = 0;
+    M(0xc467) = 0;
+    M(hl)++;
+}
+
+/* 0x2F57 (2F2D): carica il fondale di gioco: sub_3f88 con HL = 80D3
+ * (palette di base), azzera d5c0-d61f (96 byte), registra i gestori 1 e 0
+ * con sub_4398 e azzera il contatore c467.
+ * Uscita: registri della seconda sub_4398. */
+void sub_2f57(struct z80 *z)
+{
+    SET_HL(z, 0x80d3);
+    sub_3f88(z);
+    for (int i = 0; i < 0x60; i++)
+        M(0xd5c0 + i) = 0;
+    SET_HL(z, 0xd5c0 + 0x60);
+    SET_BC(z, 0);
+    z->a = 1;
+    sub_4398(z);
+    z->a = 0;
+    M(0xc467) = 0;
+    sub_4398(z);
+}

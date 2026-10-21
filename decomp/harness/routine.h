@@ -100,4 +100,28 @@ void sub_0ac3(struct z80 *z);
 void sub_0af9(struct z80 *z);
 void sub_0b57(struct z80 *z);
 
+/* Lotto 9 (compito 13): porte come funzioni di piattaforma.
+ * 3404 è la coda di 33EB (mai chiamata direttamente). */
+void sub_0043(struct z80 *z);
+void sub_234a(struct z80 *z);
+void sub_2980(struct z80 *z);
+void sub_2ae2(struct z80 *z);
+void sub_2bc3(struct z80 *z);
+void sub_2bc9(struct z80 *z);
+void sub_2bf3(struct z80 *z);
+void sub_2c1a(struct z80 *z);
+void sub_2e11(struct z80 *z);
+void sub_2e90(struct z80 *z);
+void sub_2f57(struct z80 *z);
+void sub_33eb(struct z80 *z);
+void sub_3404(struct z80 *z);
+void sub_342d(struct z80 *z);
+void sub_354b(struct z80 *z);
+void sub_3569(struct z80 *z);
+void sub_3812(struct z80 *z);
+void sub_3f88(struct z80 *z);
+void sub_75aa(struct z80 *z);
+void sub_797e(struct z80 *z);
+void sub_7c84(struct z80 *z);
+
 #endif

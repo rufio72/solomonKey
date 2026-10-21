@@ -82,3 +82,63 @@ void sub_7dea(struct z80 *z)
     SET_HL(z, 0x7e94);
     sub_7e1d(z);
 }
+
+/* 0x75AA (6655, 761D, 78E4, 7C4E, 7C98): azzeramenti di cambio quadro:
+ * i due piani video d480-d77f e d080-d37f (0x300 byte), c299-c2a8
+ * (0x10 byte), il bit 0 di c258, i 24 slot oggetto c46e-c8ed (0x480 byte)
+ * e gli slot c2c1-c458 (0x198 byte).
+ * Uscita: A = 0, BC = 0, HL = c459. */
+void sub_75aa(struct z80 *z)
+{
+    uint16_t hl = 0xd480;
+    for (int i = 0; i < 0x300; i++, hl++) {    /* due piani: res 2,h */
+        M(hl) = 0;
+        M(hl & ~0x0400) = 0;
+    }
+    for (int i = 0; i < 0x10; i++)
+        M(0xc299 + i) = 0;
+    M(0xc258) &= ~0x01;
+    for (int i = 0; i < 0x480; i++)            /* 24 slot oggetto da 0x30 */
+        M(0xc46e + i) = 0;
+    for (int i = 0; i < 0x198; i++)
+        M(0xc2c1 + i) = 0;
+    z->a = 0;
+    SET_BC(z, 0);
+    SET_HL(z, 0xc2c1 + 0x198);
+}
+
+/* 0x797E (7970): le due cifre BCD di (HL) in ASCII a (DE) (unità) e
+ * (DE+8) (decine, riga sotto). Il ramo per la cifra oltre '1' (scrive
+ * 0x73 a DE+6 e usa il passo 2) non è mai eseguito nelle tracce: tradotto
+ * dal disassembly statico. Uscita: A = cifra alta + 0x30, B = 0, C = passo
+ * (8, 2 nel ramo mai visto), DE avanzato del passo, HL invariato. */
+void sub_797e(struct z80 *z)
+{
+    uint16_t hl = HL(z), de = DE(z);
+    uint16_t passo = 0x0008;
+    z->a = (uint8_t)((leggi(hl) & 0x0f) + 0x30);
+    M(de) = z->a;
+    if (z->a >= 0x32) {            /* ramo mai eseguito nelle tracce */
+        M(de + 6) = 0x73;
+        passo = 0x0002;
+    }
+    de = (uint16_t)(de + passo);
+    z->a = (uint8_t)(((leggi(hl) & 0xf0) >> 4) + 0x30);
+    M(de) = z->a;
+    SET_BC(z, passo);
+    SET_DE(z, de);
+}
+
+/* 0x7C84 (761A, 7C4B, 7C9B): azzera le due righe del pannello ddaa-ddb7
+ * e ddca-ddd7 (14 + 14 byte). Uscita: A = 0, B = 0, C = 0x0e, HL = ddd8. */
+void sub_7c84(struct z80 *z)
+{
+    for (int i = 0; i < 0x0e; i++)
+        M(0xddaa + i) = 0;
+    for (int i = 0; i < 0x0e; i++)
+        M(0xddca + i) = 0;
+    z->a = 0;
+    z->b = 0;
+    z->c = 0x0e;
+    SET_HL(z, 0xddca + 0x0e);
+}

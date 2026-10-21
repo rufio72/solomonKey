@@ -353,3 +353,21 @@ void sub_004f(struct z80 *z)
     z->b = b;
     SET_HL(z, hl);
 }
+
+/* 0x0043 (dal gestore rst 28, 002B): filtro dei suoni in attract.
+ * Se c045 & 6 è zero (attract) legge e604 (DSW1, bit 0 = Demo Sounds):
+ * con il bit 0 acceso (suoni spenti) esce senza accodare; altrimenti
+ * prosegue in sub_004f, che accoda C nella coda suoni c054-c057.
+ * Uscita: nel ramo che esce A = DSW1 ruotato a destra; negli altri
+ * i registri di sub_004f. */
+void sub_0043(struct z80 *z)
+{
+    z->a = (uint8_t)(M(0xc045) & 0x06);
+    if (z->a == 0) {
+        uint8_t dsw1 = leggi_porta(0xe604);   /* DSW1: bit 0 = Demo Sounds */
+        z->a = (uint8_t)((dsw1 >> 1) | ((dsw1 & 1) << 7));   /* rrca */
+        if (dsw1 & 1)
+            return;                           /* ret c: Demo Sounds Off */
+    }
+    sub_004f(z);
+}
