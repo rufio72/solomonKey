@@ -14,6 +14,10 @@
 --   AUDIO_TRACE_DA  frame di apertura della traccia del solo :audiocpu in
 --   AUDIO_TRACE_A   out/audio/<nome>_trace.txt e di chiusura (vuoti = nessuna traccia)
 --   AUDIO_FINE      frame di uscita (predefinito: ultimo codice + passo)
+--   AUDIO_FOTO      1 = foto della RAM 4000-4243 a fine frame, nel frame
+--                   prima di ogni codice forzato e in quello del codice, in
+--                   out/audio/<nome>_foto.txt: «frame 4000 byte» (580 byte
+--                   in esadecimale maiuscolo); altrimenti nessuna foto
 -- Uscite in out/audio/:
 --   <nome>_ay.txt     oracolo: «frame chip reg val» solo quando un registro
 --                     cambia valore (chip 1-3 = porte 10/20/30, esadecimali),
@@ -34,6 +38,7 @@ local passo = numero(os.getenv("AUDIO_PASSO"), 90)
 local gioco = os.getenv("AUDIO_GIOCO") == "1"
 local trace_da = numero(os.getenv("AUDIO_TRACE_DA"), nil)
 local trace_a = numero(os.getenv("AUDIO_TRACE_A"), nil)
+local foto = os.getenv("AUDIO_FOTO") == "1"
 
 -- elenco dei codici: «00-07,1a» -> {0,1,...,7,0x1a}
 local codici = {}
@@ -56,6 +61,11 @@ local f_ay = assert(io.open(string.format("out/audio/%s_ay.txt", nome), "w"))
 f_ay:write("# frame\tchip\treg\tval\n")
 local f_latch = assert(io.open(string.format("out/audio/%s_latch.txt", nome), "w"))
 f_latch:write("# frame\tvalore\torigine\n")
+local f_foto = nil
+if foto then
+  f_foto = assert(io.open(string.format("out/audio/%s_foto.txt", nome), "w"))
+  f_foto:write("# frame\tinizio\tbyte\n")
+end
 
 frames = 0
 local main = manager.machine.devices[":maincpu"].spaces["program"]
@@ -141,6 +151,7 @@ local function chiudi()
   f:close()
   f_ay:close()
   f_latch:close()
+  if f_foto then f_foto:close() end
 end
 
 if trace_da == 0 then
@@ -151,6 +162,14 @@ dbg:command("go")
 
 emu.register_frame_done(function()
   frames = frames + 1
+  -- foto della RAM a fine del frame appena finito (frames - 1), prima di
+  -- ogni altra azione: frame prima del codice e frame del codice
+  if f_foto and (piano[frames - 1] or piano[frames]) then
+    local mem = audio.spaces["program"]
+    local b = {}
+    for a = 0x4000, 0x4243 do b[#b + 1] = string.format("%02X", mem:read_u8(a)) end
+    f_foto:write(string.format("%d\t4000\t%s\n", frames - 1, table.concat(b)))
+  end
   if not gioco and frames == 100 then dbg:command("suspend 0") end
   if frames == 110 then installa_ram() end
   if gioco then

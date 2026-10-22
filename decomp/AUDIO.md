@@ -149,7 +149,7 @@ File in `harness/` (bersaglio `make -C harness audio_banco`, prefisso
   `00FA`, `rst 8/10h/18h`.
 - `audio_registri.c`: `029E` e `036B` con tutti i rami (`02DD`, `02E5`,
   `030B`, `0381`). L'inviluppo hardware è selezionato dai bit 5-6 del flag.
-- `audio_interprete.c`: `aud_0147` vuoto (lotto successivo).
+- `audio_interprete.c`: `aud_0147` vuoto nel brief 19, tradotto nel brief 20 (sotto).
 - `audio_banco.c`: `./harness/audio_banco <nome> [frame_max]` da `decomp/`.
 
 Modello del tempo del banco: al frame 0 l'avvio; per ogni frame i latch
@@ -170,3 +170,54 @@ di `audio.lua` (intestazione, righe `frame chip reg val`, `# codice`) ed è
 l'ingresso del futuro renderizzatore `.wav` (emulatore YM2149). Scarto
 noto: i cambi dell'avvio nel C portano tutti il frame 0 (in MAME 0-13).
 Rimando: `AUDIO-SEQUENZE.md` per l'interprete.
+
+## Interprete tradotto (brief 20)
+
+- `harness/audio_interprete.c` (438 righe): `aud_0147` e, interne, il
+  glissando `01B2`, l'inviluppo software `0172`, la lettura `01E8/01EF`,
+  la nota `0217`, `024A`, `0250` e i 16 gestori `03EE-05A6`, smistati da
+  una tabella C controllata contro le parole della ROM a 03CE (`exit(2)`
+  se diverse). Il registro DE si porta in una variabile: conta solo in
+  `0286` (pausa col bit 6). Al blocco 0 vale 0: in MAME è quello del
+  codice interrotto dall'IRQ, non modellabile. Letture e campi in
+  `AUDIO-SEQUENZE.md`.
+- `audio.h`: campi `BL_INV_CONT`, `BL_INV_PUNT`, `BL_GLISSA`,
+  `BL_DUR_NOTA`, `BL_INV_INIZIO`, `BL_RIP_PUNT`, `BL_RIP_CONT`, `BL_RIT`,
+  tabelle `AUD_TAB_*`, bit del flag.
+- Foto della RAM: `sh audio.sh foto` (fuori da `tutto`, ~3 s) forza i
+  codici 01-40 con `AUDIO_FOTO=1`; `audio.lua` scrive la RAM 4000-4243 a
+  fine del frame prima di ogni codice e di quello del codice in
+  `out/audio/foto_01_40_foto.txt`. `audio_banco` la confronta se il file
+  esiste: **127 foto su 127 uguali** (la 128ª è del comando 40, escluso),
+  quindi `00FA` e il primo passo di 0147 coincidono con MAME byte per byte.
+- Comando 40: escluso (scelta B del brief 20). Il banco ferma il confronto
+  al frame prima del primo latch 40 e lo dice in una riga; `cod_40` e
+  `lungo_40` coincidono fino al 119.
+
+Registro 6 inudibile: il banco non confronta il registro 6 (periodo del
+rumore) di un chip quando il rumore è spento su tutti i suoi canali (bit
+3-5 del registro 7 a 1) sia nell'oracolo sia nel C. Motivo: in MAME l'IRQ
+che legge `F1 0F F9 00 0C` (rumore 0 e pausa) può interrompere `029E` dopo
+la lettura del flag della voce e prima di quella di +0A; il resto della
+passata scrive il registro 6 = 00 su una voce che poi è muta e non lo
+riscrive più. Il valore resta nel chip ma non si sente. Casi: `cod_10_17`
+523, `cod_18_1f` 217, `lungo_14` 219, `lungo_16` 410, `lungo_19` 289,
+`lungo_1C` 173, `lungo_26` 126, `lungo_28` 123 (ora confronti pieni).
+
+Banco su tutti gli oracoli: **39 su 44** con 0 frame diversi per intera
+durata (`cod_40` e `lungo_40` fino al 119). Le 5 eccezioni sono fallimenti
+attesi del modello del tempo (IRQ e passata di `029E` atomici, latch a
+inizio frame), non della traduzione; il primo frame diverso atteso è:
+
+| oracolo | primo frame diverso | causa |
+|---|---|---|
+| `cod_08_0f` | 301 | passata di `029E` tagliata dalla fine del frame: toni e mixer del chip 3 un frame dopo |
+| `cod_20_27` | 571 | come sopra, mixer e volumi del chip 1 |
+| `cod_28_2f` | 752 | come sopra: due voci del chip 1 col rumore scrivono il registro 6 a turno (05 e 17); il frame finisce fra le due scritture |
+| `cod_38_3f` | 751 | come sopra, mixer dei chip 1-2 (comando 3F) |
+| `gioco` | 1189 | i latch del gioco cadono prima, fra o dopo i due IRQ del frame; `_latch.txt` registra solo il frame |
+| `foto_01_40` (seconda riga) | 931 | come `cod_08_0f` (comando 0A); le foto RAM invece coincidono tutte (127) |
+
+Per arrivare a 0 servirebbe contare i cicli di `029E`, `0147` e `00E4` e
+sapere dove cade il latch del gioco nel frame: scelta di chiudere senza
+modello a cicli (risoluzione aggiuntiva del brief 20).

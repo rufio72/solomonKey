@@ -26,22 +26,39 @@ extern uint8_t aud_rom[0x4000];                /* 1.3jk */
 
 /* Tabelle della ROM (solo indirizzi) */
 #define AUD_TAB_COMANDI    0x0AF3   /* parola per comando 01-40 */
+#define AUD_TAB_GESTORI    0x03CE   /* 16 parole: gestori dei byte F0-FF */
+#define AUD_TAB_TONI       0x0700   /* parole: periodo per indice < 30 */
+#define AUD_TAB_TONI_B     0x0760   /* byte: periodo per indice >= 30 */
+#define AUD_TAB_DURATE     0x0790   /* parole: durate dei byte 80-EF */
+#define AUD_TAB_INVILUPPI  0x0850   /* parole: inizio degli inviluppi software */
 
-/* Campi del blocco usati dall'ossatura (scostamento dall'inizio) */
-#define BL_FLAG      0x00   /* bit0 attivo, bit1 spegni, bit2 coperto, bit3 muto, bit5-6 inviluppo */
+/* Campi del blocco (scostamento dall'inizio); +1D-+1F mai usati */
+/* flag: bit 0 attivo, bit 1 da spegnere, bit 2 coperto (dal secondo
+ * strato), bit 3 muto (pausa), bit 4 glissando, bit 5-6 inviluppo
+ * hardware (20 forma e periodo, 40 solo forma, 60 forma e periodo dalla
+ * nota) */
+#define BL_FLAG      0x00
 #define BL_PUNT      0x01   /* +01/+02: puntatore di sequenza (parola) */
-#define BL_DURATA    0x03
+#define BL_DURATA    0x03   /* +03/+04: IRQ restanti della nota (16 bit) */
 #define BL_04        0x04
+#define BL_INV_CONT  0x05   /* IRQ restanti del passo d'inviluppo software */
+#define BL_INV_PUNT  0x06   /* +06/+07: passo corrente dell'inviluppo software */
 #define BL_VOLUME    0x08
 #define BL_ATTENUA   0x09
 #define BL_RUMORE    0x0A   /* 0 = tono; altrimenti periodo del rumore + 1 */
 #define BL_TONO_FINE 0x0B
 #define BL_TONO_GROS 0x0C
+#define BL_GLISSA    0x0D   /* +0D/+0E: passo del glissando (16 bit) */
 #define BL_FORMA     0x0F   /* forma dell'inviluppo, azzerata dopo l'uso */
 #define BL_INV_FINE  0x10
 #define BL_INV_GROS  0x11
+#define BL_DUR_NOTA  0x12   /* +12/+13: durata delle note (meno 1) */
+#define BL_INV_INIZIO 0x14  /* +14/+15: inizio dell'inviluppo software */
 #define BL_16        0x16
 #define BL_17        0x17
+#define BL_RIP_PUNT  0x18   /* +18/+19: inizio della ripetizione (F5/F6) */
+#define BL_RIP_CONT  0x1A   /* giri restanti della ripetizione */
+#define BL_RIT       0x1B   /* +1B/+1C: ritorno della chiamata (F7/F8) */
 
 /* Piattaforma (audio_piattaforma.c) */
 extern int aud_frame;                          /* frame corrente per il flusso */
@@ -73,6 +90,6 @@ uint8_t aud_0018(uint16_t ix);
 void aud_029e(void);                           /* una passata */
 
 /* Interprete (audio_interprete.c) */
-void aud_0147(void);                           /* interprete: lotto successivo */
+void aud_0147(void);                           /* interprete: una passata sui 18 blocchi */
 
 #endif

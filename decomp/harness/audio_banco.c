@@ -9,6 +9,14 @@
  * Confronti: sequenza dei cambi (chip, reg, val) dei frame 0-13 (l'avvio);
  * stato dei registri a fine frame dal 13 a frame_max. L'ordine dei cambi
  * dentro un frame non si confronta: dipende da dove l'IRQ interrompe 029E.
+ * Il registro 6 (periodo del rumore) non si confronta quando il rumore è
+ * spento su tutti i canali del chip sia in MAME sia nel C: inudibile.
+ * Foto: se esiste out/audio/<nome>_foto.txt (audio.sh foto), a fine di
+ * ognuno dei suoi frame confronta la RAM 4000-4243 del C con la foto.
+ * Comando 40: la sua voce punta fuori dalla ROM (7A09) e in MAME tiene
+ * l'IRQ occupato ~86 frame con IRQ annidati, un effetto di tempismo a
+ * livello di cicli che questo modello a fine frame non simula; il gioco non
+ * lo invia mai. Dal frame del primo latch 40 il confronto si ferma.
  * Uscita 0 se tutto coincide, 1 se no, 2 per errori di file. */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
@@ -38,6 +46,10 @@ static void *aggiungi(struct elenco *e)
 static struct elenco oracolo = { NULL, 0, 0, sizeof(struct cambio) };
 static struct elenco latch = { NULL, 0, 0, sizeof(struct latch) };
 static struct elenco avvio_c = { NULL, 0, 0, sizeof(struct cambio) };
+
+#define FOTO_LUNG 0x244    /* 4000-4243: blocchi e globali */
+struct foto { int frame; uint8_t ram[FOTO_LUNG]; };
+static struct elenco foto = { NULL, 0, 0, sizeof(struct foto) };
 
 /* Cambi del C nei frame dell'avvio, per il confronto della sequenza. */
 static void osserva(int chip, int reg, int val)
@@ -95,6 +107,36 @@ static void leggi_latch(const char *nome)
     fclose(f);
 }
 
+/* Righe «frame 4000 byte» della foto della RAM; assente = nessuna foto. */
+static void leggi_foto(const char *nome)
+{
+    char percorso[512];
+    snprintf(percorso, sizeof percorso, "out/audio/%s_foto.txt", nome);
+    FILE *f = fopen(percorso, "r");
+    if (!f) return;
+    static char r[4096];
+    while (fgets(r, sizeof r, f)) {
+        if (r[0] == '#' || r[0] == '\n') continue;
+        struct foto *ft = aggiungi(&foto);
+        unsigned inizio;
+        int n = 0;
+        if (sscanf(r, "%d %x %n", &ft->frame, &inizio, &n) != 2 || inizio != AUD_RAM
+            || strlen(r + n) < 2 * FOTO_LUNG) {
+            fprintf(stderr, "ERRORE: riga non valida nella foto: %.40s\n", r);
+            exit(2);
+        }
+        for (int i = 0; i < FOTO_LUNG; i++) {
+            unsigned b;
+            if (sscanf(r + n + 2 * i, "%2x", &b) != 1) {
+                fprintf(stderr, "ERRORE: byte non valido nella foto del frame %d\n", ft->frame);
+                exit(2);
+            }
+            ft->ram[i] = (uint8_t)b;
+        }
+    }
+    fclose(f);
+}
+
 int main(int argc, char **argv)
 {
     if (argc < 2 || argc > 3) {
@@ -106,8 +148,10 @@ int main(int argc, char **argv)
     aud_azzera();
     leggi_oracolo(nome);
     leggi_latch(nome);
+    leggi_foto(nome);
     const struct cambio *orc = oracolo.v;
     const struct latch *lat = latch.v;
+    const struct foto *ft = foto.v;
 
     /* fine naturale: ultimo latch o ultimo cambio dell'oracolo. Il flusso
      * si scrive sempre fino a lì (interfaccia stabile, con tutte le righe
@@ -119,6 +163,10 @@ int main(int argc, char **argv)
         if (orc[i].frame > frame_fine) frame_fine = orc[i].frame;
     int frame_max = argc == 3 ? atoi(argv[2]) : frame_fine;
     if (frame_max > frame_fine) frame_fine = frame_max;
+    int frame_40 = -1;                           /* primo latch 40: fuori modello */
+    for (size_t i = 0; i < latch.n && frame_40 < 0; i++)
+        if (lat[i].valore == 0x40 && lat[i].frame >= PRIMO_LATCH) frame_40 = lat[i].frame;
+    if (frame_40 >= 0 && frame_max >= frame_40) frame_max = frame_40 - 1;
 
     char percorso[512];
     mkdir("out/audio/banco", 0777);
@@ -134,6 +182,8 @@ int main(int argc, char **argv)
     memset(stato, 0xFF, sizeof stato);
     size_t io = 0, il = 0;
     int primo_diverso = -1, confrontati = 0;
+    size_t ifoto = 0;
+    int foto_confrontate = 0, foto_diversa = -1, foto_indirizzo = 0;
 
     aud_frame = 0;
     aud_avvio();
@@ -153,17 +203,33 @@ int main(int argc, char **argv)
             aud_0038();
             aud_029e();
         }
+        for (; ifoto < foto.n && ft[ifoto].frame <= f; ifoto++) {
+            if (ft[ifoto].frame < f || f > frame_max) continue;
+            foto_confrontate++;
+            if (foto_diversa >= 0) continue;
+            for (int i = 0; i < FOTO_LUNG; i++)
+                if (aud_ram[i] != ft[ifoto].ram[i]) {
+                    foto_diversa = f;
+                    foto_indirizzo = AUD_RAM + i;
+                    break;
+                }
+        }
         for (; io < oracolo.n && orc[io].frame <= f; io++)
             stato[orc[io].chip][orc[io].reg] = orc[io].val;
         if (f < FINE_AVVIO || f > frame_max) continue;
         confrontati++;
         if (primo_diverso >= 0) continue;
         for (int chip = 1; chip <= 3 && primo_diverso < 0; chip++)
-            for (int reg = 0; reg < 256; reg++)
+            for (int reg = 0; reg < 256; reg++) {
+                /* registro 6 inudibile: rumore spento su tutti i canali
+                 * del chip (bit 3-5 del registro 7) in MAME e nel C */
+                if (reg == 6 && (stato[chip][7] & 0x38) == 0x38
+                    && (aud_ombra(chip, 7) & 0x38) == 0x38) continue;
                 if (stato[chip][reg] != aud_ombra(chip, reg)) {
                     primo_diverso = f;
                     break;
                 }
+            }
     }
     aud_flusso_chiudi();
 
@@ -184,6 +250,14 @@ int main(int argc, char **argv)
            FINE_AVVIO, frame_max, confrontati);
     if (primo_diverso < 0) printf("nessuno\n");
     else printf("%d\n", primo_diverso);
+    if (frame_40 >= 0)
+        printf("%s: comando 40 al frame %d, confronto fermato (fuori modello)\n",
+               nome, frame_40);
+    if (foto.n) {
+        printf("%s: foto RAM %d frame, primo frame diverso: ", nome, foto_confrontate);
+        if (foto_diversa < 0) printf("nessuno\n");
+        else printf("%d (%04X)\n", foto_diversa, foto_indirizzo);
+    }
     printf("PORTE IGNOTE");
     int alcune = 0;
     for (int p = 0; p < 256; p++)
@@ -192,5 +266,5 @@ int main(int argc, char **argv)
             alcune = 1;
         }
     printf("%s\n", alcune ? "" : " nessuna");
-    return (uguale && primo_diverso < 0) ? 0 : 1;
+    return (uguale && primo_diverso < 0 && foto_diversa < 0) ? 0 : 1;
 }

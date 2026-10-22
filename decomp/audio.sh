@@ -3,6 +3,8 @@
 # oracolo AY, RAM audio, copertura dalla traccia del solo :audiocpu.
 # Uso (da decomp/): mkdir -p out/audio; sh audio.sh [blocco] > out/audio/audio.log 2>&1
 # Blocchi: avvio | codici | ignorati | lunghi | gioco; senza argomento tutti in ordine.
+# Blocco foto (fuori da «tutto»): codici 01-40 con le foto della RAM 4000-4243
+# a fine frame (AUDIO_FOTO=1), per il banco del brief 20; nessuna traccia.
 # Ogni corsa scrive out/audio/<nome>_{ay,latch,ram}.txt (audio.lua) e, se ha
 # traccia, coverage.py --cpu audio ne ricava out/audio/<nome>_*.txt
 # cancellando la traccia. In coda la copertura delle call statiche dell'audio.
@@ -86,14 +88,21 @@ gioco() {
         corsa gioco
 }
 
+# foto della RAM attorno all'avvio di ogni comando 01-40, nessuna traccia
+foto() {
+    rm -f out/audio/foto_01_40_*
+    AUDIO_FOTO=1 AUDIO_CODICI=01-40 AUDIO_PASSO=$PASSO corsa foto_01_40
+}
+
 case "$BLOCCO" in
     avvio) avvio ;;
     codici) codici ;;
     ignorati) ignorati ;;
     lunghi) lunghi ;;
     gioco) gioco ;;
+    foto) foto ;;
     tutto) avvio; codici; ignorati; lunghi; gioco ;;
-    *) echo "ERRORE: blocco sconosciuto $BLOCCO (avvio, codici, ignorati, lunghi, gioco o nessuno)"; exit 2 ;;
+    *) echo "ERRORE: blocco sconosciuto $BLOCCO (avvio, codici, ignorati, lunghi, gioco, foto o nessuno)"; exit 2 ;;
 esac
 
 # copertura delle destinazioni statiche di call sotto 4000 (unione esclusa dal glob)
