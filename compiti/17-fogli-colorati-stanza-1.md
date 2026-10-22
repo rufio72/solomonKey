@@ -229,3 +229,22 @@ Tutte le domande sono preferenze, accettate con la proposta dell'analista:
 3. Pen 0 trasparente per chars e sprite, opaco per tiles.
 4. Parametro `stanza` con default 1.
 5. Tutti i 27 PNG nel repo.
+
+## Esito (2026-10-22): PASSATO
+
+Ciclo in locale: analista Sonnet ~79k token, sviluppatore Opus ~31k,
+verificatore Sonnet ~16k. Tutte le 8 verifiche passate due volte
+(sviluppatore e verificatore); i PNG rigenerati dal verificatore sono
+identici a quelli committati (b282b96) e i quattro fogli grigi sono
+rimasti intatti.
+
+Prova dei colori: lo schermo della stanza 1 ricostruito dai fogli e dagli
+attributi del dump coincide con lo screenshot MAME per 54326 pixel su
+57344; il blocco marrone (r10 c14) coincide pixel per pixel, colore
+campione (204, 136, 68).
+
+Da sapere: `dump_stanza_N` è 0-based (la stanza 1 vera è
+`dump_stanza_0_2000.bin` = `ram_room_1.bin`); `colora.py` accetta come
+primo argomento sia `solomon.zip` sia la cartella che lo contiene e ha il
+parametro `stanza` (default 1) per colorare con la palette di altre
+stanze.
