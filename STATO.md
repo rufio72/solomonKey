@@ -63,8 +63,12 @@ ogni ciclo nei brief in `compiti/`.
    comando 40 escluso (mai inviato dal gioco, voce di tabella fuori ROM),
    5 eccezioni di tempismo fine documentate in AUDIO.md. PUNTO APERTO:
    le eccezioni si giudicano col test dei .wav; se stona, modello a cicli
-   mirato. Restano: lotto 4 estrazione dei dati, lotto 5 renderizzatore
-   wav.
+   mirato. Lotto 4 (dati, brief 21) chiuso il 2026-10-22: la regione
+   dati 05C6-3FFF è sorgente C generato (`estrai_dati.py`, andata e
+   ritorno byte per byte, banco IDENTICO con `AUDIO_DATI=estratti`);
+   `SPARTITI.md` cataloga i 63 comandi, nomi da battezzare coi wav.
+   Resta il lotto 5: renderizzatore wav (emulatore YM2149 a scaffale sul
+   flusso del banco), che è anche il giudice delle 5 eccezioni.
 
 ## Come si lavora (ricetta collaudata)
 
