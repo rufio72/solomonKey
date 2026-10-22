@@ -63,6 +63,7 @@ extern uint8_t aud_rom[0x4000];                /* 1.3jk */
 /* Piattaforma (audio_piattaforma.c) */
 extern int aud_frame;                          /* frame corrente per il flusso */
 void aud_carica_rom(void);                     /* 1.3jk o exit(2) */
+void aud_usa_dati_estratti(int modo);          /* 05C6-3FFF: 1 tabelle estratte, 2 tutta AA */
 void aud_azzera(void);                         /* RAM, ombre, contatori */
 extern uint8_t aud_latch;                      /* ultimo valore del latch (8000) */
 uint8_t aud_leggi(uint16_t a);                 /* ROM sotto 4000, RAM 4000-47ff */

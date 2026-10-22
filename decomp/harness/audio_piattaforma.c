@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "audio.h"
+#include "audio_dati.h"
 
 uint8_t aud_ram[0x800];
 uint8_t aud_rom[0x4000];
@@ -43,6 +44,23 @@ void aud_carica_rom(void)
     }
     fprintf(stderr, "1.3jk non trovato in ../roms/ext/solomon/ né in ../../roms/ext/solomon/\n");
     exit(2);
+}
+
+/* Origine dei dati 05C6-3FFF (dopo aud_carica_rom): modo 1 = immagine
+ * ricomposta dalle tabelle estratte (audio_dati_*.c), così ogni lettura
+ * della regione passa dalle tabelle; modo 2 = controllo negativo, regione
+ * tutta 0xAA; altrimenti la ROM resta com'è. Il codice del driver
+ * (0000-05C5) resta sempre quello della ROM. */
+void aud_usa_dati_estratti(int modo)
+{
+    static uint8_t img[0x4000];
+    if (modo == 1) {
+        aud_dati_serializza(img);
+        memcpy(aud_rom + AUD_DATI_INIZIO, img + AUD_DATI_INIZIO,
+               AUD_DATI_FINE - AUD_DATI_INIZIO);
+    } else if (modo == 2) {
+        memset(aud_rom + AUD_DATI_INIZIO, 0xAA, AUD_DATI_FINE - AUD_DATI_INIZIO);
+    }
 }
 
 /* Stato iniziale: RAM a zero (MAME la azzera all'avvio), nessun registro

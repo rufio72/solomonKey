@@ -6,6 +6,8 @@
    dell'autore del repository**: grafica, palette, livelli e codice originale
    sono copyright Tecmo (oggi Koei Tecmo). Sono inclusi a scopo di studio e
    conservazione. Le ROM vere (`roms/*.zip`, `roms/ext/`) non sono incluse.
+   Le tabelle e i flussi in `decomp/harness/audio_dati*.c` sono dati musicali
+   derivati dal programma Tecmo, estratti con `decomp/estrai_dati.py`.
 
 2. **Analisi e decompilazione** (`decomp/`, `compiti/`): script, rapporti e
    traduzioni in C prodotti qui. Le traduzioni in C sono opere derivate dal

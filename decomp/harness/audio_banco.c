@@ -17,6 +17,9 @@
  * l'IRQ occupato ~86 frame con IRQ annidati, un effetto di tempismo a
  * livello di cicli che questo modello a fine frame non simula; il gioco non
  * lo invia mai. Dal frame del primo latch 40 il confronto si ferma.
+ * AUDIO_DATI=estratti: la regione 05C6-3FFF viene dalle tabelle estratte
+ * (audio_dati_*.c); AUDIO_DATI=vuoto: regione tutta 0xAA (controllo
+ * negativo). La conferma va su stderr, stdout non cambia.
  * Uscita 0 se tutto coincide, 1 se no, 2 per errori di file. */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
@@ -145,6 +148,14 @@ int main(int argc, char **argv)
     }
     const char *nome = argv[1];
     aud_carica_rom();
+    const char *dati = getenv("AUDIO_DATI");   /* origine della regione 05C6-3FFF */
+    if (dati && strcmp(dati, "estratti") == 0) {
+        aud_usa_dati_estratti(1);
+        fprintf(stderr, "dati: estratti\n");
+    } else if (dati && strcmp(dati, "vuoto") == 0) {
+        aud_usa_dati_estratti(2);
+        fprintf(stderr, "dati: vuoto\n");
+    }
     aud_azzera();
     leggi_oracolo(nome);
     leggi_latch(nome);

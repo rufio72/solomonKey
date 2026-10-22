@@ -129,3 +129,9 @@ tempismo a livello di cicli che il modello a fine frame non simula.
 | 0760 | byte: periodi del tono, indice ≥ 30h (byte alto 0) | `0240` |
 | 0790 | parole: durate, indice (byte & 7F) + (+16) | `01FA` |
 | 0850 | parole: inizi degli inviluppi software | F0 (`0400`) |
+
+## Dati estratti (brief 21)
+
+Le tabelle e i flussi qui descritti sono estratti come macro C in
+`harness/audio_dati_*.c` (`estrai_dati.py`); i comandi 01-3F sono descritti
+in `SPARTITI.md`.
