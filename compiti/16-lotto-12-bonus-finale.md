@@ -283,3 +283,34 @@ salvataggio ci sono le sue modifiche parziali e NON verificate a
 sessioni.sh, snap.lua); `decomp/CENSIMENTO-12.md` non è ancora stato
 creato. Alla ripresa: rilanciare lo sviluppatore sul brief, che riparte
 dalle modifiche presenti; poi verificatore sulle 12 verifiche.
+
+## Esito (2026-10-22): PASSATO
+
+Ciclo ripreso e chiuso in locale. Sviluppatore (Opus, ~95k token alla
+ripresa, oltre al lavoro parziale del 2026-10-21) e verificatore (Sonnet,
+~16k token): tutte le 12 verifiche passate. Il verificatore non ha
+rieseguito il blocco `lotto12` (verifica 2) e lo ha validato sul log
+esistente `out/sessioni12.log`, chiuso regolarmente e senza righe
+`ERRORE:`; il blocco dura circa 6 minuti, non 30-60 come stimato.
+
+Valori misurati dei cancelli (erano attese non misurate):
+- N = 235 su 299 (78,6%), contro l'obiettivo N ≥ 240;
+- K = 40 su 104 del lotto, contro l'obiettivo K ≥ 60.
+Le 64 destinazioni rimaste hanno tutte il sito di chiamata mai eseguito
+(colonna NO nel censimento): probabile dato (serie AFxx chiamata da
+A8xx-AAxx) o codice raggiungibile solo da zone mai eseguite; 37 stanno a
+8000 o sopra. Questi valori sono la base dei lotti successivi.
+
+Prodotti: `decomp/CENSIMENTO-12.md` (40 destinazioni in 25 blocchi
+contigui più la tabella delle 64 scoperte), due catture pilota fuori NMI
+(`0x3FCE porta` al frame 2386, `0x51FA finale` al frame 3311), sessione
+`oggetti` allargata a tutta la tabella dei gestori a 130A (copertura da
+225 a 235), attività 16 aggiunta alle corse `att_XX`, `DATI.md` corretto
+sulla catena 3DC9/3DCE/3E47. Sessione `servizio` non necessaria: la
+condizione della risoluzione 2 non scatta.
+
+Da sapere per i lotti futuri: il censimento è stato generato con uno
+script fuori dal repo; va rifatto a mano o lo script va aggiunto a
+`decomp/`. `att_27` è artificiale (coverage.py segnala esecuzione in RAM,
+`violazione: C04A -> C04D`). Lo stato `bonus` di `cattura.sh` parte dalla
+stanza 0 con c24b = 0x85 invece di `SESS_ROOM=4`.

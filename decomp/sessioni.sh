@@ -54,6 +54,8 @@ SESS_ROOM= SESS_INPUT=nessuno SESS_MONETA=0 SESS_TRACE_DA=7400,19400 SESS_TRACE_
 # azzerati prima di postare 1C o 24. Le finestre seguono le stampe FASE di
 # corse di prova senza traccia.
 lotto12() {
+    # le corse att_XX dipendono dall'unione: si ripartono da zero a ogni giro
+    rm -f out/att_*_*.txt
     # a) porta: sequenza 1C (3F40) -> 4000, avanzamento alla stanza 1
     SESS_ROOM= SESS_INPUT=casuale SESS_CASUALE_DA=1600 \
     SESS_POKE=2250:0xc19d:0,2250:0xc19e:0 SESS_POSTA=2300:0x1c \
@@ -78,19 +80,34 @@ lotto12() {
     SESS_POKE=$POKE_FIN SESS_POSTA=2300:0x1c \
     SESS_TRACE_DA=4500,7700 SESS_TRACE_A=6900,9400 sessione finale2
 
-    # d) oggetti speciali: coda c05b (oggetto, parametro) e posta 22 (12D6),
-    # oggetti 08, 0B, 0E a 400 frame di distanza
+    # d) oggetti speciali: coda c05b (3 slot da 2 byte: oggetto, parametro E)
+    # e posta 22 (12D6). 12F0 salta per oggetto-8 nella tabella a 130A, valida
+    # per gli oggetti 08-1B: tre oggetti per posta, una posta ogni 100 frame
+    # (il brief prevedeva solo 08, 0B, 0E: lasciavano scoperte 1471/1474/147F/1533)
+    POKE_OGG=
+    POSTA_OGG=
+    f=2250
+    for terna in "08 09 0a" "0b 0c 0d" "0e 0f 10" "11 12 13" "14 15 16" "17 18 19" "1a 1b 00"; do
+        a=$((0xc05b))
+        for o in $terna; do
+            POKE_OGG="$POKE_OGG$f:$(printf 0x%x $a):0x$o,$f:$(printf 0x%x $((a + 1))):0,"
+            a=$((a + 2))
+        done
+        POSTA_OGG="$POSTA_OGG$((f + 50)):0x22,"
+        f=$((f + 100))
+    done
     SESS_ROOM= SESS_INPUT=casuale SESS_CASUALE_DA=1600 \
-    SESS_POKE=2250:0xc05b:0x08,2250:0xc05c:0,2250:0xc05d:0,2650:0xc05b:0x0b,2650:0xc05c:0,2650:0xc05d:0,3050:0xc05b:0x0e,3050:0xc05c:0,3050:0xc05d:0 \
-    SESS_POSTA=2300:0x22,2700:0x22,3100:0x22 \
+    SESS_POKE=$POKE_OGG SESS_POSTA=$POSTA_OGG \
     SESS_TRACE_DA=2250 SESS_TRACE_A=3300 sessione oggetti
 
     # e) attract completa senza moneta (attività 16 a 6496)
     SESS_ROOM= SESS_INPUT=nessuno SESS_MONETA=0 SESS_TRACE_DA=7400,19400 SESS_TRACE_A=8200,19900 \
         sessione attract2
 
-    # f) attività il cui ingresso resta fuori dall'unione dopo a-e
-    for voce in 0F:640E 12:426A 13:6480 19:3792 1A:411D 1B:4111 1D:3F39 25:3B77 26:3B63 27:62B6; do
+    # f) attività il cui ingresso resta fuori dall'unione dopo a-e (in più del
+    # brief la 16: la attract completa non la spedisce, finale2 la posta a 5269
+    # ma 6496 non viene eseguita)
+    for voce in 0F:640E 12:426A 13:6480 16:6496 19:3792 1A:411D 1B:4111 1D:3F39 25:3B77 26:3B63 27:62B6; do
         cod=${voce%%:*}
         ing=${voce##*:}
         # unione ricalcolata a ogni giro: sessione() la riscrive col solo file nuovo

@@ -162,5 +162,7 @@ finale); azzera c299 e c19d; c248 = FF.
   2DCE 2E9C 3709 3829 321E 31C5 2EF5 2E6D 2F1A 2E1E, cioè i passi del carico
   quadro (sito 2CD2) più 2C9E. Nella sessione `finale` la 24 compare al frame
   2578 (postata da 4000 dopo la 1C forzata) e la partita prosegue nella
-  stanza finale; la catena 3DC9 (posta 14), 3DCE (posta 25 → 3B77), 3E47
-  (posta 26 → 3B63) chiude il gioco.
+  stanza finale (16 al 5269, di nuovo 1C al 7788). La catena 3DC9 (posta
+  14), 3DCE (posta 25 → 3B77), 3E47 (posta 26 → 3B63) non compare nelle
+  finestre di `finale`/`finale2`: il blocco 3D20-3E71 è coperto solo dalle
+  corse dedicate `att_25` e `att_26` (vedi `CENSIMENTO-12.md`).

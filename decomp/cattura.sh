@@ -13,6 +13,9 @@
 #   porta  c19d/c19e = 0 al 2250, posta 1C al 2300 (sequenza della porta)
 #   bonus  in più c24a = 0 e c24b = 0x85: la porta porta alla stanza nascosta 5
 #   finale in più c24b-c24d = 0x32: 4032 posta l'attività 24 (finale)
+# Per questi tre stati il primo frame provato è 2300 (la posta stessa): la
+# sequenza della porta dura 2300-2577 e i suoi passi iniziali cadono prima
+# del 2400.
 set -u
 if [ $# -lt 2 ]; then
     echo "uso: sh cattura.sh <ENTRY> <stato> [N] [SUFFISSO]" >&2
@@ -28,11 +31,11 @@ case "$STATO" in
     titolo) INGRESSI=nessuno; FRAMES="1000 650 0" ;;
     gioco)  INGRESSI=traccia; FRAMES="2400 2000 1700 1600 1500" ;;
     tardo)  INGRESSI=traccia; FRAMES="4000 3000" ;;
-    porta)  INGRESSI=traccia; FRAMES="2400 2600 3000"
+    porta)  INGRESSI=traccia; FRAMES="2300 2400 2600 3000"
             POKE_DEF=2250:0xc19d:0,2250:0xc19e:0 ;;
-    bonus)  INGRESSI=traccia; FRAMES="2400 2600 3000"
+    bonus)  INGRESSI=traccia; FRAMES="2300 2400 2600 3000"
             POKE_DEF=2250:0xc19d:0,2250:0xc19e:0,2250:0xc24a:0,2250:0xc24b:0x85 ;;
-    finale) INGRESSI=traccia; FRAMES="2400 2600 3000"
+    finale) INGRESSI=traccia; FRAMES="2300 2400 2600 3000"
             POKE_DEF=2250:0xc19d:0,2250:0xc19e:0,2250:0xc24b:0x32,2250:0xc24c:0x32,2250:0xc24d:0x32 ;;
     *) echo "stato sconosciuto: $STATO (titolo, gioco, tardo, porta, bonus, finale)" >&2; exit 2 ;;
 esac
