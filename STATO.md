@@ -67,8 +67,14 @@ ogni ciclo nei brief in `compiti/`.
    dati 05C6-3FFF è sorgente C generato (`estrai_dati.py`, andata e
    ritorno byte per byte, banco IDENTICO con `AUDIO_DATI=estratti`);
    `SPARTITI.md` cataloga i 63 comandi, nomi da battezzare coi wav.
-   Resta il lotto 5: renderizzatore wav (emulatore YM2149 a scaffale sul
-   flusso del banco), che è anche il giudice delle 5 eccezioni.
+   Lotto 5 (renderizzatore, brief 22) chiuso il 2026-10-22: emu2149
+   vendorizzato, `audio_wav.sh` genera i 63 wav dei comandi dal C
+   (`out/wav/codici/`) e le coppie C/MAME dei 44 oracoli
+   (`out/wav/oracoli/`). Wav BYTE PER BYTE IDENTICI in 40/44; le 4
+   differenze restanti sono deboli (picchi −33…−49 dBFS, eccezioni.txt)
+   e attendono il giudizio all'ascolto dell'utente; nomi dei suoni da
+   battezzare in `audio_nomi.tsv`. La catena audio è completa: driver
+   tradotto, dati estratti, resa wav dal C.
 
 ## Come si lavora (ricetta collaudata)
 
