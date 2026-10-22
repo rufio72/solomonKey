@@ -40,10 +40,10 @@ Every line of C in this repository is backed by a measurement, not a guess:
 5. **Cleanup.** Only then is the C made human-friendly — names, structs,
    constants — with the replay as the regression test.
 
-The sound driver gets the same treatment with its own oracle: a per-frame log
+The sound driver got the same treatment with its own oracle: a per-frame log
 of every PSG register change, captured for each of the 65 sound/music command
-codes. The end-to-end test will be the C driver rendering all 65 sounds to
-audio files through a YM2149 emulator, indistinguishable from the original.
+codes. Its end-to-end test — WAV files rendered from the C driver through a
+YM2149 emulator and compared against the original's — has been passed.
 
 ## Status (October 2026)
 
@@ -61,14 +61,19 @@ audio files through a YM2149 emulator, indistinguishable from the original.
   the 64 never-executed remainder all have call sites that never run
   (data misread as code, or code reachable only from dead zones) and are
   censused in `decomp/CENSIMENTO-12.md`.
-- **Audio Z80 — in progress, will be fully decompiled** (decision made: real
-  driver, no sampled or pre-rendered audio). Done so far: observation
-  infrastructure (traces, call graph, PSG register-change oracle for all 65
-  command codes) and the **driver skeleton in C**, already matching the
-  original on boot — down to reproducing a harmless original-ROM bug that
-  writes to two unmapped ports — idle state and ignored commands. Next: the
-  sequence interpreter (the music engine), the music data extraction, and the
-  WAV renderer used as the final listening test.
+- **Audio Z80 — done: fully decompiled and verified end to end.** The whole
+  sound driver is now C (`decomp/harness/audio_*.c`): command dispatch, the
+  sequence interpreter (9 voices × 2 layers, glissando, envelopes) and the
+  register writer for the three PSGs — down to reproducing a harmless
+  original-ROM bug that writes to two unmapped ports. The music data region
+  was extracted into generated, human-readable C source (`SPARTITI.md`
+  catalogs all 63 sound/music commands) and re-serializes byte-for-byte back
+  into the ROM. Final test, passed: WAV files rendered from the C driver's
+  register stream through an off-the-shelf YM2149 emulator (emu2149) are
+  **byte-for-byte identical** to the same renderer fed by the MAME-captured
+  streams in 40 of 44 cases; the 4 remaining differences are sub-frame timing
+  artifacts peaking at −33 to −49 dBFS, measured, documented and confirmed
+  inaudible by listening tests.
 - **After that:** the hardware layer (video, sprites, palettes, input) to make
   the C port playable, then cleanup with the replay as regression.
 
