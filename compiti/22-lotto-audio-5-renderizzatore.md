@@ -342,3 +342,10 @@ Risultato — il test finale della catena audio:
   mono a pesi uguali come da driver MAME;
 - nomi dei suoni da battezzare in decomp/audio_nomi.tsv (SPARTITI.md è
   generato e li recepisce via estrai_dati.py).
+
+### Chiusura del punto aperto (2026-10-23, utente)
+
+L'utente ha ascoltato le coppie C/MAME e giudica che va bene: le 4
+differenze di tempismo fine non stonano. Il punto aperto del brief 20
+(modello a cicli se i wav stonano) è CHIUSO; si riapre solo se in futuro
+emergono differenze udibili (ad esempio nel gioco completo).
