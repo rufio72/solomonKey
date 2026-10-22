@@ -468,8 +468,28 @@ def descrivi(rom, c, nomi):
     return righe, sintesi, durata, ciclo, testo_strumenti(strum), voci, strati
 
 
+def leggi_nomi_suoni():
+    """Nomi dei suoni da audio_nomi.tsv (righe «cc<TAB>nome», # = commento),
+    se il file esiste: {comando: nome}; «|» diventa «/» per la tabella."""
+    nomi = {}
+    p = os.path.join(QUI, 'audio_nomi.tsv')
+    if not os.path.exists(p):
+        return nomi
+    with open(p, encoding='utf-8') as f:
+        for riga in f:
+            riga = riga.rstrip('\n')
+            if not riga.strip() or riga.lstrip().startswith('#'):
+                continue
+            cc, _, nome = riga.partition('\t')
+            nome = nome.strip().replace('|', '/')
+            if nome:
+                nomi[int(cc.strip(), 16)] = nome
+    return nomi
+
+
 def documento(rom, cmd, nomi):
     principali = [c for c in cmd if c.num]
+    nomi_suoni = leggi_nomi_suoni()
     info = {c.num: descrivi(rom, c, nomi) for c in principali}
     in_ciclo = [c.num for c in principali if info[c.num][3]]
     usi = {}
@@ -495,7 +515,7 @@ def documento(rom, cmd, nomi):
          'primo IRQ di avvio escluso. «ciclo» = un salto F4 riporta il flusso in un',
          'punto già suonato con lo stesso stato: il comando non finisce da solo (lo',
          'ferma un altro comando o il latch 00). La colonna «nome» resta vuota: i nomi',
-         'si assegnano nel lotto dei .wav, ascoltandoli.',
+         'si scrivono in `audio_nomi.tsv` ascoltando `out/wav/codici/<cc>.wav`.',
          '',
          '## Riassunto',
          '',
@@ -503,8 +523,10 @@ def documento(rom, cmd, nomi):
          '|---|---|---|---|---|---|---|---|']
     for c in principali:
         r, _, durata, _, st, voci, strati = info[c.num]
-        t.append('| %02X | | %04X | %d | %d | %d | %s | %s |' % (
-            c.num, c.elenco, len(c.record), len(voci), len(strati), durata, st))
+        nome = nomi_suoni.get(c.num, '')
+        t.append('| %02X | %s| %04X | %d | %d | %d | %s | %s |' % (
+            c.num, nome + ' ' if nome else '', c.elenco, len(c.record),
+            len(voci), len(strati), durata, st))
     t += ['', 'Comandi in ciclo: ' + ' '.join('%02X' % n for n in in_ciclo), '',
           'Comandi: %d; record: %d; flussi distinti: %d.' % (
               len(principali), sum(len(c.record) for c in principali),

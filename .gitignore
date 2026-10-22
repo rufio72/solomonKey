@@ -69,3 +69,7 @@ project.4coder
 final.txt
 LICENSE
 decomp/harness/audio_immagine
+decomp/harness/audio_wav
+decomp/harness/audio_suona
+# la licenza di emu2149 deve restare accanto ai sorgenti (regola LICENSE sopra)
+!decomp/harness/emu2149/LICENSE

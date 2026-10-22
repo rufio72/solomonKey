@@ -170,7 +170,7 @@ poi serve l'interprete: `cod_00_07` intero diverge al frame 211.
 
 Il flusso `out/audio/banco/<nome>_ay.txt` è scritto per intero nel formato
 di `audio.lua` (intestazione, righe `frame chip reg val`, `# codice`) ed è
-l'ingresso del futuro renderizzatore `.wav` (emulatore YM2149). Scarto
+l'ingresso del renderizzatore `.wav` `harness/audio_wav` (brief 22). Scarto
 noto: i cambi dell'avvio nel C portano tutti il frame 0 (in MAME 0-13).
 Rimando: `AUDIO-SEQUENZE.md` per l'interprete.
 
@@ -247,6 +247,55 @@ modello a cicli (risoluzione aggiuntiva del brief 20).
   `AUDIO_DATI=vuoto` (regione tutta AA) li fa divergere. Il codice del driver
   0000-05C5 resta letto dalla ROM.
 - `SPARTITI.md`: per ogni comando voci, strati, durata nominale o ciclo,
-  strumenti; tabella riassuntiva con la colonna «nome» vuota (i nomi nel
-  lotto dei .wav). Comandi in ciclo: gli stessi 15 dei lunghi (3D dura 1800
+  strumenti; tabella riassuntiva con la colonna «nome» (da `audio_nomi.tsv`,
+  brief 22). Comandi in ciclo: gli stessi 15 dei lunghi (3D dura 1800
   frame nominali senza ciclo).
+
+## Renderizzatore (brief 22)
+
+- `harness/audio_wav <flusso_ay.txt> <uscita.wav> [da [a]]`: tre YM2149
+  emulati con emu2149 (Mitsutaka Okazaki, MIT, commit `441f3dc`, in
+  `harness/emu2149/` non modificato; vedi `NOTICE.md`), clock 1 500 000 Hz,
+  tabella dei volumi YM2149, convertitore di frequenza attivo. Uscita
+  44100 Hz, 16 bit, mono: 735 campioni per frame a 60 Hz, somma dei tre chip
+  × 7/8 (sulla scheda i 9 canali vanno all'altoparlante mono con lo stesso
+  peso 0,12). `da` predefinito = primo `# codice` (se non c'è 14), `a` =
+  ultima riga di dati.
+- A ogni frame lo stato del flusso a fine frame si scrive nel chip solo dove
+  cambia. Registro 6 (periodo del rumore): si scrive solo con il rumore
+  acceso su almeno un canale del chip (`(r7 & 0x38) != 0x38`), lo stesso
+  criterio del banco: rende uguali C e MAME quando il periodo cambia a
+  rumore spento e sposta solo la fase del generatore di rumore, inudibile.
+- Limiti: i cambi si applicano a confine di frame (il tempo dentro il frame
+  si perde, allo stesso modo per C e MAME); una riscrittura del registro 0D
+  con lo stesso valore, che sul chip riavvia l'inviluppo, non compare nei
+  flussi e non si sente.
+- `harness/audio_suona <cc> <frame_fine> <uscita_ay.txt>`: un comando dal C,
+  stesso ciclo del banco senza oracolo, codice al frame 120; il flusso è
+  identico byte per byte a `out/audio/banco/lungo_<cc>_ay.txt`.
+- `sh audio_wav.sh codici`: wav dei comandi 01-3F in `out/wav/codici/`, da
+  120 all'ultimo cambio + 30 frame, al massimo il 2000 (i 15 comandi in
+  ciclo arrivano al tetto, 31,35 s; il 3D al 1951). Esclusi 00 (arresto),
+  40 (fuori modello, mai inviato dal gioco), 41-FF (ignorati, nessun
+  cambio). I nomi dei suoni si scrivono in `audio_nomi.tsv` ascoltandoli e
+  finiscono in `SPARTITI.md` con `python3 estrai_dati.py`.
+- `sh audio_wav.sh oracoli`: per i 44 oracoli (non `foto_01_40`) rigenera il
+  flusso del C, rende oracolo e C dal frame 14 in
+  `out/wav/oracoli/<nome>_mame.wav` / `<nome>_c.wav` e li confronta con
+  `cmp`. Esito: **40 uguali, 4 diversi**. `cod_38_3f` risulta uguale: il
+  suo frame diverso (751) non cambia i campioni fino al 752, ultimo reso.
+  L'ascolto finale si fa sulle coppie `_mame.wav` / `_c.wav`.
+
+Le 4 eccezioni (`out/wav/eccezioni.txt`, `audio_wav_confronto.py c mame`;
+lo scarto dopo il primo frame diverso resta per la fase di toni e
+inviluppi):
+
+| oracolo | campioni diversi | primo frame | ultimo frame | frame diversi | scarto massimo | rms differenza |
+|---|---|---|---|---|---|---|
+| `cod_08_0f` | 106937 / 607110 | 301 | 839 | 197 | 7140 | −33,1 dBFS |
+| `cod_20_27` | 1113 / 574770 | 571 | 662 | 4 | 3570 | −49,3 dBFS |
+| `cod_28_2f` | 42622 / 607110 | 752 | 839 | 86 | 4830 | −40,4 dBFS |
+| `gioco` | 341807 / 1606710 | 1305 | 2199 | 592 | 8174 | −37,0 dBFS |
+
+Il giudizio sulle eccezioni (ed eventualmente un modello a cicli di
+`029E/0147/00E4`) è un compito a parte, dopo l'ascolto.

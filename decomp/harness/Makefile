@@ -4,9 +4,10 @@ SORGENTI = harness.c routine.c fondale.c porte.c nmi.c nmi_oggetti.c routine_tab
 SORGENTI_SCHED = sched.c sched_proto.c
 SORGENTI_DATI = $(wildcard audio_dati*.c)
 INTESTAZIONI_DATI = $(wildcard audio_dati*.h)
-SORGENTI_AUDIO = audio_banco.c audio_piattaforma.c audio_ossatura.c audio_registri.c audio_interprete.c $(SORGENTI_DATI)
+SORGENTI_DRIVER = audio_piattaforma.c audio_ossatura.c audio_registri.c audio_interprete.c $(SORGENTI_DATI)
+SORGENTI_AUDIO = audio_banco.c $(SORGENTI_DRIVER)
 
-all: harness sched_proto audio_banco audio_immagine
+all: harness sched_proto audio_banco audio_immagine audio_suona audio_wav
 
 harness: $(SORGENTI) ram.h routine.h e603.h rst20_tables.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI)
@@ -21,7 +22,15 @@ audio_banco: $(SORGENTI_AUDIO) audio.h $(INTESTAZIONI_DATI)
 audio_immagine: audio_immagine.c $(SORGENTI_DATI) $(INTESTAZIONI_DATI)
 	$(CC) $(CFLAGS) -o $@ audio_immagine.c $(SORGENTI_DATI)
 
+# un comando dal C del driver, senza oracolo (brief 22)
+audio_suona: audio_suona.c $(SORGENTI_DRIVER) audio.h $(INTESTAZIONI_DATI)
+	$(CC) $(CFLAGS) -o $@ audio_suona.c $(SORGENTI_DRIVER)
+
+# renderizzatore dei flussi AY in wav con emu2149 (brief 22)
+audio_wav: audio_wav.c emu2149/emu2149.c emu2149/emu2149.h
+	$(CC) $(CFLAGS) -o $@ audio_wav.c emu2149/emu2149.c
+
 clean:
-	rm -f harness sched_proto audio_banco audio_immagine
+	rm -f harness sched_proto audio_banco audio_immagine audio_suona audio_wav
 
 .PHONY: all clean

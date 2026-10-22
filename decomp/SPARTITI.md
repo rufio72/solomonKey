@@ -17,7 +17,7 @@ F7/F8), d + 1 IRQ per nota, 2 IRQ per frame, secondi a 60 frame/s
 primo IRQ di avvio escluso. «ciclo» = un salto F4 riporta il flusso in un
 punto già suonato con lo stesso stato: il comando non finisce da solo (lo
 ferma un altro comando o il latch 00). La colonna «nome» resta vuota: i nomi
-si assegnano nel lotto dei .wav, ascoltandoli.
+si scrivono in `audio_nomi.tsv` ascoltando `out/wav/codici/<cc>.wav`.
 
 ## Riassunto
 
