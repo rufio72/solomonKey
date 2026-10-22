@@ -12,16 +12,19 @@ Con --classifica aggiunge a out/call_mai_osservate.txt la colonna
 sito_eseguito (SI/NO: il PC della prima call statica è nell'unione); NO vuol
 dire probabile dato disassemblato come codice, o codice raggiungibile solo da
 zone a loro volta mai eseguite.
+--limite (esadecimale, predefinito 0xC000) scarta le destinazioni da quel
+valore in su; --uscite (predefinito out) è la cartella dei due file scritti.
+Z80 audio: --dasm out/audio.dasm --limite 0x4000 --uscite out/audio
 """
 import argparse
+import os
 import re
 
 CALL = re.compile(r'^\tcall (?:[a-z]+,)?(?:0([0-9a-f]{4})h|(?:l|sub_)([0-9a-f]{4})h)(?:\+\d+)?\t')
 SITO = re.compile(r';([0-9a-f]{4})\s*$')
-UNIONE = 'out/eseguiti_unione.txt'
 
 
-def destinazioni(dasm):
+def destinazioni(dasm, limite=0xC000):
     """Destinazione -> primo sito di call (indirizzo nel commento z80dasm)."""
     dest = {}
     with open(dasm) as f:
@@ -30,7 +33,7 @@ def destinazioni(dasm):
             if not m:
                 continue
             d = int(m.group(1) or m.group(2), 16)
-            if d >= 0xC000:
+            if d >= limite:
                 continue
             s = SITO.search(riga)
             sito = int(s.group(1), 16) if s else -1
@@ -52,16 +55,22 @@ def principale():
     ap = argparse.ArgumentParser(description='Copertura delle destinazioni di call')
     ap.add_argument('eseguiti', nargs='+', help='file *_eseguiti.txt')
     ap.add_argument('--dasm', default='out/main48.dasm')
+    ap.add_argument('--limite', default='0xC000', type=lambda x: int(x, 16),
+                    help='destinazioni da questo indirizzo in su scartate (esadecimale)')
+    ap.add_argument('--uscite', default='out',
+                    help='cartella di eseguiti_unione.txt e call_mai_osservate.txt')
     ap.add_argument('--classifica', action='store_true',
                     help='colonna sito_eseguito SI/NO in call_mai_osservate.txt')
     arg = ap.parse_args()
 
-    dest = destinazioni(arg.dasm)
+    unione_file = os.path.join(arg.uscite, 'eseguiti_unione.txt')
+    mai_file = os.path.join(arg.uscite, 'call_mai_osservate.txt')
+    dest = destinazioni(arg.dasm, arg.limite)
     tot = len(dest)
     unione = set()
     file_letti = 0
     for nome in arg.eseguiti:
-        if nome == UNIONE:
+        if os.path.normpath(nome) == os.path.normpath(unione_file):
             continue          # l'unione di una corsa precedente non conta
         pc = leggi_pc(nome)
         unione |= pc
@@ -69,11 +78,11 @@ def principale():
         oss = sum(1 for d in dest if d in pc)
         print(riga('%s destinazioni statiche osservate' % nome if len(arg.eseguiti) > 1
                    else 'destinazioni statiche osservate', oss, tot))
-    with open(UNIONE, 'w') as f:
+    with open(unione_file, 'w') as f:
         for p in sorted(unione):
             f.write('%04X\n' % p)
     mancano = sorted(d for d in dest if d not in unione)
-    with open('out/call_mai_osservate.txt', 'w') as f:
+    with open(mai_file, 'w') as f:
         if arg.classifica:
             f.write('# destinazione\tprima call statica\tsito_eseguito\n')
         else:
