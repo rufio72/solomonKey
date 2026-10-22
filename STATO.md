@@ -57,8 +57,14 @@ ogni ciclo nei brief in `compiti/`.
    gestori di 0216 in `AUDIO-SEQUENZE.md`; copertura call audio 28/97.
    Decisione utente: test finale = i .wav dei 65 codici generati dal C
    via emulatore YM2149 (lotto dedicato dopo la traduzione).
-   Restano: lotto 3 interprete delle sequenze, lotto 4 estrazione dei
-   dati, lotto 5 renderizzatore wav.
+   Lotto 3 (interprete, brief 20) chiuso il 2026-10-22: l'interprete
+   delle sequenze è tradotto (aud_0147, glissando, inviluppo, 16 gestori,
+   9 voci × 2 strati); 39 oracoli su 44 identici per intera durata,
+   comando 40 escluso (mai inviato dal gioco, voce di tabella fuori ROM),
+   5 eccezioni di tempismo fine documentate in AUDIO.md. PUNTO APERTO:
+   le eccezioni si giudicano col test dei .wav; se stona, modello a cicli
+   mirato. Restano: lotto 4 estrazione dei dati, lotto 5 renderizzatore
+   wav.
 
 ## Come si lavora (ricetta collaudata)
 
