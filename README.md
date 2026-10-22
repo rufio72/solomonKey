@@ -1,81 +1,101 @@
-# solomonKey
+# solomonKey — reverse engineering Solomon's Key (Tecmo, 1986)
 
-Ricostruzione in C, da zero e a partire dalle sole ROM arcade, di **Solomon's Key**
-(Tecmo, 1986): il puzzle-platform in cui il mago Dana crea e distrugge blocchi per
-raggiungere la chiave e la porta di ogni stanza.
+A from-scratch **decompilation** of the arcade game **Solomon's Key** — the
+classic Tecmo puzzle-platformer where the wizard Dana creates and destroys
+blocks to reach the key in every room — reconstructed in **readable C** from
+nothing but the original ROMs, with **MAME as the oracle**.
 
-> **Nota di proprietà.** Le immagini, i dump e i dati in `roms/decoded/` e le tabelle
-> in `decomp/harness/` derivano dalle ROM arcade Tecmo e **non sono di proprietà
-> dell'autore di questo repository**. Vedi [NOTICE.md](NOTICE.md). Le ROM non sono
-> incluse e non vanno aggiunte.
+No original source code exists. This project recovers it the hard way:
+execution-driven **reverse engineering** of the two **Zilog Z80** CPUs on the
+arcade board (a 48 KB game program + 4 KB of data, and a 16 KB sound driver
+for three **YM2149/AY-3-8910** PSG chips), routine by routine, with every
+translation **verified bit-for-bit** against the real machine state captured
+in the emulator. Rules, enemy AI, timers, glitches — original bugs included.
 
-## Cosa stiamo facendo
+> **Ownership note.** The images, dumps and data tables under `roms/decoded/`
+> and `decomp/harness/` are derived from the Tecmo arcade ROMs and are **not
+> the property of this repository's author**. See [NOTICE.md](NOTICE.md).
+> The ROMs are not included and must never be committed.
 
-Il gioco originale gira su una scheda con due Z80: uno per il gioco (48 KB di
-programma più 4 KB di dati) e uno per l'audio (16 KB). Non esiste un sorgente
-pubblico. L'obiettivo è ottenere un sorgente C leggibile e modificabile che
-riproduca esattamente la logica dell'arcade: regole, comportamento dei nemici,
-tempi, bug compresi.
+**Keywords:** reverse engineering · decompilation · disassembly · Z80 ·
+arcade · Tecmo · Solomon's Key · 1986 · MAME · emulation · bit-accurate ·
+cycle-exact verification · game preservation · C port · retrogaming ·
+YM2149 · AY-3-8910 · static and dynamic analysis.
 
-Il metodo è una decompilazione guidata dall'esecuzione, con MAME come oracolo:
+## Method: decompilation with an oracle
 
-1. **Traccia.** MAME esegue l'originale e registra ogni istruzione eseguita.
-   Ogni byte eseguito almeno una volta è codice, il resto è dati.
-2. **Mappa.** Dal disassembly e dalla traccia si ricavano il grafo delle chiamate,
-   le aree di RAM e di hardware toccate da ogni routine, le tabelle di dati.
-3. **Traduzione verificata.** Ogni routine viene tradotta in C su una copia della
-   RAM originale. Un banco di prova carica lo stato della RAM catturato in MAME
-   un istante prima della routine, esegue la versione C e confronta byte per byte
-   con lo stato catturato un istante dopo. Se combacia, la traduzione è giusta.
-4. **Replay.** Quando tutte le routine sono tradotte, una partita registrata in
-   MAME viene rigiocata dal programma C con la RAM identica frame per frame.
-5. **Pulizia.** Solo a quel punto il C viene reso leggibile: nomi, strutture,
-   costanti, con il replay come test di regressione.
+Every line of C in this repository is backed by a measurement, not a guess:
 
-## Stato
+1. **Trace.** MAME runs the original and logs every executed instruction.
+   Any byte executed at least once is code; the rest is data.
+2. **Map.** From the disassembly and the traces we build the call graph and
+   chart the RAM, hardware ports and data tables each routine touches.
+3. **Verified translation.** Each routine is translated to C operating on a
+   copy of the original RAM. A test harness loads the RAM state captured in
+   MAME one instant *before* the routine, runs the C version, and compares
+   byte-for-byte with the state captured one instant *after*. If it matches,
+   the translation is correct.
+4. **Replay.** Once everything is translated, a game session recorded in MAME
+   is replayed by the C program with identical RAM, frame by frame.
+5. **Cleanup.** Only then is the C made human-friendly — names, structs,
+   constants — with the replay as the regression test.
 
-- **Sondaggio di fattibilità** (`decomp/RAPPORTO.md`): fattibile con riserve.
-  Codice pulito, nessun codice in RAM né salti indiretti; 250-300 routine stimate.
-- **Fase 1, chiusa** (brief 01-04): tabelle `rst $20` estratte, protezione
-  `e603` tabellata, formato dei livelli decodificato (`decomp/DATI.md`),
-  scheduler riprodotto a funzioni, copertura con sessioni guidate su tutte le
-  stanze: 195 destinazioni su 299 (bonus e finale fuori perimetro per
-  decisione in sospeso).
-- **Fase 2, traduzione in lotti, chiusa** (brief 05-15): al 2026-10-21 il
-  perimetro osservato è completo — **116 routine in ROUTINE.md, 104
-  verificate** con doppia cattura MAME, banco a 112 confronti e 0 falliti;
-  9 candidate escluse con motivazione e rinviate ai filoni futuri. Tra le
-  cose fatte: il motore per-oggetto della NMI, la NMI stessa (`0066`) con lo
-  scheduler `0493` e lo stato di Dana, e le porte hardware come funzioni di
-  piattaforma (`porte.c`, censimento in `compiti/12-filone-porte.md`). I
-  lotti dal 3 in poi girano in sessioni cloud di Claude Code che consegnano
-  su branch con pull request; ogni lotto viene riverificato in locale
-  rigenerando le catture (finora identiche bit a bit, salvo una condizionata
-  che varia tra build di MAME ed è stata validata con entrambe le coppie).
-- **Dopo, in ordine previsto:**
-  - **stanze bonus e sequenza finale** (decisione sciolta il 2026-10-21: si
-    fanno): copertura con sessioni guidate o partita tracciata, poi
-    traduzione in lotti come il resto;
-  - copertura delle altre zone mai eseguite (rami rari, morti particolari),
-    con forzature di RAM e ricerca di copertura a input automatici;
-  - strato hardware (video, sprite, palette, input) per rendere giocabile il
-    risultato, e pulizia finale;
-  - Z80 audio: per ora emulato o sostituito da campioni, decompilazione da
-    valutare a nucleo chiuso.
+The sound driver gets the same treatment with its own oracle: a per-frame log
+of every PSG register change, captured for each of the 65 sound/music command
+codes. The end-to-end test will be the C driver rendering all 65 sounds to
+audio files through a YM2149 emulator, indistinguishable from the original.
 
-## Contenuto del repository
+## Status (October 2026)
 
-- `decomp/`: script di traccia, copertura e grafo (`trace.lua`, `coverage.py`,
-  `callgraph.py`), cattura prima/dopo (`snap.lua`), estrattori (`rst20.py`,
-  `e603.lua`, `stanze.py`), banco di prova e routine tradotte (`harness/`),
-  rapporti (`RAPPORTO.md`, `DATI.md`).
-- `roms/decoded/`: chip grafici decodificati, palette, dump di RAM e screenshot
-  presi da MAME, usati come oracolo.
-- `compiti/`: un brief per ogni ciclo di lavoro, con fatti verificati, verifiche
-  obbligatorie, decisioni prese ed esito.
+- **Feasibility survey** (`decomp/RAPPORTO.md`): clean code, no self-modifying
+  tricks on the main CPU, ~250-300 routines estimated.
+- **Phase 1 — mapping, done:** full instruction traces, call graph, level
+  format decoded (`decomp/DATI.md`), scheduler reproduced as C functions.
+- **Phase 2 — batch translation, done:** the entire observed perimeter is
+  translated — **116 routines in `ROUTINE.md`, 104 verified** with
+  before/after MAME captures, harness at **112 comparisons, 0 failures**.
+  This includes the NMI, the activity scheduler, Dana's state machine, the
+  per-object engine and the hardware ports as platform functions.
+- **Bonus rooms & ending coverage, done:** guided sessions with targeted RAM
+  forcing pushed coverage to **235 of 299 static call destinations (78.6%)**;
+  the 64 never-executed remainder all have call sites that never run
+  (data misread as code, or code reachable only from dead zones) and are
+  censused in `decomp/CENSIMENTO-12.md`.
+- **Audio Z80 — in progress, will be fully decompiled** (decision made: real
+  driver, no sampled or pre-rendered audio). Done so far: observation
+  infrastructure (traces, call graph, PSG register-change oracle for all 65
+  command codes) and the **driver skeleton in C**, already matching the
+  original on boot — down to reproducing a harmless original-ROM bug that
+  writes to two unmapped ports — idle state and ignored commands. Next: the
+  sequence interpreter (the music engine), the music data extraction, and the
+  WAV renderer used as the final listening test.
+- **After that:** the hardware layer (video, sprites, palettes, input) to make
+  the C port playable, then cleanup with the replay as regression.
 
-## Strumenti richiesti
+## Repository layout
 
-MAME 0.264, `z80dasm`, Python 3 con Pillow, gcc e make. Il set ROM `solomon` va
-messo in `roms/` e non va committato. Le misure si rifanno con i comandi in fondo a
-`decomp/RAPPORTO.md`.
+- `decomp/` — tracing, coverage and call-graph tooling (`trace.lua`,
+  `coverage.py`, `callgraph.py`), before/after capture (`snap.lua`), data
+  extractors, the audio toolchain (`audio.lua`, `audio.sh`), the test harness
+  with the translated routines (`harness/`), and the reports (`RAPPORTO.md`,
+  `DATI.md`, `AUDIO.md`, `ROUTINE.md`).
+- `roms/decoded/` — decoded graphics chips (tiles, sprites, palettes), RAM
+  dumps and MAME screenshots used as oracles, plus `colora.py` to render the
+  sheets with any room's real palette.
+- `compiti/` — one brief per work cycle, with verified facts, mandatory
+  checks with expected outputs, decisions taken and outcome. The project's
+  working documents are in Italian; the code and this README are the
+  interface for everyone else.
+
+## Requirements
+
+MAME 0.264, `z80dasm`, Python 3 with Pillow, gcc and make. Put the `solomon`
+ROM set in `roms/` (never commit it). Every measurement in the reports can be
+reproduced with the commands listed at the end of `decomp/RAPPORTO.md`.
+
+## Contributing
+
+Issues, questions and pull requests are welcome — curiosity about Z80 reverse
+engineering is the only prerequisite. Good starting points: read
+`decomp/AUDIO.md` for the sound driver, or pick a routine in
+`decomp/ROUTINE.md` and follow its verification trail.
