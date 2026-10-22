@@ -47,14 +47,18 @@ ogni ciclo nei brief in `compiti/`.
    giocabile il C, poi pulizia con il replay come regressione.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
-   Lotto 1 (infrastruttura, brief 18) chiuso lo stesso giorno: tracce e
-   callgraph su `:audiocpu`, oracolo dei cambi di registro sui tre YM2149,
-   giro dei 65 codici comando; rapporto in `decomp/AUDIO.md`. Codice del
-   driver ~1,5 KB (0000-05C5), 9 routine vere più i gestori dello
-   smistatore `jp (hl)` a 0216 da censire. Stima: 3 lotti di traduzione
-   (ossatura e registri; interprete delle sequenze; estrazione dei dati).
-   Da coprire in un lotto futuro l'avvio (0072-009D) con traccia dal
-   frame 0.
+   Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)
+   chiusi lo stesso giorno. C'è l'oracolo dei cambi di registro sui tre
+   YM2149 per tutti i 65 codici (`out/audio/`), e l'ossatura C del driver
+   (`decomp/harness/audio_*.c`) coincide con l'originale su avvio, attesa,
+   codice 00 e codici ignorati; interprete a stub, diverge al frame 211
+   come atteso. Banco a stato di fine frame; il flusso emesso è nel
+   formato degli oracoli, pronto per il renderizzatore. Censimento dei 16
+   gestori di 0216 in `AUDIO-SEQUENZE.md`; copertura call audio 28/97.
+   Decisione utente: test finale = i .wav dei 65 codici generati dal C
+   via emulatore YM2149 (lotto dedicato dopo la traduzione).
+   Restano: lotto 3 interprete delle sequenze, lotto 4 estrazione dei
+   dati, lotto 5 renderizzatore wav.
 
 ## Come si lavora (ricetta collaudata)
 
