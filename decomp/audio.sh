@@ -2,7 +2,7 @@
 # Corse di osservazione del Z80 audio (brief 18): codici forzati nel latch,
 # oracolo AY, RAM audio, copertura dalla traccia del solo :audiocpu.
 # Uso (da decomp/): mkdir -p out/audio; sh audio.sh [blocco] > out/audio/audio.log 2>&1
-# Blocchi: codici | ignorati | lunghi | gioco; senza argomento tutti in ordine.
+# Blocchi: avvio | codici | ignorati | lunghi | gioco; senza argomento tutti in ordine.
 # Ogni corsa scrive out/audio/<nome>_{ay,latch,ram}.txt (audio.lua) e, se ha
 # traccia, coverage.py --cpu audio ne ricava out/audio/<nome>_*.txt
 # cancellando la traccia. In coda la copertura delle call statiche dell'audio.
@@ -25,6 +25,13 @@ corsa() {
     elif [ -n "${AUDIO_TRACE_DA:-}" ]; then
         echo "ERRORE: traccia di $nome assente"
     fi
+}
+
+# avvio dal reset (frame 0-30), traccia dal frame 0: copre 0000-0007,
+# 0072-009D e 00A4, che le altre corse non tracciano
+avvio() {
+    rm -f out/audio/avvio_*
+    AUDIO_CODICI= AUDIO_TRACE_DA=0 AUDIO_TRACE_A=30 AUDIO_FINE=30 corsa avvio
 }
 
 # gruppi di 8 codici (00-3f) più il 40, PASSO frame ciascuno, traccia intera
@@ -80,12 +87,13 @@ gioco() {
 }
 
 case "$BLOCCO" in
+    avvio) avvio ;;
     codici) codici ;;
     ignorati) ignorati ;;
     lunghi) lunghi ;;
     gioco) gioco ;;
-    tutto) codici; ignorati; lunghi; gioco ;;
-    *) echo "ERRORE: blocco sconosciuto $BLOCCO (codici, ignorati, lunghi, gioco o nessuno)"; exit 2 ;;
+    tutto) avvio; codici; ignorati; lunghi; gioco ;;
+    *) echo "ERRORE: blocco sconosciuto $BLOCCO (avvio, codici, ignorati, lunghi, gioco o nessuno)"; exit 2 ;;
 esac
 
 # copertura delle destinazioni statiche di call sotto 4000 (unione esclusa dal glob)

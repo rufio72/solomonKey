@@ -116,6 +116,13 @@ def principale():
     print('rst usati (esecuzioni): ' + ' '.join('%s=%d' % kv for kv in sorted(rst.items())))
     jp_hl = sum(pc_tot[p] for p, t in testo.items() if t.replace(' ', '') == 'jp(hl)')
     print('jp (hl) eseguiti: %d' % jp_hl)
+    # gestori del jp (hl) a 0216: tabella di 16 parole a 03CE, indice =
+    # byte di sequenza F0-FF & 0F; esecuzioni = conteggio del primo PC
+    gestori = [rom[0x03CE + 2 * i] | (rom[0x03CF + 2 * i] << 8) for i in range(16)]
+    esec = [pc_tot.get(g, 0) for g in gestori]
+    print('gestori 0216: ' + ' '.join('F%X=%04X:%d' % (i, g, n)
+                                      for i, (g, n) in enumerate(zip(gestori, esec)))
+          + ' somma %d' % sum(esec))
 
     # RAM audio scritta dal frame 110
     ram = {}

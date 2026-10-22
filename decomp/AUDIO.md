@@ -2,8 +2,9 @@
 
 Decisione del 2026-10-22: **il Z80 audio sarà tradotto** per intero (niente
 emulazione né campioni). Questo rapporto non è un via/stop: serve a
-pianificare i lotti di traduzione. Prodotto dal brief 18; nessuna riga
-tradotta finora. Indirizzi e conteggi, nessun byte della ROM.
+pianificare i lotti di traduzione. Prodotto dal brief 18, aggiornato dal
+brief 19 (ossatura tradotta, sezione in fondo). Indirizzi e conteggi,
+nessun byte della ROM.
 
 ## Hardware (MAME 0.264, `space.map.entries`)
 
@@ -18,15 +19,30 @@ tradotta finora. Indirizzi e conteggi, nessun byte della ROM.
 
 Z80 audio a 3,07 MHz. Il driver scrive anche alle porte **12 e 13, non
 mappate**: misurato `PORTE IGNOTE 12=128 13=64` in tutte le 43 corse, uguale
-al gioco normale; sono scritture del solo avvio (stessi conteggi con 90 o 900
-frame), non del ciclo per interruzione. La traduzione può ometterle o
-lasciarle a una funzione di piattaforma vuota.
+al gioco normale e nella corsa `avvio`; sono scritture del solo avvio
+(stessi conteggi con 90 o 900 frame), non del ciclo per interruzione.
+Causa: un errore dell'originale in `00A4`. Il ciclo dei tre chip fa
+`ld a,0fh; add a,c; ld a,0ffh` (00CE-00D1) e scarta la somma, quindi `c`
+avanza di 1 per giro (10, 11, 12) invece che a 20 e 30: il chip 1 riceve
+07..0A come dati nel registro 0A e le porte 12 e 13 ricevono 8 e 4
+scritture per chiamata; 16 chiamate all'avvio danno `12=128 13=64`. Il C
+riproduce l'errore e conta le stesse porte ignote.
+
+Registro selezionato: `audio.lua` (e il C) usano il byte intero scritto
+alla porta pari, senza la maschera dei 4 bit bassi del YM2149. Non ha
+effetto: il driver seleziona solo 06-0D o valori calcolati da `b`, e negli
+oracoli la colonna `reg` vale solo 00-0D (misurato su tutti gli `_ay.txt`).
+Fuori da ROM, RAM e latch la memoria del Z80 audio si legge 00 (lo mostra
+il comando 40, vedi `AUDIO-SEQUENZE.md`).
 
 ## Flusso del comando
 
 - Scrittura a e800 dal principale → NMI sull'audio. NMI `0066` legge 8000,
   incrementa, salva in **4243**, `retn`.
-- Avvio `0072`: `sp = 4800h`, `im 1`; IRQ su `0038` (circa 6-7 per frame).
+- Avvio `0072`: `sp = 4800h`, `im 1`, 16 giri di azzeramento della RAM e
+  `00A4`, poi `ei` e ciclo infinito su `029E`; IRQ su `0038`,
+  **2 IRQ per frame** (misurato: `0042 0147 1440` in 720 frame di `cod_00_07`, 33 in
+  30 frame di `avvio`).
 - Spedidore `00E4`: legge 4243 (0 = niente), lo azzera, decrementa: codice
   00 → `00d6` (arresto), 01-40 → `rst 8`/`rst 10h` sulla tabella a **0AF3**
   (voce del codice v a 0AF3+2v); 41-FE ignorati (`cp 041h; ret nc`), FF
@@ -37,25 +53,28 @@ lasciarle a una funzione di piattaforma vuota.
 
 ## Numeri (rifarli: `sh audio.sh > out/audio/audio.log 2>&1; python3 audio_numeri.py`)
 
-Unione di 43 corse (9 gruppi `cod_*` 00-40, `cod_41_ff`, 32 `lungo_*`,
-`gioco`); main sospeso con `suspend 0` tranne in `gioco`.
+Unione di 44 corse (`avvio` con traccia dal frame 0, 9 gruppi `cod_*`
+00-40, `cod_41_ff`, 32 `lungo_*`, `gioco`); main sospeso con `suspend 0`
+tranne in `gioco`. La corsa `avvio` (brief 19, `sh audio.sh avvio`, 30
+frame) aggiunge 54 PC: 0000-0001, 0072-009D, 00A4-00D5.
 
-- PC distinti eseguiti: **667** (max 05C3, nessuno ≥ 4000).
-- Byte di ROM eseguiti: **1170 su 16384 (7,1%)**, mai eseguiti 15214;
+- PC distinti eseguiti: **721** (max 05C3, nessuno ≥ 4000).
+- Byte di ROM eseguiti: **1268 su 16384 (7,7%)**, mai eseguiti 15116;
   ultimo byte eseguito 05C5; byte eseguiti oltre 0AF3: 0.
-- Intervalli codice 13, dati 14: `0008-000d 0010-0013 0018-0026 0038-004f
-  0066-0071 009e-00a3 00d6-01ce 01e8-028a 029e-03c6 03ee-043d 0470-047d
-  0485-0590 05a6-05c5`.
+- Intervalli codice 12, dati 12: `0000-0003 0008-000d 0010-0013 0018-0026
+  0038-004f 0066-01ce 01e8-028a 029e-03c6 03ee-043d 0470-047d 0485-0590
+  05a6-05c5`.
 - Riempimento uniforme in fondo alla ROM: 385F-3FFF (1953 byte).
-- Destinazioni di call/rst eseguite: 7; **routine (con 0038 e 0066): 9**:
-  `0008 0010 0018 0038 0066 00E4 0147 029E 036B`.
+- Destinazioni di call/rst eseguite: 8; **routine (con 0038 e 0066): 10**:
+  `0008 0010 0018 0038 0066 00A4 00E4 0147 029E 036B`.
 - `rst` usati: `08=26930 10=68863 18=40599` esecuzioni; `jp (hl)` eseguiti
   14001, da un solo sito (`0216`): è lo smistamento dei comandi delle
-  sequenze, i cui gestori non risultano come routine.
-- Copertura delle call statiche: **unione 17 su 97 (17,5%)**. Delle 80 mai
-  osservate, 79 hanno il sito di chiamata a 05C6 o sopra (dati letti come
-  codice da z80dasm); l'unica con sito nel codice è `00A4` da `0090`, nel
-  test di avvio, che parte prima della finestra di traccia (frame 120).
+  sequenze, i cui gestori non risultano come routine. Censimento dei 16
+  gestori (riga `gestori 0216` di `audio_numeri.py`) in `AUDIO-SEQUENZE.md`.
+- Copertura delle call statiche: **unione 28 su 97 (28,9%)** con la corsa
+  `avvio` (17 prima). Le mai osservate hanno il sito di chiamata a 05C6 o
+  sopra (dati letti come codice da z80dasm); `00A4` da `0090` è ora
+  osservata (`0090 00A4 16` in `avvio_chiamate.txt`).
 - RAM audio scritta dal frame 110: **458 byte distinti in 41 zone**.
   Più scritti: `47FC=1078715 47FD=1078715 47FE=631824 47FF=631824
   4242=392234 4240=336636 4241=274334 47EE=159408 47EF=159408 47F0=144741`.
@@ -77,9 +96,8 @@ Unione di 43 corse (9 gruppi `cod_*` 00-40, `cod_41_ff`, 32 `lungo_*`,
 Il codice sta in **0000-05C5 (circa 1,5 KB)**; da 05C6 a 385E (circa 12,6 KB)
 ci sono tabelle e sequenze: la tabella dei puntatori dei comandi a 0AF3, le
 sequenze dalla 0B73; poi il riempimento. Nessun byte oltre 05C5 viene mai
-eseguito. Fuori dalle tracce resta solo l'avvio (0000-0007, 0072-009D, 00A4):
-test della RAM e inizializzazione, facile da coprire con una traccia dal
-frame 0.
+eseguito. L'avvio (0000-0001, 0072-009D, 00A4-00D5) è coperto dalla corsa
+`avvio` con traccia dal frame 0.
 
 ## Stato del sequencer in RAM
 
@@ -115,3 +133,40 @@ comando forzato. Una traduzione futura, pilotata con gli stessi codici agli
 stessi frame (`AUDIO_CODICI`, `AUDIO_DA`, `AUDIO_PASSO` di `audio.lua`) e
 con le stesse interruzioni per frame, deve produrre lo stesso file: il
 confronto è un `diff`. Le porte 12/13 vanno tenute fuori dal confronto.
+
+## Ossatura tradotta (brief 19)
+
+File in `harness/` (bersaglio `make -C harness audio_banco`, prefisso
+`aud_` per non urtare i nomi del principale):
+
+- `audio.h`: modello di memoria (`aud_ram`, `aud_rom`, `AM()`), indirizzi e
+  campi del blocco con nome, firme.
+- `audio_piattaforma.c`: caricamento di `1.3jk` a tempo di esecuzione,
+  `aud_leggi`/`aud_scrivi`, `aud_out` con la semantica di `audio.lua`
+  (selezione, ombra, porte ignote), scrittura del flusso dei cambi.
+- `audio_ossatura.c`: avvio `0072` (senza il ciclo infinito), `00A4` con
+  l'errore dell'originale, IRQ `0038`, NMI `0066`, `00E4` con `00D6` e
+  `00FA`, `rst 8/10h/18h`.
+- `audio_registri.c`: `029E` e `036B` con tutti i rami (`02DD`, `02E5`,
+  `030B`, `0381`). L'inviluppo hardware è selezionato dai bit 5-6 del flag.
+- `audio_interprete.c`: `aud_0147` vuoto (lotto successivo).
+- `audio_banco.c`: `./harness/audio_banco <nome> [frame_max]` da `decomp/`.
+
+Modello del tempo del banco: al frame 0 l'avvio; per ogni frame i latch
+del frame (NMI; quelli prima del frame 14 ignorati con avviso), poi 2 volte
+IRQ e una passata di `029E`. Confronta la sequenza (chip, reg, val) dei
+cambi dei frame 0-13 e lo stato dei registri a fine frame dal 13 in poi.
+Limite: l'ordine dei cambi dentro un frame dipende da dove l'IRQ
+interrompe `029E` e non è modellato (nel codice 00 dell'oracolo il chip 1
+compare dopo i chip 2 e 3), quindi non si confronta riga per riga.
+
+Tratti che coincidono: avvio (85 cambi, sequenza uguale), attesa fino al
+primo codice in tutti i 43 oracoli, codice 00 (`cod_00_07` fino al 209),
+codici 41-FF (`cod_41_ff` intero), `gioco` fino al 1187. Dal codice 01 in
+poi serve l'interprete: `cod_00_07` intero diverge al frame 211.
+
+Il flusso `out/audio/banco/<nome>_ay.txt` è scritto per intero nel formato
+di `audio.lua` (intestazione, righe `frame chip reg val`, `# codice`) ed è
+l'ingresso del futuro renderizzatore `.wav` (emulatore YM2149). Scarto
+noto: i cambi dell'avvio nel C portano tutti il frame 0 (in MAME 0-13).
+Rimando: `AUDIO-SEQUENZE.md` per l'interprete.
