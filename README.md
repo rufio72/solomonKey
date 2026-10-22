@@ -74,8 +74,14 @@ YM2149 emulator and compared against the original's — has been passed.
   streams in 40 of 44 cases; the 4 remaining differences are sub-frame timing
   artifacts peaking at −33 to −49 dBFS, measured, documented and confirmed
   inaudible by listening tests.
-- **After that:** the hardware layer (video, sprites, palettes, input) to make
-  the C port playable, then cleanup with the replay as regression.
+- **Next up — the full-game replay:** a recorded MAME run replayed by the C
+  translation frame by frame, comparing RAM fingerprints against the original
+  at every frame. The work brief is ready (`compiti/23-lotto-replay.md`); it
+  also covers the last ~1 KB of activity bodies the game loop touches. This is
+  the integration test of everything translated so far.
+- **After that:** the remaining censused bonus/ending routines, then the
+  hardware layer (video, sprites, palettes, input) to make the C port
+  playable, and cleanup with the replay as regression.
 
 ## Repository layout
 
