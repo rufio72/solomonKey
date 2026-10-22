@@ -33,6 +33,19 @@ ogni ciclo nei brief in `compiti/`.
   d'urto, porte come funzioni di piattaforma (`porte.c`, proposta A del
   brief 12; proposta C — log degli accessi — rinviata a NMI/audio).
 
+## Lavoro in sospeso
+
+- **Lotto replay (brief 23, `compiti/23-lotto-replay.md`): brief scritto
+  (analista Fable, ~130k token), ciclo NON avviato.** Alla ripresa vanno
+  risolte le domande aperte in fondo al brief, poi sviluppatore e
+  verificatore. La domanda 1 è una scelta di progetto per l'utente:
+  tradurre i 10 corpi di attività mancanti (~1 KB, misurati) nello stesso
+  lotto dell'infrastruttura, o spezzare in 23a/23b (proposta
+  dell'analista: un lotto solo). Le 2-5 sono preferenze con proposta
+  (verifica dei corpi col replay stesso; registrazione in Lua scriptato;
+  esclusioni d'impronta c040-c043 e cf00-cfff tarate a F0; finestra
+  F0=2402, fine 5500).
+
 ## Prossimi passi, in ordine
 
 1. **Traduzione delle routine censite nel lotto 12**: 40 destinazioni in
