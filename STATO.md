@@ -1,6 +1,6 @@
 # Stato del progetto
 
-Aggiornato al 2026-10-22. Fotografia operativa per riprendere il
+Aggiornato al 2026-10-22, sera. Fotografia operativa per riprendere il
 lavoro; la descrizione del metodo è nel [README](README.md), la storia di
 ogni ciclo nei brief in `compiti/`.
 
@@ -45,9 +45,16 @@ ogni ciclo nei brief in `compiti/`.
    basta. Attenzione: `att_27` è artificiale (esecuzione in RAM).
 3. **Strato hardware** (video, sprite, palette, input) per rendere
    giocabile il C, poi pulizia con il replay come regressione.
-4. **Z80 audio** (ROM `1.3jk`, 16 KB): da valutare; richiede la proposta C
-   per l'oracolo delle scritture ai chip sonori. In alternativa resta
-   emulato o campionato.
+4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
+   tradotto per intero** (audio originale, niente emulazione né campioni).
+   Lotto 1 (infrastruttura, brief 18) chiuso lo stesso giorno: tracce e
+   callgraph su `:audiocpu`, oracolo dei cambi di registro sui tre YM2149,
+   giro dei 65 codici comando; rapporto in `decomp/AUDIO.md`. Codice del
+   driver ~1,5 KB (0000-05C5), 9 routine vere più i gestori dello
+   smistatore `jp (hl)` a 0216 da censire. Stima: 3 lotti di traduzione
+   (ossatura e registri; interprete delle sequenze; estrazione dei dati).
+   Da coprire in un lotto futuro l'avvio (0072-009D) con traccia dal
+   frame 0.
 
 ## Come si lavora (ricetta collaudata)
 
