@@ -72,7 +72,8 @@ ogni ciclo nei brief in `compiti/`.
    (`out/wav/codici/`) e le coppie C/MAME dei 44 oracoli
    (`out/wav/oracoli/`). Wav BYTE PER BYTE IDENTICI in 40/44; le 4
    differenze restanti sono deboli (picchi −33…−49 dBFS, eccezioni.txt)
-   e attendono il giudizio all'ascolto dell'utente; nomi dei suoni da
+   e il 2026-10-23 l'utente le ha giudicate OK all'ascolto: punto chiuso,
+   niente modello a cicli salvo differenze udibili future; nomi dei suoni da
    battezzare in `audio_nomi.tsv`. La catena audio è completa: driver
    tradotto, dati estratti, resa wav dal C.
 
