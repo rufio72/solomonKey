@@ -1,6 +1,6 @@
 # Stato del progetto
 
-Aggiornato al 2026-10-21, sera. Fotografia operativa per riprendere il
+Aggiornato al 2026-10-22. Fotografia operativa per riprendere il
 lavoro; la descrizione del metodo è nel [README](README.md), la storia di
 ogni ciclo nei brief in `compiti/`.
 
@@ -9,19 +9,24 @@ ogni ciclo nei brief in `compiti/`.
 | Cosa | Valore |
 |---|---|
 | Destinazioni statiche nel Z80 principale | 299 |
-| Coperte dalle sessioni (fase 1) | 195 |
+| Coperte dalle sessioni (lotto 12 compreso) | 235 (78,6%) |
 | Routine osservate nel callgraph | ~120 |
 | Righe in `decomp/ROUTINE.md` | 116 |
 | …di cui `verificata` (doppia cattura MAME) | 104 |
 | …di cui `tradotta` con nota (cattura singola) | 12 |
 | Banco di prova (`harness --tutte`) | 112 confronti, 0 falliti |
 | Catture `regs` in `decomp/out/` | 217 |
-| Destinazioni mai osservate | 104 (blocco grosso in `8xxx-Axxx`: con ogni probabilità bonus e finale) |
+| Destinazioni mai osservate | 64, tutte con sito di chiamata mai eseguito (probabile dato o codice raggiungibile solo da zone mai eseguite; 37 a `8000` o sopra) |
 
 ## Fasi
 
 - **Fase 1 (brief 01-04): chiusa.** Tracce, callgraph, formato livelli,
   scheduler a funzioni, copertura 195/299.
+- **Lotto 12 (brief 16): chiuso il 2026-10-22.** Copertura di bonus e
+  finale con sole forzature di RAM: unione a 235/299, 40/104 del lotto
+  censite in `decomp/CENSIMENTO-12.md`; il vincolo «bonus e finale non
+  vanno tentati» del brief 04 è caduto. Ciclo fatto in locale
+  (sviluppatore Opus ~95k token alla ripresa, verificatore Sonnet ~16k).
 - **Fase 2 (brief 05-15): chiusa.** Perimetro osservato tutto tradotto in
   lotti verificati; 9 candidate escluse con motivazione (brief 15). Dentro:
   NMI (`0066`), scheduler `0493`, stato di Dana, motore oggetti, gestori
@@ -30,14 +35,14 @@ ogni ciclo nei brief in `compiti/`.
 
 ## Prossimi passi, in ordine
 
-1. **Lotto 12 — copertura di bonus e finale** (decisione sciolta il
-   2026-10-21: si fanno). Partita tracciata o sessioni guidate con
-   forzature di RAM; stima 25-35 routine nuove. Il vincolo «bonus e finale
-   non vanno tentati» del brief 04 cade con questo lotto, che deve
-   aggiornare anche i cancelli di copertura.
-2. **Altre zone mai eseguite**: forzature mirate di RAM e ricerca di
-   copertura con input automatici (MAME a `-nothrottle` fa ore di gioco in
-   minuti); una parte sarà codice morto da documentare e basta.
+1. **Traduzione delle routine censite nel lotto 12**: 40 destinazioni in
+   25 blocchi contigui in `decomp/CENSIMENTO-12.md`, due catture pilota
+   già fatte (`0x3FCE porta`, `0x51FA finale`). Per i lotti futuri il
+   censimento va rigenerato a mano o lo script va aggiunto a `decomp/`.
+2. **Altre zone mai eseguite**: restano 64 destinazioni, tutte con sito
+   di chiamata mai eseguito (tabella SI/NO in coda al censimento);
+   forzature mirate di RAM, una parte sarà codice morto da documentare e
+   basta. Attenzione: `att_27` è artificiale (esecuzione in RAM).
 3. **Strato hardware** (video, sprite, palette, input) per rendere
    giocabile il C, poi pulizia con il replay come regressione.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): da valutare; richiede la proposta C
