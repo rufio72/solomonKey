@@ -29,6 +29,11 @@ Uso del giro, da `decomp/`:
     harness/replay out/replay_oracolo.txt out/replay_disp.txt out/replay_2410.bin 2410 [fine] [--oltre]
     python3 replay_diff.py out/replay_<f>.bin <altro dump>
 
+Codice d'uscita di `replay`: 0 se il giro arriva in fondo senza divergenze
+nello spedidore; 1 se si ferma (corpo non tradotto, spedizione diversa,
+divergenza) o se l'impronta a F0 non coincide; 2 per errori di ingresso.
+Oggi esce sempre con 1, voluto, perché si ferma al corpo 0A.
+
 ## Parametri della registrazione
 
 - Ingressi convenzionali (moneta 1510-1530, start 1560-1580, dal 1900 un
@@ -41,7 +46,16 @@ Uso del giro, da `decomp/`:
   «frame» e due registrazioni diverse fra loro dal frame 382. Anche contare
   solo le chiamate con il tempo emulato avanzato non basta. `replay.lua` usa
   il numero di frame dello schermo (`screen:frame_number() + 1`), che non si
-  muove a debugger fermo: le due registrazioni coincidono byte per byte.
+  muove a debugger fermo.
+- **Ingressi dell'host spenti.** `replay.sh` passa `-keyboardprovider none
+  -mouseprovider none -joystickprovider none -lightgunprovider none`. Senza
+  queste opzioni, un tasto o un joystick dell'host toccato mentre MAME gira
+  entra nelle porte anche senza finestra. È successo in due registrazioni su
+  cinque: e600 = 02 ai frame 1692-1724 in una, dal 3594 in un'altra, con
+  impronte diverse da lì in poi. Con le opzioni, tre registrazioni di fila
+  coincidono byte per byte (oracolo e `disp.txt`). Vale anche per
+  `cattura.sh`, `sessioni.sh` e gli altri lanci di MAME del progetto, che
+  oggi non spengono gli ingressi dell'host.
 - **Confronto con `out/sched_log.txt`.** Le righe D/W/I coincidono una per
   una a meno del campo frame. Il campo frame è uguale fino al 64; dal reset
   del ~600 in poi il replay ha un frame in più (sched_log 601 = replay 602).
