@@ -52,6 +52,7 @@ decomp/out/*
 decomp/harness/harness
 decomp/harness/sched_proto
 decomp/harness/audio_banco
+decomp/harness/replay
 decomp/harness/*.o
 
 # vecchio port OpenSolomonsKey: resta su disco per prove locali, non nel repository

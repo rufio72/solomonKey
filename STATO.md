@@ -1,6 +1,6 @@
 # Stato del progetto
 
-Aggiornato al 2026-10-22, sera. Fotografia operativa per riprendere il
+Aggiornato al 2026-10-27. Fotografia operativa per riprendere il
 lavoro; la descrizione del metodo è nel [README](README.md), la storia di
 ogni ciclo nei brief in `compiti/`.
 
@@ -35,16 +35,20 @@ ogni ciclo nei brief in `compiti/`.
 
 ## Lavoro in sospeso
 
-- **Lotto replay (brief 23, `compiti/23-lotto-replay.md`): brief scritto
-  (analista Fable, ~130k token), ciclo NON avviato.** Alla ripresa vanno
-  risolte le domande aperte in fondo al brief, poi sviluppatore e
-  verificatore. La domanda 1 è una scelta di progetto per l'utente:
-  tradurre i 10 corpi di attività mancanti (~1 KB, misurati) nello stesso
-  lotto dell'infrastruttura, o spezzare in 23a/23b (proposta
-  dell'analista: un lotto solo). Le 2-5 sono preferenze con proposta
-  (verifica dei corpi col replay stesso; registrazione in Lua scriptato;
-  esclusioni d'impronta c040-c043 e cf00-cfff tarate a F0; finestra
-  F0=2402, fine 5500).
+- **Lotto replay (brief 23): fatto in parte il 2026-10-27, infrastruttura
+  verificata.** Oracolo (`replay.lua`/`replay.sh`, ~90 s) riproducibile
+  bit a bit e giro in C (`replay.c`) con sanità a F0=2402 coincidente;
+  banco storico intatto (220/0). Il giro si ferma al corpo 0A (4DA2),
+  che via `rst 38` entra nel **motore dei nemici**: ~3,6 KB e 36 routine
+  non tradotte — il brief stimava ~1 KB per tutti i corpi, il totale vero
+  è ~5 KB. 7 corpi su 10 tradotti in `attivita.c`, non verificati (la
+  loro verifica è il replay che non li raggiunge). Prossimi, in ordine:
+  censimento e lotti del motore di 0A, poi corpi 01 e 10 (~870 B), poi
+  giro da F0=2410 (`--oltre`). Lista e misure in `decomp/REPLAY.md`.
+  **Trappola scoperta**: MAME legge tastiera e joystick dell'host anche
+  senza finestra; `replay.sh` ora passa `-keyboardprovider none` (e gli
+  altri tre provider); `cattura.sh` e `sessioni.sh` hanno lo stesso
+  rischio, da sistemare in un lotto di manutenzione.
 
 ## Prossimi passi, in ordine
 
@@ -60,7 +64,15 @@ ogni ciclo nei brief in `compiti/`.
    interruzione (`decomp/copertura_viva.lua`, MAME con finestra) ha
    svegliato `4FC5` — 6 esecuzioni, sito `4F8F` eseguito 1 volta, quindi
    le altre 5 arrivano da un'altra via: non è codice morto. Le altre 63
-   restano mute. Log in `decomp/out/partita_viva_20261027.log`.
+   restano mute. `4FC5` cade nel motore dei nemici del corpo 0A (vedi
+   REPLAY.md). Seconda partita mirata (campanella presa, fata catturata,
+   uscita dal quadro, nessun nemico ucciso): 1 sola esecuzione, sito mai
+   passato — di quei tre eventi uno solo la accende, con ogni probabilità
+   la comparsa della fata; cattura e uscita non passano di lì. Nella
+   partita libera gli altri scatti corrispondono a morti dei nemici e
+   palla di fuoco. Ipotesi: gestore della comparsa di un'entità da evento
+   (spawn), non della sua rimozione. Ricette di riproduzione annotate qui;
+   log in `decomp/out/partita_viva_20261027.log` e `...27b.log`.
 3. **Strato hardware** (video, sprite, palette, input) per rendere
    giocabile il C, poi pulizia con il replay come regressione.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va

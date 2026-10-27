@@ -261,3 +261,21 @@ Tutte le domande sono risolte; il brief è eseguibile così com'è.
 3. Sì: registrazione in Lua scriptato, non `-record/-playback`.
 4. Sì: esclusioni di partenza c040-c043 e cf00-cfff, margine di pila largo.
 5. Sì: finestra F0=2402, fine 5500.
+
+## Esito (2026-10-27)
+
+Ciclo fatto in locale: sviluppatore Opus (~197k token, commit 2447721 e
+435a139), verificatore Sonnet (~21k, due passate). Infrastruttura
+consegnata e verificata: oracolo riproducibile bit a bit (dopo la
+correzione degli ingressi dell'host: MAME raccoglieva la tastiera del
+computer anche senza finestra; ora `replay.sh` passa i quattro
+`-…provider none`), sanità a F0 con hash coincidente, banco 220/0,
+`sched_proto` 106124/0/131/131. Il giro si ferma al corpo 0A (4DA2): il
+brief sbagliava la dimensione dei corpi (~5 KB veri contro ~1 KB
+stimato; 0A entra via `rst 38` nel motore dei nemici, ~3,6 KB, 36
+routine non tradotte). 7 corpi su 10 tradotti, non ancora verificati
+(la loro verifica è il replay, che non li raggiunge). Il fatto sbagliato
+è dell'analista già al modello massimo: niente rifacimento, il seguito
+si spezza in lotti nuovi — censimento e traduzione del motore di 0A,
+poi 01 e 10 (~870 B), poi giro da F0=2410. Lista ordinata e misure in
+`decomp/REPLAY.md`.
