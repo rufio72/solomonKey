@@ -56,6 +56,11 @@ ogni ciclo nei brief in `compiti/`.
    di chiamata mai eseguito (tabella SI/NO in coda al censimento);
    forzature mirate di RAM, una parte sarà codice morto da documentare e
    basta. Attenzione: `att_27` è artificiale (esecuzione in RAM).
+   **Novità 2026-10-27**: una partita dal vivo sorvegliata con punti di
+   interruzione (`decomp/copertura_viva.lua`, MAME con finestra) ha
+   svegliato `4FC5` — 6 esecuzioni, sito `4F8F` eseguito 1 volta, quindi
+   le altre 5 arrivano da un'altra via: non è codice morto. Le altre 63
+   restano mute. Log in `decomp/out/partita_viva_20261027.log`.
 3. **Strato hardware** (video, sprite, palette, input) per rendere
    giocabile il C, poi pulizia con il replay come regressione.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va

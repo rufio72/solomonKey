@@ -249,3 +249,15 @@ frame della prima divergenza (o «nessuna») e le deviazioni dal brief.
    (256 byte) poi eventualmente stretto. **Preferenza.**
 5. **Finestra**: F0=2402 (gioco, stanza 1) e fine 5500, come tutte le misure
    esistenti. Proposta: così. **Preferenza.**
+
+## Risoluzioni (2026-10-27)
+
+Tutte le domande sono risolte; il brief è eseguibile così com'è.
+
+1. **Un lotto solo**: i 10 corpi di attività si traducono in questo stesso
+   lotto, verificati col replay (scelta dell'utente, conferma la proposta).
+2. Sì: verifica dei corpi col replay, stato «tradotta (replay)» in sezione
+   separata di ROUTINE.md.
+3. Sì: registrazione in Lua scriptato, non `-record/-playback`.
+4. Sì: esclusioni di partenza c040-c043 e cf00-cfff, margine di pila largo.
+5. Sì: finestra F0=2402, fine 5500.
