@@ -125,3 +125,25 @@ i frame sono quelli della cattura riuscita.
 | 0x7ECA | sub_7eca | z80_7xxx.c | 52 | cornice del pannello di gioco: caratteri 04-11 a ddaa e 12-1F a ddca (sub_7f2d), bordi a celle con sub_7efe (attributo 2 su 11 righe × 16 colonne, attributo 3 su 11 × 5) | tradotta | — | — | non registrata nel banco: carico di quadro più lungo di un frame, la NMI attraversa ogni occorrenza e snap.lua le scarta tutte (come 322A) |
 | 0x7EFE | sub_7efe | z80_7xxx.c | 47 | cella in d486/d496 da D, E, C: A e C in due piani | verificata | 2 | titolo, gioco | titolo f610, gioco f1544 (occorrenza 5); scrivono entrambe |
 | 0x7F2D | sub_7f2d | z80_7xxx.c | 12 | B caratteri consecutivi a partire da C da HL in avanti (attributo 60 sull'altro piano); uscita C += B, B = 0, HL avanzato | verificata | 2 | titolo, gioco | titolo f610, gioco f1540 (scrivono) |
+
+## Corpi di attività (lotto 23)
+
+Ingressi della tabella 3B11, raggiunti con `rst 20` dallo spedidore e non con
+`call`: non fanno parte delle 116 routine sopra. Stanno in
+`harness/attivita.c` (`corpo_attivita_replay[]`) e si verificano col replay
+(`REPLAY.md`), non con le catture. Stato «tradotta (replay)» = C scritto, ma
+non ancora confrontato: il giro si ferma prima, al corpo 0A che non è
+tradotto.
+
+| codice | ingresso | funzione | descrizione | stato |
+|---|---|---|---|---|
+| 02 | 0x4B84 | attivita_02_4b84 | attende c463 ≥ 0e, chiude l'oggetto c46e (4B98, statica), diventa 03 | tradotta (replay) |
+| 03 | 0x4BC6 | attivita_03_4bc6 | attende c463 ≥ 0e, riaccende Dana dalle copie +29..+2c, si spegne | tradotta (replay) |
+| 0D | 0x5C8E | attivita_0d_5c8e | cancello c4ce: contatore c29a/c29b (250E, statica) contro c25a, posa 2 o chiusura col tabellone | tradotta (replay) |
+| 0E | 0x63A4 | attivita_0e_63a4 | ingresso nel cancello: diventa 03, oppure apre c4ce sopra Dana e diventa 0F | tradotta (replay) |
+| 11 | 0x456E | attivita_11_456e | attende c466 ≥ 6, azzera c49e, si spegne | tradotta (replay) |
+| 14 | 0x44B5 | attivita_14_44b5 | canali di registri c09d (4) e c0b7 (1) via sub_452b | tradotta (replay) |
+| 20 | 0x3E90 | attivita_20_3e90 | il tempo: sottrazione BCD da c093-c095, cifre e colore a d472, fine tempo | tradotta (replay) |
+| 01 | 0x48D1 | — | chiama 49AE, 4938, 4ADA, 4B20, 4C11 non tradotte (~870 B con 10) | non tradotta |
+| 0A | 0x4DA2 | — | `rst 38` su c2b8 verso il motore dei nemici (~3,6 KB) | non tradotta |
+| 10 | 0x457B | — | chiama 4592, 4938, 4C11 non tradotte | non tradotta |
