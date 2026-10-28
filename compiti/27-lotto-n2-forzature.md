@@ -322,3 +322,25 @@ Tutte da `/home/rufio72/OpenSolomonsKey-master`.
 
 Resta valida la decisione dell'utente dal brief 25: se il replay diverge
 si corregge tutto, annotando in REPLAY.md.
+
+## Esito (2026-10-28)
+
+PASSATO. Sviluppatore: 11/11; verificatore: tutte passate (la 3 senza
+ricompilare perché i binari erano aggiornati; la 9, gcov, non rieseguita —
+misurata dallo sviluppatore al 96,08% con nessuna routine a zero; la 11
+vuota perché già committato, 764699e). Le catture nuove sono 101 invece
+delle ~70 attese: copertura in più, non un difetto.
+
+Risultato: 33 routine dei tipi 8 e 14 in nemici_tipi_08_14.c (697 righe)
+più 6 dipendenze nei moduli prescritti; stub a 26; banco a 321 catture e
+147 voci, 35 nuove tutte «verificata» con almeno 2 catture non forzate;
+replay 2410-5499 e sched_proto identici. Manutenzione chiusa: provider a
+none in cattura.sh e sessioni.sh, stato bonus a SNAP_ROOM=4, nuovi
+SNAP_ROOM/SNAP_FORZA in snap.lua, stato stanzaNN (frame 1951/2100/2300,
+non 1700+: sotto il 1951 snap.lua non arma il breakpoint — deviazione
+documentata). Altre deviazioni sane: sched.c non serve nel banco; sub_4f0f
+spegne il riporto dopo rst 38 (letto da 57AA), replay invariato; quattro
+forzature aggiunte per rami mai visti.
+
+Token: analista Opus ~134k, sviluppatore Opus ~218k (84 chiamate, ~1 h con
+le catture MAME), verificatore Sonnet ~16k. Nulla su OpenRouter.
