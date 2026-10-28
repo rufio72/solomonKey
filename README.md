@@ -74,14 +74,27 @@ YM2149 emulator and compared against the original's — has been passed.
   streams in 40 of 44 cases; the 4 remaining differences are sub-frame timing
   artifacts peaking at −33 to −49 dBFS, measured, documented and confirmed
   inaudible by listening tests.
-- **Next up — the full-game replay:** a recorded MAME run replayed by the C
-  translation frame by frame, comparing RAM fingerprints against the original
-  at every frame. The work brief is ready (`compiti/23-lotto-replay.md`); it
-  also covers the last ~1 KB of activity bodies the game loop touches. This is
-  the integration test of everything translated so far.
-- **After that:** the remaining censused bonus/ending routines, then the
+- **Full-game replay — done, end to end.** A recorded 90-second MAME run is
+  replayed by the C translation frame by frame, comparing RAM fingerprints
+  against the original at every frame: **64,686 dispatches and 3,090 NMIs
+  over frames 2410–5499, zero divergences**, exit 0 (`decomp/replay.sh` +
+  `decomp/harness/replay.c`, see `decomp/REPLAY.md`). Getting there exposed
+  and fixed a latent bug — nine collision handlers of table 08AE had been
+  silently missing since batch 7 — and refined the NMI interleaving model.
+  The replay is now the regression test for everything.
+- **Enemy engine — censused, translation under way.** Behind activity body
+  0A lives the per-enemy engine: **8,833 bytes and 220 routines**, mapped
+  with the real `rst 38` dispatch tables (`decomp/CENSIMENTO-NEMICI.md`)
+  and split into batches N1–N12. N1 (the 27 routines the replay exercises)
+  and N2 (enemy types 8 and 14, 33 routines + 6 shared helpers, verified
+  with targeted room/state forcing) are done; the capture harness now also
+  covers the enemy modules and stands at **321 comparisons, 147 entries,
+  0 failures**.
+- **Next up:** batches N3–N12 of the enemy engine (~160 routines, same
+  forcing-based method), then the censused bonus/ending routines, the
   hardware layer (video, sprites, palettes, input) to make the C port
-  playable, and cleanup with the replay as regression.
+  playable, wiring the game to the translated sound driver, and cleanup
+  with the replay as regression.
 
 ## Repository layout
 
