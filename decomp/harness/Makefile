@@ -2,8 +2,9 @@ CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra -O0
 SORGENTI = harness.c comune.c routine.c fondale.c porte.c nmi.c nmi_oggetti.c routine_tab.c $(wildcard z80_*.c)
 SORGENTI_SCHED = sched.c sched_proto.c
-# giro di gioco del replay (brief 23): il banco senza harness.c, più spedidore e corpi
-SORGENTI_REPLAY = $(filter-out harness.c,$(SORGENTI)) sched.c attivita.c replay.c
+# giro di gioco del replay (brief 23): il banco senza harness.c, più spedidore e corpi;
+# i moduli del motore dei nemici (nemici*.c, brief 25) entrano solo qui
+SORGENTI_REPLAY = $(filter-out harness.c,$(SORGENTI)) sched.c attivita.c replay.c $(wildcard nemici*.c)
 SORGENTI_DATI = $(wildcard audio_dati*.c)
 INTESTAZIONI_DATI = $(wildcard audio_dati*.h)
 SORGENTI_DRIVER = audio_piattaforma.c audio_ossatura.c audio_registri.c audio_interprete.c $(SORGENTI_DATI)
@@ -17,7 +18,7 @@ harness: $(SORGENTI) ram.h routine.h e603.h rst20_tables.h
 sched_proto: $(SORGENTI_SCHED) sched.h ram.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_SCHED)
 
-replay: $(SORGENTI_REPLAY) ram.h routine.h sched.h e603.h rst20_tables.h rst38_tables.h
+replay: $(SORGENTI_REPLAY) ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_REPLAY)
 
 audio_banco: $(SORGENTI_AUDIO) audio.h $(INTESTAZIONI_DATI)

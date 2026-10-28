@@ -54,9 +54,10 @@ ogni ciclo nei brief in `compiti/`.
 
 0. **Motore dei nemici (corpo 0A)**: censito in `decomp/CENSIMENTO-NEMICI.md`
    con 21 tabelle `rst 38` (`harness/rst38_tables.h`), 220 routine e 8833 B.
-   Il prossimo è il **lotto N1**: corpo 0A più le 27 routine coperte dal
-   replay, ~938 righe C fra `nemici.c` e altri cinque moduli. È il lotto che
-   sblocca il replay oltre il frame 2410. Dopo vengono N2-N12.
+   **Lotto N1 fatto** (brief 25): corpo 0A, 26 routine e `sub_3b62` in
+   `decomp/harness/nemici*.c`, 27 stub in `nemici_stub.c`. Il replay da
+   F0=2410 arriva al frame 2589 senza divergenze nello spedidore e si ferma
+   al corpo 01. Prossimo: corpi 01 e 10 (brief a parte), poi N2-N12.
 1. **Traduzione delle routine censite nel lotto 12**: 40 destinazioni in
    25 blocchi contigui in `decomp/CENSIMENTO-12.md`, due catture pilota
    già fatte (`0x3FCE porta`, `0x51FA finale`). Per i lotti futuri il

@@ -339,6 +339,13 @@ Le chiamate di ogni routine, comprese quelle verso la frontiera tradotta
 - **7F68** salta (`jr z`) a 7F39, che è il sito `rst 38` dentro `sub_7f2d`,
   già tradotta. Il C di 7F68 deve rifare lo smistamento di 7F39, con la
   tabella `rst38_7F39`, oppure fattorizzarlo con `sub_7f2d`.
+  **Risolto in N1** (brief 25): 7F39 non sta dentro `sub_7f2d`, che finisce
+  col `ret` a 7F38; 7F39 è l'etichetta subito dopo e ci si arriva solo dal
+  `jr z` di 7F68. Lo smistamento delle due tabelle 7F39 e 7F72 è in
+  `sub_7f68` (`nemici_tipi_15_17.c`), `sub_7f2d` non cambia.
+- **3B62** è un `ret` solo, la voce nulla di molte tabelle: è tradotta già
+  in N1 come `sub_3b62` vuota in `nemici.c` (non è uno stub) e N7 la trova
+  fatta. Gli stub di N1 sono quindi 27, in `harness/nemici_stub.c`.
 - **Ritorni spinti in pila**: `ld hl,nn; push hl; rst 38/20` a 4FA8
   (ritorno 4FC2) e a 6F18 (ritorno 7056). Il ritorno è codice della stessa
   routine, e il cammino lo segue.

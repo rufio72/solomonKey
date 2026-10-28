@@ -131,9 +131,9 @@ i frame sono quelli della cattura riuscita.
 Ingressi della tabella 3B11, raggiunti con `rst 20` dallo spedidore e non con
 `call`: non fanno parte delle 116 routine sopra. Stanno in
 `harness/attivita.c` (`corpo_attivita_replay[]`) e si verificano col replay
-(`REPLAY.md`), non con le catture. Stato «tradotta (replay)» = C scritto, ma
-non ancora confrontato: il giro si ferma prima, al corpo 0A che non è
-tradotto.
+(`REPLAY.md`), non con le catture. Stato «tradotta (replay)» = C scritto e
+confrontato col giro. Dopo il lotto N1 il giro da F0 = 2410 arriva al
+frame 2589 (corpo 01) con tutte le NMI pulite coincidenti.
 
 | codice | ingresso | funzione | descrizione | stato |
 |---|---|---|---|---|
@@ -145,5 +145,46 @@ tradotto.
 | 14 | 0x44B5 | attivita_14_44b5 | canali di registri c09d (4) e c0b7 (1) via sub_452b | tradotta (replay) |
 | 20 | 0x3E90 | attivita_20_3e90 | il tempo: sottrazione BCD da c093-c095, cifre e colore a d472, fine tempo | tradotta (replay) |
 | 01 | 0x48D1 | — | chiama 49AE, 4938, 4ADA, 4B20, 4C11 non tradotte (~870 B con 10) | non tradotta |
-| 0A | 0x4DA2 | — | `rst 38` su c2b8 verso il motore dei nemici (~3,6 KB) | non tradotta |
+| 0A | 0x4DA2 | attivita_0a_4da2 | `rst 38` su c2b8 verso le fasi 4DAD / 4632 / 4EE6 del motore dei nemici (`nemici.c`, lotto N1) | tradotta (replay) |
 | 10 | 0x457B | — | chiama 4592, 4938, 4C11 non tradotte | non tradotta |
+
+## Motore dei nemici (lotto N1)
+
+Corpo 0A e routine che il replay esegue (brief 25, `CENSIMENTO-NEMICI.md`).
+Stanno in `harness/nemici*.c`, entrano solo nel bersaglio `replay` e si
+verificano col giro, non con le catture. Prototipi in `harness/nemici.h`;
+il riporto, dove il chiamante lo legge, è il bit 0 di `z->f`. Le 27
+routine non tradotte che N1 chiama o smista sono stub in `nemici_stub.c`
+(`STUB_NEMICI`): il replay si ferma con `ROUTINE xxxx mancante`. Stato
+«tradotta (replay)»: il giro 2410-2589 coincide con MAME a ogni NMI
+pulita; «non in onda» = nessuna esecuzione in quel tratto (gcov).
+
+| ingresso | funzione | modulo | descrizione | stato |
+|---|---|---|---|---|
+| 0x4DAD | sub_4dad (statica) | nemici.c | fase 0: c2b7 sui 17 slot (249E), conta in c2af, 4E87, 4E31, 4DEE | tradotta (replay) |
+| 0x4632 | sub_4632 (statica) | nemici.c | fase 1: con c459 bit 5 e bit 6-7, `rst 20` a 4644 (46A3, 4649) | tradotta (replay); `rst 20` non in onda |
+| 0x4EE6 | sub_4ee6 (statica) | nemici.c | fase 2: 4F0F per ogni oggetto c4fe con (IY+0) ≥ c0, fase a 0 | tradotta (replay) |
+| 0x4F0F | sub_4f0f | nemici.c | gestore per tipo: `rst 38` a 4F1B su (IY+3) − 6 se (IY+4) ≥ 6 | tradotta (replay) |
+| 0x3B62 | sub_3b62 | nemici.c | `ret` solo, voce nulla delle tabelle | tradotta |
+| 0x2482 | sub_2482 | nemici_comuni.c | HL = 32·D + E | tradotta (replay), non in onda |
+| 0x248D | sub_248d | nemici_comuni.c | C nel blocco 2×2 a HL | tradotta (replay), non in onda |
+| 0x24BE | sub_24be | nemici_comuni.c | da coordinate di schermo a cella | tradotta (replay), non in onda |
+| 0x4592 | sub_4592 | nemici_comuni.c | presa del blocco sotto l'oggetto IY, riporto = fallita | tradotta (replay), non in onda |
+| 0x4938 | sub_4938 | nemici_comuni.c | posa dell'oggetto IX sulla cella E di valore A | tradotta (replay) |
+| 0x49AE | sub_49ae | nemici_comuni.c | posa con contatti (c4ce, Dana e oggetti), A = esito | tradotta (replay), non in onda |
+| 0x4B20 | sub_4b20 | nemici_comuni.c | contatto fra l'oggetto IX e la posizione H, L (riporto) | tradotta (replay), non in onda |
+| 0x4C11 | sub_4c11 | nemici_comuni.c | carattere B e attributo C nel blocco 2×2 della cella D, E | tradotta (replay), non in onda |
+| 0x55B2 | sub_55b2 | nemici_tipi_10_13.c | tipo 12: `rst 38` a 55B5 su (IY+1D) | tradotta (replay) |
+| 0x55C9 | sub_55c9 | nemici_tipi_10_13.c | tipo 12, fase 4: cammino dopo l'attesa | tradotta (replay), non in onda |
+| 0x561B | sub_561b | nemici_tipi_10_13.c | tipo 12, fase 2: inversione, fase 5 | tradotta (replay) |
+| 0x5640 | sub_5640 | nemici_tipi_10_13.c | tipo 12, fase 5: cammino, vicinanza (5507) | tradotta (replay) |
+| 0x5693 | sub_5693 | nemici_tipi_10_13.c | tipo 12, fase 0: presa o chiusura del blocco davanti | tradotta (replay) |
+| 0x714B | sub_714b | nemici_tipi_10_13.c | tipo 10: `rst 38` a 714E su (IY+1D) | tradotta (replay) |
+| 0x7155 | sub_7155 | nemici_tipi_10_13.c | tipo 10, fase 0: velocità dalla tabella 7196 | tradotta (replay) |
+| 0x7235 | sub_7235 | nemici_tipi_10_13.c | tipo 10, fase 2: cammino con la cella davanti (734D) | tradotta (replay) |
+| 0x58CF | sub_58cf | nemici_tipo09.c | l'oggetto della tabella 48AF si posa sul blocco davanti (4938 / 49AE) | tradotta (replay) |
+| 0x5917 | sub_5917 | nemici_tipo09.c | chiusura dell'oggetto della tabella 48AF (4B98) | tradotta (replay) |
+| 0x5928 | sub_5928 | nemici_tipo09.c | cella davanti all'oggetto IY secondo (IY+1E) | tradotta (replay) |
+| 0x734D | sub_734d | nemici_comparsa.c | cella vicina in una delle quattro direzioni (scostamenti B, C) | tradotta (replay) |
+| 0x7F51 | sub_7f51 | nemici_tipi_15_17.c | tipo 17, fase 4 di 7F39, poi 809C | tradotta (replay) |
+| 0x7F68 | sub_7f68 | nemici_tipi_15_17.c | tipo 17: `rst 38` a 7F39 ((IY+4) = a1) o a 7F72 | tradotta (replay) |

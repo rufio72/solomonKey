@@ -7,7 +7,8 @@
  * dell'oracolo. La NMI si inietta nel punto misurato da replay.lua (riga
  * «N <f> <ritorno> <letture>» di disp.txt):
  *   - ritorno in 3AFB-3B10 con letture 0: la NMI è entrata dopo la lettura
- *     che ha trovato l'attività e prima del corpo: si esegue prima del corpo;
+ *     che ha trovato l'attività e prima del corpo: si esegue prima del corpo,
+ *     con c04f ancora al valore vecchio se il ritorno precede 3B0F;
  *   - altrimenti si esegue nella scansione successiva prima della lettura
  *     numero <letture> (0 se la NMI è entrata a metà di un corpo, che nel C
  *     non si può spezzare: lì la divergenza è attesa e si classifica).
@@ -22,6 +23,7 @@
 #include <string.h>
 #include "routine.h"
 #include "sched.h"
+#include "nemici.h"
 #include "rst20_tables.h"
 
 attivita_fn corpo_attivita[SCHED_CODICI];
@@ -234,6 +236,11 @@ static void gancio_scansione(int lettura)
 
 static int corpo_mancante = -1;
 
+/* c04f prima della spedizione in corso: lo spedidore lo scrive a 3B0C, e
+ * una NMI pendente entrata prima (ritorno < 3B0F) deve vedere il valore
+ * vecchio, mentre nel C spedisci_una lo ha già scritto. */
+static uint8_t indice_prima;
+
 /* Involucro di tutti i corpi: la NMI pendente, poi il corpo tradotto. */
 static void involucro(uint8_t slot)
 {
@@ -241,7 +248,14 @@ static void involucro(uint8_t slot)
     if (nmi_corpo) {
         const struct evento *n = nmi_corpo;
         nmi_corpo = NULL;
-        esegui_nmi(n);
+        if (n->ritorno < 0x3b0f) {
+            uint8_t nuovo = indice;
+            indice = indice_prima;
+            esegui_nmi(n);
+            indice = nuovo;
+        } else {
+            esegui_nmi(n);
+        }
     }
     if (codice >= SCHED_CODICI || !corpo_attivita_replay[codice]) {
         corpo_mancante = codice;
@@ -343,6 +357,7 @@ int main(int argc, char **argv)
         }
         ultima_d = e;
         uint8_t slot = 0xff, codice = 0;
+        indice_prima = indice;
         int r = spedisci_una(&slot, &codice);
         spedizioni++;
         if (r != 1 || slot != e->slot || codice != e->codice) {
@@ -352,6 +367,16 @@ int main(int argc, char **argv)
         }
         if (corpo_mancante >= 0) {
             printf("CORPO %02X non tradotto al frame %ld\n", corpo_mancante, e->frame);
+            ferma(1);
+        }
+        if (nemici_mancante) {
+            printf("ROUTINE %04X mancante (motore dei nemici) al frame %ld\n",
+                   nemici_mancante, e->frame);
+            ferma(1);
+        }
+        if (nemici_fuori_sito) {
+            printf("INDICE %02X fuori dalla tabella rst del sito %04X al frame %ld\n",
+                   nemici_fuori_indice, nemici_fuori_sito, e->frame);
             ferma(1);
         }
         if (i_scan < n_scan) {

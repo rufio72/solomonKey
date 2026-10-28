@@ -6,14 +6,13 @@
  * argomenti a quelle routine.
  *
  * Tradotti qui: 02 (4B84), 03 (4BC6), 0D (5C8E), 0E (63A4), 11 (456E),
- * 14 (44B5), 20 (3E90). Restano NULL in corpo_attivita_replay 01 (48D1),
- * 0A (4DA2) e 10 (457B): i loro sottoalberi eseguiti chiamano routine non
- * ancora tradotte (49AE, 4938, 4592, 4C11, 24BE e, per 0A, lo smistamento
- * `rst 38` su c2b8 verso 4DAD/4632/4EE6, circa 2000 istruzioni): vedi
- * REPLAY.md. */
+ * 14 (44B5), 20 (3E90). Il corpo 0A (4DA2), motore dei nemici, sta in
+ * nemici.c (lotto N1, brief 25). Restano NULL in corpo_attivita_replay 01
+ * (48D1) e 10 (457B): vedi REPLAY.md. */
 #include <stddef.h>
 #include "routine.h"
 #include "sched.h"
+#include "nemici.h"
 
 /* Lettura di una parola in RAM (byte basso al primo indirizzo). */
 static uint16_t parola(uint16_t a)
@@ -25,8 +24,9 @@ static uint16_t parola(uint16_t a)
 /* 0x4B98: chiusura dell'oggetto IX. Se il bit 1 di (ix+0) è acceso
  * conserva solo i bit 0 e 6; altrimenti, se la cella sotto l'oggetto
  * (sub_36f0 sulle coordinate +0e, +15) ha il bit 7, ridisegna il blocco
- * 2×2 (tile 0x10, attributo 0x20, sub_3a54) e poi conserva i bit 0 e 6. */
-static void sub_4b98(uint16_t ix)
+ * 2×2 (tile 0x10, attributo 0x20, sub_3a54) e poi conserva i bit 0 e 6.
+ * Usata anche da 5917 (nemici_tipo09.c), prototipo in nemici.h. */
+void sub_4b98(uint16_t ix)
 {
     if (M(ix) & 0x02) {                        /* 4B98 bit 1,(ix+0) */
         M(ix) &= 0x41;                         /* 4B9E-4BA3 */
@@ -342,6 +342,7 @@ static void attivita_20_3e90(uint8_t slot)
 attivita_fn corpo_attivita_replay[SCHED_CODICI] = {
     [0x02] = attivita_02_4b84,
     [0x03] = attivita_03_4bc6,
+    [0x0a] = attivita_0a_4da2,
     [0x0d] = attivita_0d_5c8e,
     [0x0e] = attivita_0e_63a4,
     [0x11] = attivita_11_456e,

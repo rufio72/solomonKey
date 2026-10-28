@@ -113,6 +113,37 @@ attività. Il giro non arriva alla seconda NMI: 0A va in onda a ogni frame
 ed è la prima spedizione dopo F0. Non c'è quindi ancora una prima
 divergenza da diagnosticare. Classificazione: **corpo mancante**.
 
+### Dopo il lotto N1 (brief 25)
+
+Con il corpo 0A in `harness/nemici*.c`:
+
+    $ harness/replay out/replay_oracolo.txt out/replay_disp.txt out/replay_2410.bin 2410
+    SANITA F0 2410: hash C A350CF53 MAME A350CF53 coincide
+    CORPO 01 (48D1) non tradotto al frame 2589
+    NMI confrontate: 180 (nello spedidore 68, a metà attività 112); divergenti: nello spedidore 0, a metà attività 83
+    prima divergenza a metà attività (attesa): frame 2413
+    nessuna divergenza nello spedidore
+
+Con `--oltre` l'uscita è la stessa (exit 1 per il corpo mancante). Le 68
+NMI pulite fra 2410 e 2589 coincidono tutte con MAME: lì l'impronta copre
+tutta la RAM, quindi i corpi del lotto 23 e le parti di N1 che vanno in
+onda sono confermati in quel tratto. Le 83 divergenze a metà attività sono
+quelle attese dal modello (corpo non spezzabile) e riconvergono alla NMI
+pulita seguente. Il giro si ferma ora alla prima spedizione di 01 (`D 2589
+27 01`). Routine di N1 che in questo tratto non vanno in onda (misura con
+gcov): 4592, 49AE, 4B20, 4C11, 2482, 248D, 24BE, 55C9 e i rami `rst 20`
+di 4632; le prime sono in comune con 01 e 10 e si verificano con loro.
+
+**Correzione fuori da N1 (interleaving della NMI in `replay.c`).** Al
+frame 2447 la prima corsa divergeva in un solo byte, `C04F: C 0E MAME 0C`.
+La NMI di quel frame è pendente (`N 2447 3AFB 0`, dopo la lettura che ha
+trovato lo slot 0D e prima del corpo), ma lo spedidore scrive c04f solo a
+3B0C, mentre nel C `spedisci_una` lo aveva già scritto prima di chiamare
+l'involucro. Ora `replay.c` ricorda c04f prima della spedizione e, per una
+NMI pendente con ritorno < 3B0F, la esegue con il valore vecchio e poi
+rimette quello nuovo (lo stesso criterio che il punto di partenza usava
+già per F0). Nessuna correzione nei corpi del lotto 23 né nel C di N1.
+
 ## Perimetro misurato dei corpi
 
 Istruzioni eseguite (unione delle sessioni `out/*_eseguiti.txt`) che si
@@ -144,6 +175,10 @@ blocco contiguo misurato nel brief non conta.
    220 routine e 8833 B statici, più del perimetro stimato qui. Il piano dei
    lotti parte da N1 (corpo 0A più le 27 routine coperte dal replay, ~938
    righe) e distribuisce il lavoro su 11 moduli `harness/nemici*.c`.
+   **N1 fatto** (brief 25): corpo 0A, 26 routine e `sub_3b62` in sette
+   moduli `harness/nemici*.c`, 27 stub in `nemici_stub.c` che fermano il
+   giro con `ROUTINE xxxx mancante`. Il giro supera il 2410 senza
+   divergenze nello spedidore e si ferma al corpo 01 al frame 2589.
 2. **Corpi 01 e 10**: ~870 byte, con 49AE/4938/4592/4B20/4C11/4ADA e le
    piccole 2474/2482/248D/24BE. Sono un lotto a sé, con un modulo
    `attivita_*.c` nuovo (`attivita.c` ha già 350 righe).
