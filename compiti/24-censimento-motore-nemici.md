@@ -272,3 +272,21 @@ moduli) e le deviazioni dal brief.
 - Domanda 3: RISOLTA con l'utente — ACCETTATA la proposta: il piano prevede
   la spezzatura in N1a/N1b solo se la stima del lotto N1 supera ~1200 righe
   C; altrimenti N1 resta unico.
+
+## Esito (2026-10-28)
+
+PASSATO. Sviluppatore: 9/9 verifiche; verificatore: 8/9 passate, la 9
+(`git status` con 7 file) fallita solo perché lo sviluppatore aveva già
+committato (924042b, albero pulito) — non è un errore di contenuto.
+
+Scoperta principale: il motore vero è 8833 byte e 220 routine (non ~3600 B
+e 36): la vecchia stima contava solo il codice già eseguito. Piano: lotti
+N1-N12, 11 moduli C (max 660 righe stimate). N1 = 27 routine, 1564 byte,
+~938 righe C stimate: sotto la soglia dei 1200, resta unico. Deviazioni
+annotate nel rapporto: tabella rst 20 di 6F1C accorciata a 16 voci solo nel
+cammino dello script; 10 routine comuni ai corpi 01/10 in nemici_comuni.c;
+temi dei moduli per numero di tipo (tabella 4F1B) tranne nemici_comparsa.c
+(4FC5); 7F68 salta dentro sub_7f2d, smistamento di 7F39 da rifare in N1.
+
+Token: analista Fable ~89k, sviluppatore Opus ~135k, verificatore Sonnet
+~18k. Nulla su OpenRouter.
