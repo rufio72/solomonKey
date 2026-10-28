@@ -2,6 +2,7 @@
  * blocco_ini/blocco_fine: intervallo scritto da verificare in modo esplicito
  * (0, 0 = nessuno; la RAM c000-e5ff si confronta comunque tutta). */
 #include "routine.h"
+#include "nemici.h"
 
 const struct voce_routine tabella_routine[] = {
     { "0x0008", sub_0008, 0, 0 },
@@ -102,11 +103,45 @@ const struct voce_routine tabella_routine[] = {
     { "0x4E31", sub_4e31, 0, 0 },
     { "0x4E87", sub_4e87, 0, 0 },
     { "0x5507", sub_5507, 0, 0 },
+    { "0x571D", sub_571d, 0, 0 },
+    { "0x57AA", sub_57aa, 0, 0 },
+    { "0x57B3", sub_57b3, 0, 0 },
     { "0x5C32", sub_5c32, 0xc07e, 0xc081 },
     { "0x5C78", sub_5c78, 0, 0 },
     { "0x673F", sub_673f, 0xc000, 0xc03f },
     { "0x6771", sub_6771, 0, 0 },
     { "0x6C2C", sub_6c2c, 0, 0 },
+    { "0x6CE8", sub_6ce8, 0, 0 },
+    { "0x6D12", sub_6d12, 0, 0 },
+    { "0x6D1B", sub_6d1b, 0, 0 },
+    { "0x6D37", sub_6d37, 0, 0 },
+    { "0x6DCE", sub_6dce, 0, 0 },
+    { "0x6E55", sub_6e55, 0, 0 },
+    { "0x6E90", sub_6e90, 0, 0 },
+    { "0x6EA1", sub_6ea1, 0, 0 },
+    { "0x6EB7", sub_6eb7, 0, 0 },
+    { "0x6EC1", sub_6ec1, 0, 0 },
+    { "0x6ECA", sub_6eca, 0, 0 },
+    { "0x6F49", sub_6f49, 0, 0 },
+    { "0x6F4B", sub_6f4b, 0, 0 },
+    { "0x6F5E", sub_6f5e, 0, 0 },
+    { "0x6F6E", sub_6f6e, 0, 0 },
+    { "0x6F81", sub_6f81, 0, 0 },
+    { "0x6F91", sub_6f91, 0, 0 },
+    { "0x6FB3", sub_6fb3, 0, 0 },
+    { "0x6FD1", sub_6fd1, 0, 0 },
+    { "0x6FED", sub_6fed, 0, 0 },
+    { "0x6FF7", sub_6ff7, 0, 0 },
+    { "0x7001", sub_7001, 0, 0 },
+    { "0x700B", sub_700b, 0, 0 },
+    { "0x7015", sub_7015, 0, 0 },
+    { "0x7025", sub_7025, 0, 0 },
+    { "0x7036", sub_7036, 0, 0 },
+    { "0x7045", sub_7045, 0, 0 },
+    { "0x70A8", sub_70a8, 0, 0 },
+    { "0x70B0", sub_70b0, 0, 0 },
+    { "0x70CE", sub_70ce, 0, 0 },
+    { "0x70FE", sub_70fe, 0, 0 },
     { "0x7379", sub_7379, 0, 0 },
     { "0x797E", sub_797e, 0, 0 },
     { "0x7C84", sub_7c84, 0, 0 },
@@ -116,6 +151,7 @@ const struct voce_routine tabella_routine[] = {
     { "0x7E32", sub_7e32, 0, 0 },
     { "0x7EFE", sub_7efe, 0, 0 },
     { "0x7F2D", sub_7f2d, 0, 0 },
+    { "0x80A5", sub_80a5, 0, 0 },
 };
 
 const unsigned num_routine = sizeof tabella_routine / sizeof tabella_routine[0];

@@ -1,0 +1,4 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+SNAP: occorrenza 1 scartata (NMI)
+SNAP: catturata occorrenza 2 di 0x6EB7 [stanza34] al frame 2303, scartate 1
+Average speed: 2935.70% (37 seconds)

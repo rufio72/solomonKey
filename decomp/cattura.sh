@@ -2,20 +2,26 @@
 # Cattura prima/dopo di una routine del Z80 principale in uno stato del gioco.
 # Uso (da decomp/): sh cattura.sh <ENTRY> <stato> [N] [SUFFISSO]
 #   ENTRY: indirizzo come 0x30EF; stato: titolo | gioco | tardo | porta | bonus |
-#   finale; N: occorrenza (1);
+#   finale | stanzaNN (NN = stanza 0-based, es. stanza10); N: occorrenza (1);
 #   SUFFISSO: se presente il tag è <stato>_<SUFFISSO> (file
 #   out/snap_<ENTRY>_<stato>_<SUFFISSO>_*). SNAP_COND dall'ambiente passa a
-#   snap.lua la condizione del breakpoint (es. SNAP_COND='a>=#10').
+#   snap.lua la condizione del breakpoint (es. SNAP_COND='a>=#10'), e
+#   SNAP_FORZA le forzature di RAM/registri all'ingresso voluto (snap.lua).
 # Prova i frame di partenza dello stato in ordine e si ferma al primo che
-# produce out/snap_<ENTRY>_<tag>_regs.txt. MAME senza finestra né audio.
+# produce out/snap_<ENTRY>_<tag>_regs.txt. MAME senza finestra né audio, con
+# i quattro provider di input a none (come replay.sh): niente tastiera vera.
 # Stati del brief 16 (inneschi come le sessioni porta/bonus/finale di
 # sessioni.sh, sovrascrivibili con SNAP_POKE/SNAP_POSTA dall'ambiente):
 #   porta  c19d/c19e = 0 al 2250, posta 1C al 2300 (sequenza della porta)
-#   bonus  in più c24a = 0 e c24b = 0x85: la porta porta alla stanza nascosta 5
+#   bonus  stanza 4 (SNAP_ROOM=4) e c24a = 0: la porta porta alla stanza
+#          nascosta 5, come bonus_04 di sessioni.sh (brief 27)
 #   finale in più c24b-c24d = 0x32: 4032 posta l'attività 24 (finale)
 # Per questi tre stati il primo frame provato è 2300 (la posta stessa): la
 # sequenza della porta dura 2300-2577 e i suoi passi iniziali cadono prima
 # del 2400.
+# Stato stanzaNN (brief 27): partita nella stanza NN forzata (SNAP_ROOM, tap
+# su c243 fra i frame 1500 e 1950), ingressi «traccia», senza poke né poste;
+# il primo frame provato è 1951, a tap tolto (snap.lua).
 set -u
 if [ $# -lt 2 ]; then
     echo "uso: sh cattura.sh <ENTRY> <stato> [N] [SUFFISSO]" >&2
@@ -23,6 +29,7 @@ if [ $# -lt 2 ]; then
 fi
 ENTRY=$1
 STATO=$2
+SNAP_ROOM=${SNAP_ROOM:-}
 N=${3:-1}
 SUFFISSO=${4:-}
 TAG=$STATO
@@ -34,10 +41,13 @@ case "$STATO" in
     porta)  INGRESSI=traccia; FRAMES="2300 2400 2600 3000"
             POKE_DEF=2250:0xc19d:0,2250:0xc19e:0 ;;
     bonus)  INGRESSI=traccia; FRAMES="2300 2400 2600 3000"
-            POKE_DEF=2250:0xc19d:0,2250:0xc19e:0,2250:0xc24a:0,2250:0xc24b:0x85 ;;
+            POKE_DEF=2250:0xc19d:0,2250:0xc19e:0,2250:0xc24a:0; SNAP_ROOM=4 ;;
     finale) INGRESSI=traccia; FRAMES="2300 2400 2600 3000"
             POKE_DEF=2250:0xc19d:0,2250:0xc19e:0,2250:0xc24b:0x32,2250:0xc24c:0x32,2250:0xc24d:0x32 ;;
-    *) echo "stato sconosciuto: $STATO (titolo, gioco, tardo, porta, bonus, finale)" >&2; exit 2 ;;
+    stanza[0-9]|stanza[0-9][0-9])
+            INGRESSI=traccia; FRAMES="1951 2100 2300"
+            SNAP_ROOM=$(echo "${STATO#stanza}" | sed 's/^0*\([0-9]\)/\1/') ;;
+    *) echo "stato sconosciuto: $STATO (titolo, gioco, tardo, porta, bonus, finale, stanzaNN)" >&2; exit 2 ;;
 esac
 case "$STATO" in
     porta|bonus|finale)
@@ -47,7 +57,7 @@ case "$STATO" in
         SNAP_POKE=${SNAP_POKE:-}
         SNAP_POSTA=${SNAP_POSTA:-} ;;
 esac
-export SNAP_POKE SNAP_POSTA
+export SNAP_POKE SNAP_POSTA SNAP_ROOM
 ROMPATH="$(cd .. && pwd)/roms"
 mkdir -p out
 for F in $FRAMES; do
@@ -56,6 +66,8 @@ for F in $FRAMES; do
     SNAP_ENTRY=$ENTRY SNAP_TAG=$TAG SNAP_INGRESSI=$INGRESSI SNAP_DA_FRAME=$F SNAP_N=$N \
         SDL_VIDEODRIVER=dummy \
         mame solomon -rompath "$ROMPATH" -video none -sound none \
+        -keyboardprovider none -mouseprovider none -joystickprovider none \
+        -lightgunprovider none \
         -skip_gameinfo -nothrottle -debug -debugger none -autoboot_script snap.lua \
         > out/snap_${ENTRY}_${TAG}.log 2>&1
     if [ -f out/snap_${ENTRY}_${TAG}_regs.txt ]; then

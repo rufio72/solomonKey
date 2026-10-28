@@ -389,6 +389,16 @@ chiama o smista diventano stub che fermano il replay con il messaggio
 «routine mancante» (elenco in fondo alla tabella dei moduli). Il replay non
 le raggiunge.
 
+**Lotto N2 fatto** (brief 27, 2026-10-28): i tipi 8 (6ECA) e 14 (6CE8)
+in `nemici_tipi_08_14.c`, 33 ingressi (6E83 e 6E8B dentro `sub_6e55`,
+6FC3 e 6FDF statiche, la coda 7056 statica). Con N2 sono state anticipate
+6 dipendenze di altri lotti, ognuna nel modulo prescritto: 571D, 57AA,
+57B3 da N5 (`nemici_tipi_10_13.c`), 80A5 da N4 (`nemici_comparsa.c`), 6EB7
+e 6EC1 da N3 (`nemici_tipo09.c`). Da N2 in poi i moduli `nemici*.c`
+entrano anche nel banco (`harness`) e ogni lotto si verifica con catture
+MAME (stato `stanzaNN` di `cattura.sh`, forzature `SNAP_FORZA`); elenco e
+stati in `ROUTINE.md`, sezione «Motore dei nemici (lotto N2)».
+
 **Lotti N2-N12**: le routine non coperte, un lotto per modulo. Sono in
 ordine di utilità, cioè di byte eseguiti nell'unione storica delle sessioni.
 Ingressi completi in `out/censimento_nemici_lotti.txt`.
@@ -411,7 +421,9 @@ Ingressi completi in `out/censimento_nemici_lotti.txt`.
 **Moduli C nuovi** (li creano i lotti futuri). Le dichiarazioni condivise,
 cioè prototipi delle routine e stub, vanno in `harness/nemici.h`. Ogni lotto
 aggiunge i suoi moduli a `SORGENTI_REPLAY` nel Makefile, e i moduli
-includono `rst38_tables.h`.
+includono `rst38_tables.h`. Dal brief 27 il Makefile prende `nemici*.c`
+con un `wildcard` sia per `harness` sia per `replay`: un modulo nuovo entra
+in entrambi senza toccare il Makefile.
 
 Il gruppo di una routine si assegna così:
 - `comuni`: le routine di 01/10;

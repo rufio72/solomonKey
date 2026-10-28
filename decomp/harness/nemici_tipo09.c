@@ -1,7 +1,8 @@
 /* Motore dei nemici, lotto N1 (brief 25): parti del tipo 09 usate dal
  * tipo 12 (5693): la cella davanti all'oggetto (5928), la presa del blocco
  * da parte dell'oggetto portato (58CF) e la sua chiusura (5917).
- * Ingressi: 58CF, 5917, 5928.
+ * Ingressi: 58CF, 5917, 5928; dal lotto N3, anticipate dal lotto N2
+ * (brief 27) per il tipo 14: 6EB7, 6EC1.
  *
  * IX = slot (c2c1 + i·0x18), IY = oggetto (c4fe + i·0x30); (IX+0E) è
  * l'indice dell'oggetto portato nella tabella ROM 48AF. Tradotto da
@@ -11,6 +12,7 @@
 
 #define PORTATI_48AF   0x48af   /* ROM: indirizzo dell'oggetto per indice */
 #define POSA_C08A      0xc08a
+#define OGGETTI_488D   0x488d   /* ROM: indirizzo per indice (IX+0E) */
 
 /* IX = indirizzo dell'oggetto portato (tabella 48AF all'indice (IX+0E)),
  * come `ld a,(ix+0e); ld hl,48af; rst 8; rst 10h; push de; ex (sp),ix`.
@@ -93,4 +95,38 @@ void sub_5917(struct z80 *z)
     uint16_t ix0 = prendi_portato(z);          /* 5917-5920 */
     sub_4b98(z->ix);                           /* 5922 */
     z->ix = ix0;                               /* 5925 pop ix */
+}
+
+/* ------------------------------------------------------------------ */
+/* Lotto N3, anticipate dal lotto N2 (brief 27). */
+
+/* Scrittura a un indirizzo del Z80: sotto c000 è ROM e non cambia. */
+static void scrivi_ram(uint16_t a, uint8_t v)
+{
+    if (a >= 0xc000)
+        M(a) = v;
+}
+
+/* 0x6EB7: azzera i due byte puntati dalla tabella 488D all'indice A,
+ * poi cade in 6EC1. */
+void sub_6eb7(struct z80 *z)
+{
+    SET_HL(z, OGGETTI_488D);                   /* 6EB7 */
+    z->c = 0x00;                               /* 6EBA */
+    sub_0008(z);                               /* 6EBC rst 8 */
+    sub_0018(z);                               /* 6EBD rst 18 */
+    scrivi_ram(HL(z), z->c);                   /* 6EBE */
+    SET_HL(z, (uint16_t)(HL(z) + 1));          /* 6EBF */
+    scrivi_ram(HL(z), z->c);                   /* 6EC0 */
+    sub_6ec1(z);
+}
+
+/* 0x6EC1: azzera il byte puntato dalla tabella 48AF all'indice A. */
+void sub_6ec1(struct z80 *z)
+{
+    z->c = 0x00;                               /* 6EC1 */
+    SET_HL(z, PORTATI_48AF);                   /* 6EC3 */
+    sub_0008(z);                               /* 6EC6 rst 8 */
+    sub_0018(z);                               /* 6EC7 rst 18 */
+    scrivi_ram(HL(z), z->c);                   /* 6EC8 */
 }

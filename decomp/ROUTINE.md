@@ -161,10 +161,14 @@ coincidenti. 01 e 10 stanno in `harness/attivita_01_10.c`.
 ## Motore dei nemici (lotto N1)
 
 Corpo 0A e routine che il replay esegue (brief 25, `CENSIMENTO-NEMICI.md`).
-Stanno in `harness/nemici*.c`, entrano solo nel bersaglio `replay` e si
-verificano col giro, non con le catture. Prototipi in `harness/nemici.h`;
+Stanno in `harness/nemici*.c` e si verificano col giro. Dal brief 27 i
+moduli `nemici*.c` (con `attivita.c` e `attivita_01_10.c`) entrano anche
+nel banco `harness`: le routine N1 restano «tradotta (replay)» finché non
+hanno catture proprie, quelle dei lotti N2-N12 si verificano con le
+catture (sezione «lotto N2» sotto). Prototipi in `harness/nemici.h`;
 il riporto, dove il chiamante lo legge, è il bit 0 di `z->f`. Le 27
-routine non tradotte che N1 chiama o smista sono stub in `nemici_stub.c`
+routine non tradotte che N1 chiama o smista erano stub (25 dopo il lotto
+N2, che ha tradotto 6CE8 e 6ECA) in `nemici_stub.c`
 (`STUB_NEMICI`): il replay si ferma con `ROUTINE xxxx mancante`. Stato
 «tradotta (replay)»: il giro coincide con MAME a ogni NMI pulita; «non in
 onda» = nessuna esecuzione nel giro (gcov). Dopo il brief 26 il giro va da
@@ -202,3 +206,73 @@ per la NMI del replay (4EE6 fra due slot, 58DF, 5928; `REPLAY.md`).
 | 0x734D | sub_734d | nemici_comparsa.c | cella vicina in una delle quattro direzioni (scostamenti B, C) | tradotta (replay) |
 | 0x7F51 | sub_7f51 | nemici_tipi_15_17.c | tipo 17, fase 4 di 7F39, poi 809C | tradotta (replay) |
 | 0x7F68 | sub_7f68 | nemici_tipi_15_17.c | tipo 17: `rst 38` a 7F39 ((IY+4) = a1) o a 7F72 | tradotta (replay) |
+
+## Motore dei nemici (lotto N2)
+
+Tipi 8 (6ECA) e 14 (6CE8) del gestore 4F1B (brief 27), in
+`harness/nemici_tipi_08_14.c`, più 6 dipendenze anticipate dai lotti N3-N5
+nei moduli del censimento. Si verificano nel banco: i moduli `nemici*.c`
+entrano in `harness` dal brief 27. Catture con lo stato `stanzaNN` di
+`cattura.sh` (stanza NN forzata, primo frame 1951); i suffissi `faseN`,
+`fermo`, `attesa`, `chiude`, `libera`, `dir1`, `vert`, `vertok` sono catture
+con `SNAP_COND` sui campi di IX/IY o sui registri (es. `b@(iy+1d)==3`),
+`gN`/`nN` occorrenze successive. Le catture `forza*` partono da uno
+**stato forzato** con `SNAP_FORZA` (MAME esegue il codice vero da lì) e
+non contano per lo stato `verificata`, che qui si regge sempre su almeno
+due catture non forzate:
+- `0x571D stanza10_forza`: `ix+d:0x40`, apre il salto a 80A5;
+- `0x6CE8 stanza10_forza`: `ix+c:ff`, 57AA senza riporto → 57B3 (mai
+  vista nelle stanze 10, 14, 24);
+- `0x6D1B stanza10_forza`: `iy+4:78`, ramo col bit 3 di (IY+4);
+- `0x6E55 stanza10_forza`: `ix+5:0,ix+4:0`, apre 6E83 (mai visto);
+- `0x6EA1 stanza10_forza`: `ix+1:08`, ramo col bit 3 di (IX+1);
+- `0x6F91 stanza08_forza6fc3`: `SNAP_COND='(c&2)==0'`, `e:0x89`, apre 6FC3;
+- `0x6F91 stanza08_forza6fdf`: `SNAP_COND='(c&2)==2'`, `d:0x81`, apre 6FDF;
+- `0x6FED stanza08_forza`: `c:00`, ramo col bit 1 di C spento.
+
+Tutte le forzature hanno aperto il ramo voluto (gcov). 6E83 e 6E8B sono
+etichette dentro `sub_6e55`, 6FC3 e 6FDF statiche (raggiunte solo da
+6F91), la coda 7056-70A7 statica, chiamata da `sub_6eca` dopo la
+destinazione di 6F1C. Righe di `nemici_tipi_08_14.c` mai eseguite dalle
+catture: le uscite fuori tabella e i `default` degli smistamenti, 6D7C
+e 6D88 (nessuno slot libero), 6E3D (cella davanti senza blocco in 6DCE),
+6E6D (cella libera in 6E55) e cinque voci dello `switch` di 6F1C dentro
+`sub_6eca` (le destinazioni hanno catture proprie).
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x571D | sub_571d | nemici_tipi_10_13.c | 9 | tipo 14, fase 0 (6D03[0]): a (IX+0D) ≥ 40 chiude slot e oggetto (80A5); dipendenza anticipata da N5 | verificata | 3 | stanza10 | stanza10 f3025; stanza10_forza f3025; stanza10_n2 f3027 — stanza10_forza: stato forzato |
+| 0x57AA | sub_57aa | nemici_tipi_10_13.c | 9 | HL = (IX+0B..0C) − BC − riporto, riporto del prestito; anticipata da N5 | verificata | 2 | stanza10, stanza14 | stanza10 f2002; stanza14 f2001 |
+| 0x57B3 | sub_57b3 | nemici_tipi_10_13.c | 26 | senza il bit 3 di (IX+1): bit 0 di A → bit 0 di (IY+0), fase 0, azzera (IX+0B..0D); anticipata da N5 | verificata | 2 | stanza10, stanza11 | stanza10 f3025; stanza11 f2049 |
+| 0x6CE8 | sub_6ce8 | nemici_tipi_08_14.c | 28 | tipo 14: 57AA con BC = c1a6/c1a8 (bit 3 di (IY+4)), 57B3 se NC, `rst 38` a 6D03 su (IY+1D) | verificata | 9 | stanza10, stanza14, stanza24 | stanza10 f2002; stanza10_fase0 f3026; stanza10_fase1 f2022; stanza10_fase4 f2575; stanza10_forza f2002; stanza14 f2001; stanza14_fase5 f2022; stanza24_fase2 f2296; stanza24_fase3 f2031 — stanza10_forza: stato forzato |
+| 0x6D12 | sub_6d12 | nemici_tipi_08_14.c | 9 | tipo 14, fase 3: (IY+12) = 5, fase 5 | verificata | 2 | stanza10, stanza14 | stanza10 f2022; stanza14 f2021 |
+| 0x6D1B | sub_6d1b | nemici_tipi_08_14.c | 28 | tipo 14, fase 1: (IX+0B..0C) = 0 col bit 3 di (IY+4), direzione dal segno di (IX+5), fase 3 | verificata | 3 | stanza10, stanza14 | stanza10 f2022; stanza10_forza f2022; stanza14 f2021 — stanza10_forza: stato forzato |
+| 0x6D37 | sub_6d37 | nemici_tipi_08_14.c | 151 | tipo 14/15, fase 2: prende due oggetti (7379) e fa comparire il secondo (4AF6, A = 45); poi attese su (IX+0D) 24 e 30 (suono 2C, fase 4) | verificata | 5 | stanza42 | stanza42 f2074; stanza42_attesan1 f2110; stanza42_attesan3 f2114; stanza42_chiude f2123; stanza42_n2 f2076 |
+| 0x6DCE | sub_6dce | nemici_tipi_08_14.c | 135 | tipo 14/15, fase 4: posa sul blocco davanti (4938); attese 15 e 29, libera gli oggetti (6EC1, 6EB7), fase 3 | verificata | 6 | stanza42 | stanza42 f2124; stanza42_attesan1 f2144; stanza42_attesan2 f2146; stanza42_dir1 f2888; stanza42_libera f2163; stanza42_n2 f2126 |
+| 0x6E55 | sub_6e55 | nemici_tipi_08_14.c | 59 | tipo 14, fase 5: Dana vicina (6E90, HL = 0816) → direzione dal segno di (IX+5), fase 2 (6E83, 6E8B interni); altrimenti cella davanti (5C32) | verificata | 5 | stanza10, stanza14 | stanza10 f2023; stanza10_fermon1 f2526; stanza10_fermon2 f2886; stanza10_forza f2023; stanza14 f2022 — stanza10_forza: stato forzato |
+| 0x6E90 | sub_6e90 | nemici_tipi_08_14.c | 17 | riporto se |2·(IX+5)| < L e (IX+4) < H | verificata | 2 | stanza10, stanza14 | stanza10 f2023; stanza14 f2022 |
+| 0x6EA1 | sub_6ea1 | nemici_tipi_08_14.c | 22 | tipo 14, fase 6: col bit 3 di (IX+1) libera (IX+0E) e (IX+0F) (6EB7) | verificata | 3 | stanza10, stanza23 | stanza10 f2002; stanza10_forza f2002; stanza23 f2003 — stanza10_forza: stato forzato |
+| 0x6EB7 | sub_6eb7 | nemici_tipo09.c | 10 | azzera i due byte della tabella 488D all'indice A, cade in 6EC1; anticipata da N3 | verificata | 2 | stanza10, stanza34 | stanza10 f2615; stanza34 f2303 |
+| 0x6EC1 | sub_6ec1 | nemici_tipo09.c | 9 | azzera il byte della tabella 48AF all'indice A; anticipata da N3 | verificata | 2 | stanza10, stanza34 | stanza10 f2595; stanza34 f2281 |
+| 0x6ECA | sub_6eca | nemici_tipi_08_14.c | 165 | tipo 8: velocità 6F3D in c1a0, nuova posizione, celle attorno (70FE), direzioni 70EE, `rst 20` a 6F1C (16 voci), coda 7056 (statica) | verificata | 8 | stanza08, stanza11, stanza22, stanza27 | stanza08 f1953; stanza11 f1953; stanza11_gn46 f2005; stanza22_gn2 f1955; stanza22_gn34 f1995; stanza27_gn19 f1974; stanza27_gn31 f1988; stanza27_gn58 f2020 |
+| 0x6F49 | sub_6f49 | nemici_tipi_08_14.c | 2 | 6F1C[0], [15]: `or a; ret` | verificata | 2 | stanza11, stanza32 | stanza11 f2343; stanza32 f1953 |
+| 0x6F4B | sub_6f4b | nemici_tipi_08_14.c | 19 | 6F1C[1]: 6F91 o gira di 2 (70A8) | verificata | 2 | stanza08, stanza11 | stanza08 f1965; stanza11 f1953 |
+| 0x6F5E | sub_6f5e | nemici_tipi_08_14.c | 16 | 6F1C[2]: 6F91 o gira di 1 | verificata | 2 | stanza08, stanza11 | stanza08 f2346; stanza11 f1979 |
+| 0x6F6E | sub_6f6e | nemici_tipi_08_14.c | 19 | 6F1C[4]: 6F91 o gira di 2 | verificata | 2 | stanza08, stanza11 | stanza08 f2356; stanza11 f2022 |
+| 0x6F81 | sub_6f81 | nemici_tipi_08_14.c | 16 | 6F1C[8]: 6F91 o gira di −1 | verificata | 2 | stanza08, stanza11 | stanza08 f1961; stanza11 f1956 |
+| 0x6F91 | sub_6f91 | nemici_tipi_08_14.c | 34 | 6FB3/6FD1 secondo il bit 1 di C; col bit 7 allinea l'altro asse (6FDF/6FC3, statiche) e C = 0/2 | verificata | 4 | stanza08, stanza11 | stanza08 f1996; stanza08_forza6fc3 f1996; stanza08_forza6fdf f2189; stanza11 f1954 — stanza08_forza6fc3, stanza08_forza6fdf: stato forzato |
+| 0x6FB3 | sub_6fb3 | nemici_tipi_08_14.c | 16 | bit 7 di C se D & 0F ≠ B >> 4 | verificata | 2 | stanza08, stanza11 | stanza08 f2189; stanza11 f1954 |
+| 0x6FD1 | sub_6fd1 | nemici_tipi_08_14.c | 14 | bit 7 di C se (E + 8) & 0F ≠ B & 0F | verificata | 2 | stanza08, stanza11 | stanza08 f1996; stanza11 f1972 |
+| 0x6FED | sub_6fed | nemici_tipi_08_14.c | 10 | 6F1C[3], [12]: asse x, 70B0 → C = 2 | verificata | 3 | stanza08, stanza11 | stanza08 f1953; stanza08_forza f1953; stanza11 f1953 — stanza08_forza: stato forzato |
+| 0x6FF7 | sub_6ff7 | nemici_tipi_08_14.c | 10 | 6F1C[6], [9]: asse y, 70CE → C = 0 | verificata | 4 | stanza08, stanza11 | stanza08 f2025; stanza11 f1953; stanza11_vert f2435; stanza11_vertok f2437 |
+| 0x7001 | sub_7001 | nemici_tipi_08_14.c | 10 | 6F1C[5]: B = 44/CC sul bit 3 di D, poi 7015/7036 | verificata | 2 | stanza11, stanza22 | stanza11 f1971; stanza22 f3093 |
+| 0x700B | sub_700b | nemici_tipi_08_14.c | 10 | 6F1C[10]: B = 4C/C4 sul bit 3 di D, poi 7025/7045 | verificata | 2 | stanza11, stanza22 | stanza11 f2214; stanza22 f1995 |
+| 0x7015 | sub_7015 | nemici_tipi_08_14.c | 16 | 6F1C[7]: col bit 0 di C spento gira di 3 | verificata | 2 | stanza08, stanza11 | stanza08 f2023; stanza11 f1971 |
+| 0x7025 | sub_7025 | nemici_tipi_08_14.c | 17 | 6F1C[11]: con (C + 1) & 2 nullo gira di 2 | verificata | 2 | stanza08, stanza11 | stanza08 f2517; stanza11 f2044 |
+| 0x7036 | sub_7036 | nemici_tipi_08_14.c | 15 | 6F1C[13]: col bit 0 di C acceso gira di 1 | verificata | 2 | stanza08, stanza11 | stanza08 f2520; stanza11 f1955 |
+| 0x7045 | sub_7045 | nemici_tipi_08_14.c | 17 | 6F1C[14]: con (C + 1) & 2 acceso gira di 2 | verificata | 2 | stanza08, stanza11 | stanza08 f2018; stanza11 f1956 |
+| 0x70A8 | sub_70a8 | nemici_tipi_08_14.c | 8 | 70B0 e, con riporto, 70CE | verificata | 2 | stanza08, stanza11 | stanza08 f1961; stanza11 f1953 |
+| 0x70B0 | sub_70b0 | nemici_tipi_08_14.c | 30 | asse y: allinea D a B >> 4 (riporto) o bit 7 di C | verificata | 2 | stanza08, stanza11 | stanza08 f1961; stanza11 f1953 |
+| 0x70CE | sub_70ce | nemici_tipi_08_14.c | 32 | asse x: allinea E a (B + 8) & 0F (riporto) o bit 7 di C | verificata | 2 | stanza08, stanza11 | stanza08 f1961; stanza11 f1953 |
+| 0x70FE | sub_70fe | nemici_tipi_08_14.c | 77 | le quattro celle attorno a (D, E) (36F0): A = B & 0F, bit 7 delle celle piene | verificata | 2 | stanza08, stanza11 | stanza08 f1953; stanza11 f1953 |
+| 0x80A5 | sub_80a5 | nemici_comparsa.c | 14 | azzera (IX+0), (IX+1), (IY+0), (IY+1); anticipata da N4 | verificata | 2 | stanza11, stanza17 | stanza11 f2128; stanza17 f2143 |

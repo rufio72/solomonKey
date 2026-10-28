@@ -88,6 +88,7 @@ void sub_4f0f(struct z80 *z)
     z->e = z->a;                               /* 4F1A */
     uint16_t dest = nemici_rst38(z, 0x4F1B, rst38_4F1B,
                                  sizeof rst38_4F1B / sizeof rst38_4F1B[0]);
+    NEMICI_PONI_RIPORTO(z, 0);                 /* rst 38: add hl,de spegne il riporto (letto da 6CE8) */
     if (dest)
         salta_4f1b(z, dest);                   /* 4F1B rst 38 */
 }

@@ -13,6 +13,16 @@
 -- SNAP_POKE, SNAP_POSTA: inneschi come SESS_POKE/SESS_POSTA di sessione.lua
 -- («frame:addr:val» e «frame:codice», separati da virgola, 0x ammesso): forzature
 -- di RAM e poste nel primo slot libero di c000-c03f al frame detto.
+-- SNAP_ROOM: stanza forzata 0-based (tap in lettura su c243 fra i frame 1500
+-- e 1950, come SESS_ROOM di sessione.lua); vuota = nessuna. Con SNAP_ROOM il
+-- breakpoint si arma non prima del frame 1951, a tap tolto: altrimenti i dump
+-- leggerebbero c243 attraverso il tap e una cattura a cavallo del frame 1950
+-- avrebbe c243 diverso fra «prima» e «dopo».
+-- SNAP_FORZA: forzature applicate all'occorrenza voluta, prima del dump
+-- «prima» e della riga dei registri (brief 27). Voci separate da virgola:
+-- ix+HH:VV e iy+HH:VV (byte in RAM a IX/IY + HH esadecimale), r:VV con r in
+-- a, b, c, d, e, h, l (registro a 8 bit); VV esadecimale (0x ammesso). La
+-- cattura resta originale: MAME esegue il codice vero dallo stato forzato.
 local testo_entry = os.getenv("SNAP_ENTRY") or "0x05B3"
 local entry = tonumber(testo_entry)
 local voluta = tonumber(os.getenv("SNAP_N") or "1")
@@ -30,6 +40,23 @@ local function inneschi(testo)
     t[#t + 1] = v
   end
   return t
+end
+local stanza = os.getenv("SNAP_ROOM") or ""
+if stanza == "" then stanza = nil else stanza = assert(tonumber(stanza), "SNAP_ROOM non valida") end
+local TAP_STANZA
+local FINE_TAP = 1950
+if stanza and da_frame <= FINE_TAP then da_frame = FINE_TAP + 1 end
+-- SNAP_FORZA: elenco di { tipo, scostamento o registro, valore }
+local forzature = {}
+for voce in string.gmatch(os.getenv("SNAP_FORZA") or "", "[^,%s]+") do
+  local base_r, off, val = string.match(voce, "^(i[xy])%+([%x]+):(%w+)$")
+  if base_r then
+    forzature[#forzature + 1] = { base_r, tonumber(off, 16), assert(tonumber(val, 16) or tonumber(val), "valore non valido: " .. voce) }
+  else
+    local r, v = string.match(voce, "^([abcdehl]):(%w+)$")
+    assert(r, "forzatura non valida: " .. voce)
+    forzature[#forzature + 1] = { r, 0, assert(tonumber(v, 16) or tonumber(v), "valore non valido: " .. voce) }
+  end
 end
 local pokes = inneschi(os.getenv("SNAP_POKE"))
 local poste = inneschi(os.getenv("SNAP_POSTA"))
@@ -93,6 +120,19 @@ local function applica_inneschi()
   end
 end
 
+local function applica_forzature()
+  for _, f in ipairs(forzature) do
+    if f[1] == "ix" or f[1] == "iy" then
+      local a = (cpu.state[string.upper(f[1])].value + f[2]) & 0xffff
+      mem:write_u8(a, f[3] & 0xff)
+      print(string.format("FORZA %s+%02X (%04X) = %02X", f[1], f[2], a, f[3] & 0xff))
+    else
+      cpu.state[string.upper(f[1])].value = f[3] & 0xff
+      print(string.format("FORZA %s = %02X", f[1], f[3] & 0xff))
+    end
+  end
+end
+
 local function registri(nome)
   local s = nome
   for _, r in ipairs(REG) do
@@ -123,6 +163,10 @@ dbg:command("go")
 
 emu.register_frame_done(function()
   frames = frames + 1
+  if stanza and frames == 1500 then
+    TAP_STANZA = mem:install_read_tap(0xc243, 0xc243, "stanza_snap", function(o, d, m) return stanza end)
+  end
+  if stanza and frames == FINE_TAP and TAP_STANZA then TAP_STANZA:remove() TAP_STANZA = nil end
   muovi_ingressi()
   applica_inneschi()
   if da_frame > 0 and frames == da_frame then arma_ingresso() end
@@ -140,6 +184,7 @@ emu.register_periodic(function()
     if pc ~= entry then dbg:command("go") return end
     occorrenze = occorrenze + 1
     if occorrenze < voluta then dbg:command("go") return end
+    applica_forzature()
     riga_prima = registri("prima")
     scarica(base .. "_prima.bin")
     local sp = cpu.state["SP"].value

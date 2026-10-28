@@ -11,7 +11,8 @@ cd "$(dirname "$0")"
 PATH="$PATH:/usr/games"
 BLOCCO="${1:-tutto}"
 export DISPLAY="${DISPLAY:-:1}"
-MOPT="-rompath $(cd .. && pwd)/roms -video none -sound none -skip_gameinfo -nothrottle"
+# provider di input a none come replay.sh: niente tastiera vera (brief 27)
+MOPT="-rompath $(cd .. && pwd)/roms -video none -sound none -keyboardprovider none -mouseprovider none -joystickprovider none -lightgunprovider none -skip_gameinfo -nothrottle"
 
 # sessione NOME: le variabili SESS_* arrivano dall'ambiente del chiamante
 sessione() {

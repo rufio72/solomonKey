@@ -1,6 +1,6 @@
 # Stato del progetto
 
-Aggiornato al 2026-10-27. Fotografia operativa per riprendere il
+Aggiornato al 2026-10-28. Fotografia operativa per riprendere il
 lavoro; la descrizione del metodo è nel [README](README.md), la storia di
 ogni ciclo nei brief in `compiti/`.
 
@@ -11,12 +11,12 @@ ogni ciclo nei brief in `compiti/`.
 | Destinazioni statiche nel Z80 principale | 299 |
 | Coperte dalle sessioni (lotto 12 compreso) | 235 (78,6%) |
 | Routine osservate nel callgraph | ~120 |
-| Righe in `decomp/ROUTINE.md` | 125 |
-| …di cui `verificata` (doppia cattura MAME) | 104 |
+| Righe in `decomp/ROUTINE.md` | 160 (125 + 35 del lotto N2) |
+| …di cui `verificata` (doppia cattura MAME) | 139 (104 + 35 del lotto N2) |
 | …di cui `tradotta` con nota (cattura singola) | 12 |
 | …di cui `tradotta (replay)` (gestori d'urto 08AE, brief 26) | 9 |
-| Banco di prova (`harness --tutte`) | 112 confronti, 0 falliti |
-| Catture `regs` in `decomp/out/` | 217 |
+| Banco di prova (`harness --tutte`) | 147 voci, 321 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 323 |
 | Destinazioni mai osservate | 64, tutte con sito di chiamata mai eseguito (probabile dato o codice raggiungibile solo da zone mai eseguite; 37 a `8000` o sopra) |
 
 ## Fasi
@@ -46,10 +46,9 @@ ogni ciclo nei brief in `compiti/`.
   loro verifica è il replay che non li raggiunge). Prossimi, in ordine:
   censimento e lotti del motore di 0A, poi corpi 01 e 10 (~870 B), poi
   giro da F0=2410 (`--oltre`). Lista e misure in `decomp/REPLAY.md`.
-  **Trappola scoperta**: MAME legge tastiera e joystick dell'host anche
-  senza finestra; `replay.sh` ora passa `-keyboardprovider none` (e gli
-  altri tre provider); `cattura.sh` e `sessioni.sh` hanno lo stesso
-  rischio, da sistemare in un lotto di manutenzione.
+  La trappola dei provider di input (MAME legge tastiera e joystick
+  dell'host anche senza finestra) è sistemata ovunque: dal brief 27 anche
+  `cattura.sh` e `sessioni.sh` passano i quattro provider a `none`.
 
 ## Prossimi passi, in ordine
 
@@ -63,8 +62,13 @@ ogni ciclo nei brief in `compiti/`.
    della NMI nel replay: il giro arriva in fondo all'oracolo (frame 5499,
    3090 NMI) senza divergenze nello spedidore, exit 0. Prossimo: punto 3
    di `decomp/REPLAY.md` (giro da altri F0 e classificazione delle
-   divergenze a metà attività), poi i lotti N2-N12 per le routine che il
-   giro 2410-5499 non raggiunge.
+   divergenze a metà attività), poi i lotti N3-N12 per le routine che il
+   giro 2410-5499 non raggiunge. **Lotto N2 fatto** (brief 27): tipi 8 e
+   14 in `nemici_tipi_08_14.c` più 6 dipendenze anticipate da N3-N5,
+   verificati con catture MAME nel banco (i moduli `nemici*.c` ora entrano
+   anche in `harness`). Strumenti nuovi per i lotti seguenti: stato
+   `stanzaNN` di `cattura.sh` (stanza forzata) e `SNAP_FORZA` di
+   `snap.lua` (byte a IX/IY+n o registri forzati all'ingresso).
 1. **Traduzione delle routine censite nel lotto 12**: 40 destinazioni in
    25 blocchi contigui in `decomp/CENSIMENTO-12.md`, due catture pilota
    già fatte (`0x3FCE porta`, `0x51FA finale`). Per i lotti futuri il

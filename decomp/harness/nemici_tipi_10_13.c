@@ -3,7 +3,8 @@
  * 5693 (presa di un blocco), 561B (inversione), 55C9 e 5640 (cammino);
  * per 714B 7155 (partenza dalla direzione di (IY+4)) e 7235 (cammino col
  * controllo della cella davanti). Ingressi: 55B2, 55C9, 561B, 5640, 5693,
- * 714B, 7155, 7235.
+ * 714B, 7155, 7235. Dal lotto N5, anticipate dal lotto N2 (brief 27) per
+ * il tipo 14: 571D, 57AA, 57B3.
  *
  * IX = slot (c2c1 + i·0x18), IY = oggetto (c4fe + i·0x30). Tradotto da
  * out/main64.dasm; tabelle da rst38_tables.h. */
@@ -273,4 +274,42 @@ void sub_7235(struct z80 *z)
     M(z->ix + 0x01) |= 0x02;                   /* 727C */
     M(z->iy + 0x1d) = z->b;                    /* 7280 */
     M(z->ix + 0x08) = 0x00;                    /* 7283 */
+}
+
+/* ------------------------------------------------------------------ */
+/* Lotto N5, anticipate dal lotto N2 (brief 27): usate dal tipo 14 (6CE8). */
+
+/* 0x571D (6D03[0], fase 0): a (IX+0D) >= 40 chiude slot e oggetto (80A5). */
+void sub_571d(struct z80 *z)
+{
+    z->a = M(z->ix + 0x0d);                    /* 571D */
+    if (z->a < 0x40)                           /* 5720-5722 ret c */
+        return;
+    sub_80a5(z);                               /* 5723 jp */
+}
+
+/* 0x57AA: HL = (IX+0B..0C) - BC - riporto, col riporto del prestito. */
+void sub_57aa(struct z80 *z)
+{
+    unsigned parola = M(z->ix + 0x0b) | (M(z->ix + 0x0c) << 8);  /* 57AA-57AD */
+    unsigned sottratto = BC(z) + (NEMICI_RIPORTO_ACCESO(z) ? 1u : 0u);
+    SET_HL(z, (uint16_t)(parola - sottratto)); /* 57B0 sbc hl,bc */
+    NEMICI_PONI_RIPORTO(z, parola < sottratto);
+}
+
+/* 0x57B3: senza il bit 3 di (IX+1): col bit 0 di A accende il bit 0 di
+ * (IY+0); poi fase 0 e azzera (IX+0D) e (IX+0B..0C). A = 0. */
+void sub_57b3(struct z80 *z)
+{
+    if (M(z->ix + 0x01) & 0x08)                /* 57B3-57B7 ret nz */
+        return;
+    int basso = z->a & 0x01;                   /* 57B8 rrca */
+    z->a = (uint8_t)((z->a >> 1) | (basso << 7));
+    if (basso)                                 /* 57B9 jr nc */
+        M(z->iy) |= 0x01;                      /* 57BB */
+    z->a = 0;                                  /* 57BF */
+    M(z->iy + 0x1d) = z->a;                    /* 57C0 */
+    M(z->ix + 0x0d) = z->a;                    /* 57C3 */
+    M(z->ix + 0x0b) = z->a;                    /* 57C6 */
+    M(z->ix + 0x0c) = z->a;                    /* 57C9 */
 }

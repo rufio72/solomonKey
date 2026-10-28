@@ -107,6 +107,46 @@ void sub_734d(struct z80 *z);
 void sub_7f51(struct z80 *z);
 void sub_7f68(struct z80 *z);
 
+/* Lotto N2, nemici_tipi_08_14.c (tipi 14 e 8; 6FC3, 6FDF e la coda
+ * 7056 sono statiche). */
+void sub_6ce8(struct z80 *z);
+void sub_6d12(struct z80 *z);
+void sub_6d1b(struct z80 *z);
+void sub_6d37(struct z80 *z);
+void sub_6dce(struct z80 *z);
+void sub_6e55(struct z80 *z);
+void sub_6e90(struct z80 *z);
+void sub_6ea1(struct z80 *z);
+void sub_6eca(struct z80 *z);
+void sub_6f49(struct z80 *z);
+void sub_6f4b(struct z80 *z);
+void sub_6f5e(struct z80 *z);
+void sub_6f6e(struct z80 *z);
+void sub_6f81(struct z80 *z);
+void sub_6f91(struct z80 *z);
+void sub_6fb3(struct z80 *z);
+void sub_6fd1(struct z80 *z);
+void sub_6fed(struct z80 *z);
+void sub_6ff7(struct z80 *z);
+void sub_7001(struct z80 *z);
+void sub_700b(struct z80 *z);
+void sub_7015(struct z80 *z);
+void sub_7025(struct z80 *z);
+void sub_7036(struct z80 *z);
+void sub_7045(struct z80 *z);
+void sub_70a8(struct z80 *z);
+void sub_70b0(struct z80 *z);
+void sub_70ce(struct z80 *z);
+void sub_70fe(struct z80 *z);
+
+/* Lotto N2, dipendenze anticipate dai lotti N3-N5 (brief 27). */
+void sub_571d(struct z80 *z);              /* nemici_tipi_10_13.c (N5) */
+void sub_57aa(struct z80 *z);              /* nemici_tipi_10_13.c (N5) */
+void sub_57b3(struct z80 *z);              /* nemici_tipi_10_13.c (N5) */
+void sub_80a5(struct z80 *z);              /* nemici_comparsa.c (N4) */
+void sub_6eb7(struct z80 *z);              /* nemici_tipo09.c (N3) */
+void sub_6ec1(struct z80 *z);              /* nemici_tipo09.c (N3) */
+
 /* Stub (nemici_stub.c): registrano l'ingresso con nemici_manca. */
 void sub_2474(struct z80 *z);
 void sub_4649(struct z80 *z);
@@ -122,8 +162,6 @@ void sub_5cfb(struct z80 *z);
 void sub_6b43(struct z80 *z);
 void sub_6c0b(struct z80 *z);
 void sub_6c1d(struct z80 *z);
-void sub_6ce8(struct z80 *z);
-void sub_6eca(struct z80 *z);
 void sub_719e(struct z80 *z);
 void sub_7288(struct z80 *z);
 void sub_73a3(struct z80 *z);
