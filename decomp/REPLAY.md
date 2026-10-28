@@ -140,6 +140,10 @@ blocco contiguo misurato nel brief non conta.
    censito con le tabelle `rst 38` vere e spezzato in lotti con moduli nuovi,
    perché nessun file può superare le 800 righe. Senza 0A il replay non va
    oltre la prima spedizione.
+   **Censito** (brief 24): `CENSIMENTO-NEMICI.md` dà 21 tabelle `rst 38`,
+   220 routine e 8833 B statici, più del perimetro stimato qui. Il piano dei
+   lotti parte da N1 (corpo 0A più le 27 routine coperte dal replay, ~938
+   righe) e distribuisce il lavoro su 11 moduli `harness/nemici*.c`.
 2. **Corpi 01 e 10**: ~870 byte, con 49AE/4938/4592/4B20/4C11/4ADA e le
    piccole 2474/2482/248D/24BE. Sono un lotto a sé, con un modulo
    `attivita_*.c` nuovo (`attivita.c` ha già 350 righe).
