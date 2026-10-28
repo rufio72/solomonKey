@@ -333,3 +333,25 @@ Rapporto finale di trenta righe al massimo, con:
 - Domanda 5 (scelta di progetto, decisa dall'utente): ACCETTATA la
   proposta — i corpi 01 e 10 restano fuori da N1 e hanno un brief a parte
   subito dopo, con il modulo `attivita_*.c` previsto da `REPLAY.md`.
+
+## Esito (2026-10-28)
+
+PASSATO. Sviluppatore: 9/9; verificatore: 8 passate, la 5 («--oltre»)
+marcata «da confermare» perché l'uscita è identica a quella senza flag —
+confermata PASSATA dalla chat principale leggendo replay.c: `--oltre` evita
+solo la fermata sulle divergenze pulite, che in questa corsa sono zero, e
+non aggira la fermata su un corpo non tradotto. La 9 (git status) è vuota
+perché lo sviluppatore aveva già committato (abd57fa).
+
+Risultato: il replay supera il 2410 ed esce su `CORPO 01 (48D1) non
+tradotto al frame 2589`, sanità F0=2410 coincidente, nessuno stub
+raggiunto, nessuna divergenza nello spedidore; banco 220/0 e sched_proto
+106124/0, 131/131 invariati. Correzione fuori perimetro (domanda 1):
+divergenza di un byte a C04F al frame 2447 per la NMI entrata tra lettura
+dello slot e corpo — corretta in replay.c, annotata in REPLAY.md; i corpi
+del lotto 23 e il C di N1 non hanno richiesto correzioni. Non ancora
+esercitate dal giro (gcov): 4592, 49AE, 4B20, 4C11, 2482, 248D, 24BE,
+55C9 e lo smistamento rst 20 di 4632 — si toccheranno coi corpi 01 e 10.
+
+Token: analista Opus ~108k, sviluppatore Opus ~144k, verificatore Sonnet
+~15k. Nulla su OpenRouter.
