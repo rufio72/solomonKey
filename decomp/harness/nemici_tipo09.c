@@ -32,6 +32,7 @@ static uint16_t prendi_portato(struct z80 *z)
  * sub_36f0. B = bit 1 e bit 0 della direzione; HL = cella, E = indice. */
 void sub_5928(struct z80 *z)
 {
+    NEMICI_PUNTO(0x5928, 0x594e);              /* NMI del replay: 5928 non scrive */
     uint8_t dir = M(z->iy + 0x1e);             /* 5928 */
     z->a = 0x08;                               /* 592B */
     z->b = 0x00;                               /* 592F */
@@ -61,6 +62,7 @@ void sub_58cf(struct z80 *z)
     M(z->iy) &= ~0x20;                         /* 58D3 */
     M(z->ix + 0x0d) = 0x00;                    /* 58D7 */
     M(z->ix + 0x01) |= 0x08;                   /* 58DB */
+    NEMICI_PUNTO(0x58df, 0x58ea);              /* NMI del replay */
     uint16_t ix0 = prendi_portato(z);          /* 58DF-58E8 */
     sub_5928(z);                               /* 58EA */
     z->a = M(HL(z));                           /* 58ED */

@@ -11,9 +11,10 @@ ogni ciclo nei brief in `compiti/`.
 | Destinazioni statiche nel Z80 principale | 299 |
 | Coperte dalle sessioni (lotto 12 compreso) | 235 (78,6%) |
 | Routine osservate nel callgraph | ~120 |
-| Righe in `decomp/ROUTINE.md` | 116 |
+| Righe in `decomp/ROUTINE.md` | 125 |
 | …di cui `verificata` (doppia cattura MAME) | 104 |
 | …di cui `tradotta` con nota (cattura singola) | 12 |
+| …di cui `tradotta (replay)` (gestori d'urto 08AE, brief 26) | 9 |
 | Banco di prova (`harness --tutte`) | 112 confronti, 0 falliti |
 | Catture `regs` in `decomp/out/` | 217 |
 | Destinazioni mai osservate | 64, tutte con sito di chiamata mai eseguito (probabile dato o codice raggiungibile solo da zone mai eseguite; 37 a `8000` o sopra) |
@@ -57,7 +58,13 @@ ogni ciclo nei brief in `compiti/`.
    **Lotto N1 fatto** (brief 25): corpo 0A, 26 routine e `sub_3b62` in
    `decomp/harness/nemici*.c`, 27 stub in `nemici_stub.c`. Il replay da
    F0=2410 arriva al frame 2589 senza divergenze nello spedidore e si ferma
-   al corpo 01. Prossimo: corpi 01 e 10 (brief a parte), poi N2-N12.
+   al corpo 01. **Corpi 01 e 10 fatti** (brief 26, `attivita_01_10.c`), con
+   i gestori d'urto mancanti della tabella 08AE e i punti di sincronia
+   della NMI nel replay: il giro arriva in fondo all'oracolo (frame 5499,
+   3090 NMI) senza divergenze nello spedidore, exit 0. Prossimo: punto 3
+   di `decomp/REPLAY.md` (giro da altri F0 e classificazione delle
+   divergenze a metà attività), poi i lotti N2-N12 per le routine che il
+   giro 2410-5499 non raggiunge.
 1. **Traduzione delle routine censite nel lotto 12**: 40 destinazioni in
    25 blocchi contigui in `decomp/CENSIMENTO-12.md`, due catture pilota
    già fatte (`0x3FCE porta`, `0x51FA finale`). Per i lotti futuri il

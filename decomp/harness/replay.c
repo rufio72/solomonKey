@@ -107,6 +107,17 @@ static void carica_registro(const char *nome)
     fclose(f);
 }
 
+/* Gestore di `rst 20h` dello spedidore (3B10 → 0020-0026, che passa per
+ * rst 8 a 0008-000D, rst 18 a 0018-001A e rst 10 a 0010-0014): una NMI
+ * entrata lì subito dopo la D cade ancora prima del corpo (brief 26).
+ * Gli stessi gestori servono anche ai corpi, per questo involucro la
+ * esegue lì solo se l'impronta coincide (prova_punto). */
+static int nel_rst20(uint16_t r)
+{
+    return (r >= 0x0008 && r <= 0x000d) || (r >= 0x0010 && r <= 0x0014) ||
+           (r >= 0x0018 && r <= 0x001a) || (r >= 0x0020 && r <= 0x0026);
+}
+
 static int pendente(const struct evento *n)
 {
     return n->ritorno >= 0x3afb && n->ritorno <= 0x3b10 && n->letture == 0;
@@ -174,6 +185,12 @@ static void stampa_diff(long frame)
     printf("  byte diversi in c000-e5ff (escluse c040-c043, cf00-cfff): %d\n", totali);
 }
 
+/* 1 mentre involucro esegue una NMI prima del corpo: anche con il ritorno
+ * nei gestori rst 20 o rst 38 o sulla prima istruzione del corpo (fuori
+ * da 3AF3-3B10) il corpo non è cominciato, quindi il confronto conta come
+ * pulito. */
+static int prima_del_corpo;
+
 /* Confronto d'impronta e NMI del prossimo frame dell'oracolo. */
 static void esegui_nmi(const struct evento *n)
 {
@@ -183,7 +200,7 @@ static void esegui_nmi(const struct evento *n)
     }
     const struct riga_f *r = &ff[k_ff++];
     uint32_t h = impronta(ram);
-    int pulita = nello_spedidore(r->ritorno);
+    int pulita = nello_spedidore(r->ritorno) || prima_del_corpo;
     nmi_totali++;
     nmi_pulite += pulita;
     if (h != r->hash) {
@@ -223,6 +240,34 @@ static void esegui_nmi(const struct evento *n)
     sub_0066(&z);
 }
 
+/* NMI entrata a metà di un corpo (riga N subito dopo la D, 0 letture,
+ * ritorno fuori da 3AFB-3B10): il C non può spezzare il corpo dove
+ * vuole, ma la esegue nel primo punto di sincronia che copre il suo
+ * ritorno e in cui l'impronta del C coincide con la riga F. I punti sono
+ * l'ingresso del corpo (gestori rst 20 dello spedidore, prima istruzione
+ * del corpo, rst 38 di 0A) e quelli dichiarati con NEMICI_PUNTO nel
+ * motore dei nemici. Se nessun punto coincide la NMI resta dopo il corpo,
+ * come prima (brief 26). */
+static const struct evento *nmi_attesa;
+static int nmi_attesa_eseguita;
+
+static int prova_punto(uint16_t da, uint16_t a)
+{
+    const struct evento *n = nmi_attesa;
+    if (!n || nmi_attesa_eseguita || n->ritorno < da || n->ritorno > a)
+        return 0;
+    if (k_ff >= n_ff || ff[k_ff].frame != n->frame || impronta(ram) != ff[k_ff].hash)
+        return 0;
+    nmi_attesa_eseguita = 1;
+    esegui_nmi(n);
+    return 1;
+}
+
+static void punto_nemici(uint16_t da, uint16_t a)
+{
+    prova_punto(da, a);
+}
+
 /* NMI da eseguire: prima del corpo (pendente) e nella scansione. */
 static const struct evento *nmi_corpo;
 static const struct evento *nmi_scan[8];
@@ -248,13 +293,24 @@ static void involucro(uint8_t slot)
     if (nmi_corpo) {
         const struct evento *n = nmi_corpo;
         nmi_corpo = NULL;
+        prima_del_corpo = 1;
         if (n->ritorno < 0x3b0f) {
             uint8_t nuovo = indice;
             indice = indice_prima;
             esegui_nmi(n);
             indice = nuovo;
         } else {
-            esegui_nmi(n);
+            esegui_nmi(n);             /* 3B0F-3B10: c04f già scritto */
+        }
+        prima_del_corpo = 0;
+    }
+    if (nmi_attesa) {
+        uint16_t r = nmi_attesa->ritorno;
+        if (nel_rst20(r) || (codice < SCHED_CODICI && r == rst20_3B10[codice]) ||
+            (codice == 0x0a && r >= 0x0038 && r <= 0x0042)) {
+            prima_del_corpo = 1;       /* c04f già scritto a 3B0C */
+            prova_punto(r, r);
+            prima_del_corpo = 0;
         }
     }
     if (codice >= SCHED_CODICI || !corpo_attivita_replay[codice]) {
@@ -279,6 +335,7 @@ int main(int argc, char **argv)
     }
     long f0 = atol(pos[3]);
     frame_fine = n_pos > 4 ? atol(pos[4]) : -1;
+    nemici_punto = punto_nemici;
     carica_oracolo(pos[0]);
     carica_registro(pos[1]);
     snprintf(prefisso, sizeof prefisso, "%s", pos[2]);
@@ -354,12 +411,18 @@ int main(int argc, char **argv)
         if (i + 1 < i1 && ev[i + 1].tipo == 'N' && pendente(&ev[i + 1])) {
             nmi_corpo = &ev[i + 1];
             i++;
+        } else if (i + 1 < i1 && ev[i + 1].tipo == 'N' && ev[i + 1].letture == 0) {
+            nmi_attesa = &ev[i + 1];
+            nmi_attesa_eseguita = 0;
         }
         ultima_d = e;
         uint8_t slot = 0xff, codice = 0;
         indice_prima = indice;
         int r = spedisci_una(&slot, &codice);
         spedizioni++;
+        if (nmi_attesa && nmi_attesa_eseguita)
+            i++;                       /* N già eseguita in un punto di sincronia */
+        nmi_attesa = NULL;
         if (r != 1 || slot != e->slot || codice != e->codice) {
             printf("DISPATCH frame %ld: atteso %02X/%02X, ottenuto %02X/%02X (esito %d)\n",
                    e->frame, e->slot, e->codice, slot, codice, r);

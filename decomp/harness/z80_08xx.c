@@ -74,6 +74,42 @@ void sub_094d(struct z80 *z)
     }
 }
 
+/* 0x08ED (tabella 08AE, indice 1): come 094D con la cella urtata a
+ * destra: la penetrazione X è la distanza dal bordo sinistro della
+ * colonna seguente meno il margine sinistro, e X si corregge in avanti
+ * (stato 2, direzione 1); il ramo Y è quello di 094D. Prima esecuzione
+ * nel replay fra i frame 2894 e 3027 (brief 26).
+ * Uscita: A = X corretta o stato; D/E = X e penetrazione X; H/L = Y e
+ * penetrazione Y. */
+void sub_08ed(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    M(ix + 0x02) = 0;                          /* 08ED */
+    uint8_t h = M(ix + OGG_Y);                 /* 08F1 */
+    uint8_t l = (uint8_t)((h & 0x0f) + M(ix + OGG_MARG_ALTO)
+                          + M(ix + OGG_MARG_BAS) - 0x0f);   /* 08F4-0903 */
+    uint8_t d = M(ix + OGG_X);                 /* 0904 */
+    uint8_t e = (uint8_t)((((uint8_t)(d - 8) & 0xf0) + 8 + 0x10) - d
+                          - M(ix + OGG_MARG_SIN));          /* 0907-0914 */
+    z->h = h; z->l = l;
+    z->d = d; z->e = e;
+    if (e < l) {                               /* 0915-0916: corregge X */
+        z->a = (uint8_t)(d + e);               /* 0918-0919 */
+        M(ix + OGG_X) = z->a;
+        M(ix + OGG_SOTTO_X) = 0;
+        M(ix + OGG_VEL_X + 1) = 0;
+        M(ix + OGG_VEL_X) = 0;
+        M(ix + OGG_STATO) = 2;                 /* 0929 */
+        M(ix + OGG_DIR) = 1;                   /* 092D */
+    } else {                                   /* 0932: corregge Y */
+        M(ix + OGG_Y) = (uint8_t)(h - l);
+        M(ix + OGG_SOTTO_Y) = 0;
+        z->a = (M(ix + 0x0c) & 0x80) ? 2 : 1;  /* 093B-0943 */
+        M(ix + OGG_STATO) = z->a;
+        M(ix + OGG_DIR) &= (uint8_t)~0x02;     /* 0948 */
+    }
+}
+
 /* 0x0A98 (tabella 08AE, indice 3): appoggio sul pavimento: Y alla base
  * della riga meno i margini verticali, sottopixel azzerato; se lo stato
  * non è 2: stato 1, (IX+2) = 0, bit 1 della direzione spento.
@@ -186,17 +222,206 @@ void sub_0b57(struct z80 *z)
     M(ix + OGG_VEL_X + 1) = 0;
 }
 
+/* Colonna allineata dei gestori d'urto: ((X - 8) & f0) + 8. */
+static uint8_t colonna(uint16_t ix)
+{
+    return (uint8_t)((((uint8_t)(M(ix + OGG_X) - 8)) & 0xf0) + 8);
+}
+
+/* Ramo Y comune a 09B3 e 0A24 (0A00/0A74): Y = H + L, sottopixel f0;
+ * se stato - 4 è almeno 2 stato 1 e bit 1 della direzione acceso,
+ * altrimenti azzera (IX+0B)/(IX+0C). Uscita: A = stato - 4. */
+static void urto_y_sopra(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    M(ix + OGG_Y) = (uint8_t)(z->h + z->l);
+    M(ix + OGG_SOTTO_Y) = 0xf0;
+    z->a = (uint8_t)(M(ix + OGG_STATO) - 4);
+    if (z->a >= 2) {
+        M(ix + OGG_STATO) = 1;
+        M(ix + OGG_DIR) |= 0x02;
+    } else {
+        M(ix + 0x0b) = 0;
+        M(ix + 0x0c) = 0;
+    }
+}
+
+/* 0x09B3 (tabella 08AE, indice 8): cella urtata in alto a destra:
+ * penetrazione Y dal bordo inferiore della riga (L), penetrazione X dal
+ * bordo sinistro della colonna seguente (E). Con E < L corregge X in
+ * avanti (stato 2, direzione 1 o 3 dal bit 7 di (IX+0C), velocità X
+ * azzerata, HL = 8000), altrimenti il ramo Y di urto_y_sopra. Brief 26.
+ * Uscita: A, D/E = X e penetrazione X, H/L (o 8000), C nel ramo X. */
+void sub_09b3(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    M(ix + 0x02) = 0;                          /* 09B3 */
+    z->h = M(ix + OGG_Y);                      /* 09B7 */
+    z->l = (uint8_t)((z->h & 0xf0) + 0x10 - z->h - M(ix + OGG_MARG_ALTO));  /* 09BA-09C3 */
+    z->d = M(ix + OGG_X);                      /* 09C4 */
+    z->e = (uint8_t)(colonna(ix) + 0x10 - z->d - M(ix + OGG_MARG_SIN));    /* 09C7-09D4 */
+    if (z->e >= z->l) {                        /* 09D5-09D6 */
+        urto_y_sopra(z);                       /* 09FF */
+        return;
+    }
+    z->a = (uint8_t)(z->d + z->e);             /* 09D8-09D9 */
+    M(ix + OGG_X) = z->a;
+    M(ix + OGG_SOTTO_X) = 0;
+    SET_HL(z, 0x8000);                         /* 09E1 */
+    M(ix + OGG_STATO) = 2;                     /* 09E4 */
+    z->c = (M(ix + 0x0c) & 0x80) ? 1 : 3;      /* 09E8-09F1 */
+    M(ix + OGG_DIR) = z->c;
+    M(ix + OGG_VEL_X) = 0;                     /* 09F6-09FA */
+    M(ix + OGG_VEL_X + 1) = 0;
+}
+
+/* 0x0A24 (tabella 08AE, indice 4): come 09B3 con la cella a sinistra:
+ * penetrazione X come in 094D, X corretta indietro, direzione 0 o 2.
+ * Brief 26. */
+void sub_0a24(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    M(ix + 0x02) = 0;                          /* 0A24 */
+    z->h = M(ix + OGG_Y);                      /* 0A28 */
+    z->l = (uint8_t)((z->h & 0xf0) + 0x10 - z->h - M(ix + OGG_MARG_ALTO));  /* 0A2B-0A34 */
+    z->d = M(ix + OGG_X);                      /* 0A35 */
+    z->e = (uint8_t)(z->d - colonna(ix) + M(ix + OGG_MARG_SIN)
+                     + M(ix + OGG_MARG_DES) - 0x0f);                       /* 0A38-0A4B */
+    if (z->e >= z->l) {                        /* 0A4C-0A4D */
+        urto_y_sopra(z);                       /* 0A73 */
+        return;
+    }
+    z->a = (uint8_t)(z->d - z->e);             /* 0A4F-0A50 */
+    M(ix + OGG_X) = z->a;
+    M(ix + OGG_SOTTO_X) = 0;
+    M(ix + OGG_STATO) = 2;                     /* 0A58 */
+    z->c = (M(ix + 0x0c) & 0x80) ? 0 : 2;      /* 0A5C-0A65 */
+    M(ix + OGG_DIR) = z->c;
+    M(ix + OGG_VEL_X) = 0;                     /* 0A6A-0A6E */
+    M(ix + OGG_VEL_X + 1) = 0;
+}
+
+/* 0x0BBB (tabella 08AE, indice 7; anche da 0CDA): angolo in basso a
+ * destra: Y sulla riga meno i margini verticali, X sulla colonna meno i
+ * margini orizzontali, sottopixel azzerati, stato 2, direzione 0,
+ * (IX+2) = 0. Brief 26. Uscita: A = X corretta. */
+void sub_0bbb(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    M(ix + OGG_Y) = (uint8_t)((M(ix + OGG_Y) & 0xf0) + 0x10 - M(ix + OGG_MARG_ALTO)
+                              - M(ix + OGG_MARG_BAS) - 1);                 /* 0BBB-0BC9 */
+    M(ix + OGG_SOTTO_Y) = 0;                   /* 0BCC */
+    z->a = (uint8_t)(colonna(ix) + 0x10 - M(ix + OGG_MARG_SIN)
+                     - M(ix + OGG_MARG_DES) - 1);                          /* 0BD0-0BE1 */
+    M(ix + OGG_X) = z->a;                      /* 0BE2 */
+    M(ix + OGG_SOTTO_X) = 0;
+    M(ix + OGG_STATO) = 2;                     /* 0BE9 */
+    M(ix + OGG_DIR) = 0;                       /* 0BED */
+    M(ix + 0x02) = 0;                          /* 0BF1 */
+}
+
+/* 0x0BF6 (tabella 08AE, indice B; anche da 0CCE): angolo in basso a
+ * sinistra: Y come 0BBB, X sulla colonna seguente meno il margine
+ * sinistro, stato 2, direzione 1, (IX+2) = 0. Brief 26.
+ * Uscita: A = X corretta. */
+void sub_0bf6(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    M(ix + OGG_Y) = (uint8_t)((M(ix + OGG_Y) & 0xf0) + 0x10 - M(ix + OGG_MARG_ALTO)
+                              - M(ix + OGG_MARG_BAS) - 1);                 /* 0BF6-0C04 */
+    M(ix + OGG_SOTTO_Y) = 0;                   /* 0C07 */
+    z->a = (uint8_t)(colonna(ix) + 0x10 - M(ix + OGG_MARG_SIN));           /* 0C0B-0C16 */
+    M(ix + OGG_X) = z->a;                      /* 0C19 */
+    M(ix + OGG_SOTTO_X) = 0;
+    M(ix + OGG_STATO) = 2;                     /* 0C20 */
+    M(ix + OGG_DIR) = 1;                       /* 0C24 */
+    M(ix + 0x02) = 0;                          /* 0C28 */
+}
+
+/* 0x0C2D (tabella 08AE, indice D; anche da 0CDA): angolo in alto a
+ * sinistra: X come 0BF6, Y alla riga sotto meno il margine alto,
+ * sottopixel Y = f0; se stato - 4 è almeno 2 stato 1, direzione 3,
+ * (IX+2) = 0, altrimenti azzera le velocità. Brief 26.
+ * Uscita: A = stato - 4, B = Y d'ingresso. */
+void sub_0c2d(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    M(ix + OGG_X) = (uint8_t)(colonna(ix) + 0x10 - M(ix + OGG_MARG_SIN));  /* 0C2D-0C3B */
+    M(ix + OGG_SOTTO_X) = 0;                   /* 0C3E */
+    z->b = M(ix + OGG_Y);                      /* 0C42 */
+    M(ix + OGG_Y) = (uint8_t)((z->b & 0xf0) + 0x10 - M(ix + OGG_MARG_ALTO));  /* 0C45-0C4D */
+    M(ix + OGG_SOTTO_Y) = 0xf0;                /* 0C50 */
+    z->a = (uint8_t)(M(ix + OGG_STATO) - 4);   /* 0C54-0C57 */
+    if (z->a >= 2) {                           /* 0C59-0C5B */
+        M(ix + OGG_STATO) = 1;                 /* 0C5E */
+        M(ix + OGG_DIR) = 3;                   /* 0C62 */
+        M(ix + 0x02) = 0;                      /* 0C66 */
+        return;
+    }
+    M(ix + OGG_VEL_X) = 0;                     /* 0C6B-0C77 */
+    M(ix + OGG_VEL_X + 1) = 0;
+    M(ix + 0x0b) = 0;
+    M(ix + 0x0c) = 0;
+}
+
+/* 0x0C7C (tabella 08AE, indice E; anche da 0CCE): urto nell'angolo in
+ * alto a destra: X alla colonna meno i margini orizzontali (come 0B57),
+ * sottopixel X azzerato; Y alla riga sotto meno il margine alto,
+ * sottopixel Y = f0 (come 0AC3). Se stato - 4 è almeno 2: stato 1,
+ * direzione 2, (IX+2) = 0; altrimenti azzera le velocità X e Y. Prima
+ * esecuzione nel replay al frame 2894 (brief 26). Uscita: A = stato - 4. */
+void sub_0c7c(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    uint8_t x = (uint8_t)((((uint8_t)(M(ix + OGG_X) - 8)) & 0xf0) + 8 + 0x10);  /* 0C7C-0C85 */
+    M(ix + OGG_X) = (uint8_t)(x - M(ix + OGG_MARG_SIN) - M(ix + OGG_MARG_DES) - 1);  /* 0C87-0C8E */
+    M(ix + OGG_SOTTO_X) = 0;                   /* 0C91 */
+    M(ix + OGG_Y) = (uint8_t)((M(ix + OGG_Y) & 0xf0) + 0x10 - M(ix + OGG_MARG_ALTO));  /* 0C95-0C9F */
+    M(ix + OGG_SOTTO_Y) = 0xf0;                /* 0CA2 */
+    z->a = (uint8_t)(M(ix + OGG_STATO) - 4);   /* 0CA6-0CA9 */
+    if (z->a >= 2) {                           /* 0CAB-0CAD */
+        M(ix + OGG_STATO) = 1;                 /* 0CB0 */
+        M(ix + OGG_DIR) = 2;                   /* 0CB4 */
+        M(ix + 0x02) = 0;                      /* 0CB8 */
+        return;
+    }
+    M(ix + OGG_VEL_X) = 0;                     /* 0CBD-0CC9 */
+    M(ix + OGG_VEL_X + 1) = 0;
+    M(ix + 0x0b) = 0;
+    M(ix + 0x0c) = 0;
+}
+
+/* 0x0CCE (tabella 08AE, indice A): 0C7C se il bit 7 di (IX+0C) è acceso
+ * (in salita), altrimenti 0BF6. Brief 26. */
+void sub_0cce(struct z80 *z)
+{
+    if (M(z->ix + 0x0c) & 0x80)                /* 0CCE-0CD2 */
+        sub_0c7c(z);                           /* 0CD7 */
+    else
+        sub_0bf6(z);                           /* 0CD4 */
+}
+
+/* 0x0CDA (tabella 08AE, indice 5): 0C2D se il bit 7 di (IX+0C) è acceso,
+ * altrimenti 0BBB. Brief 26. */
+void sub_0cda(struct z80 *z)
+{
+    if (M(z->ix + 0x0c) & 0x80)                /* 0CDA-0CDE */
+        sub_0c2d(z);                           /* 0CE3 */
+    else
+        sub_0bbb(z);                           /* 0CE0 */
+}
+
 /* La tabella inline a 08AE (16 parole dopo la `call 08CE` di 08A2):
  * 08D8 08ED 094D 0A98 0A24 0CDA 0B57 0BBB 09B3 0AF9 0CCE 0BF6 0AC3 0C2D
- * 0C7C 08D8. Gli indici con NULL (gestori mai eseguiti nelle tracce:
- * 08ED, 09B3, 0A24, 0BBB, 0BF6, 0C2D, 0C7C, 0CCE, 0CDA) non sono tradotti
- * in questo lotto: lo stato resta intatto e un'eventuale cattura futura
- * farebbe fallire il confronto del banco in modo visibile. */
+ * 0C7C 08D8. Il lotto 7 traduceva solo i gestori visti nelle tracce; gli
+ * altri (08ED, 09B3, 0A24, 0BBB, 0BF6, 0C2D, 0C7C, 0CCE, 0CDA) sono stati
+ * aggiunti nel brief 26, perché il replay li esegue (0C7C dal frame 2894,
+ * 08ED e 0CCE più avanti). */
 static void (*const gestori_08ae[16])(struct z80 *) = {
-    sub_08d8, NULL,     sub_094d, sub_0a98,
-    NULL,     NULL,     sub_0b57, NULL,
-    NULL,     sub_0af9, NULL,     NULL,
-    sub_0ac3, NULL,     NULL,     sub_08d8,
+    sub_08d8, sub_08ed, sub_094d, sub_0a98,
+    sub_0a24, sub_0cda, sub_0b57, sub_0bbb,
+    sub_09b3, sub_0af9, sub_0cce, sub_0bf6,
+    sub_0ac3, sub_0c2d, sub_0c7c, sub_08d8,
 };
 
 /* 0x08A2: smistamento d'urto dell'oggetto IX. Se il bit 5 di (IX+0) è
@@ -217,8 +442,7 @@ void sub_08a2(struct z80 *z)
     uint16_t voce = (uint16_t)(0x08ae + 2 * e);
     SET_HL(z, voce + 1);
     SET_DE(z, (uint16_t)(leggi(voce) | (leggi(voce + 1) << 8)));
-    if (gestori_08ae[e])
-        gestori_08ae[e](z);
+    gestori_08ae[e](z);
 }
 
 /* 0x0CE6 (dalla NMI, 0114): stati della chiave. IX = c4ce, IY = c299;

@@ -153,6 +153,9 @@ static void sub_4632(struct z80 *z)
         salta_4644(z, dest);                   /* 4644 rst 20 */
 }
 
+/* Punto di sincronia per la NMI del replay (nemici.h, brief 26). */
+void (*nemici_punto)(uint16_t da, uint16_t a);
+
 /* 0x4EE6, fase 2: per ognuno dei 17 slot (IX da c2c1) con l'oggetto (IY da
  * c4fe) a (IY+0) >= 0xc0 chiama il gestore per tipo 4F0F; poi la fase
  * torna a 0. */
@@ -161,6 +164,9 @@ static void sub_4ee6(struct z80 *z)
     z->ix = SLOT_C2C1;                         /* 4EE6 */
     z->iy = OGGETTI_C4FE;                      /* 4EEA */
     for (z->b = NUM_SLOT; z->b; z->b--) {      /* 4EEE, 4F06 djnz */
+        /* fra due slot: qualunque ritorno, anche dentro il gestore dello
+         * slot prima della sua prima scrittura; decide l'impronta */
+        NEMICI_PUNTO(0x0000, 0xffff);
         z->a = M(z->iy);                       /* 4EF0 */
         if (z->a >= 0xc0) {                    /* 4EF3-4EF5 */
             uint8_t b = z->b, c = z->c;        /* 4EF7 push bc */
@@ -172,6 +178,7 @@ static void sub_4ee6(struct z80 *z)
         z->ix = (uint16_t)(z->ix + SLOT_PASSO);    /* 4EFC-4EFF */
         z->iy = (uint16_t)(z->iy + OGGETTO_PASSO); /* 4F01-4F04 */
     }
+    NEMICI_PUNTO(0x0000, 0xffff);              /* dopo l'ultimo slot */
     SET_HL(z, FASE_C2B8);                      /* 4F08 pop hl; 4F09 */
     M(FASE_C2B8) = 0x00;                       /* 4F0C */
 }

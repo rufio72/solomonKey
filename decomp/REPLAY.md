@@ -95,6 +95,12 @@ NMI nel punto misurato da `replay.lua` (riga N):
   (`sched_gancio_scansione`, come `sched_proto`);
 - a metà di un corpo: dopo il corpo, all'inizio della scansione seguente.
   Qui la divergenza è attesa: si conta ma non ferma il giro.
+- (brief 26) entrata subito dopo la D ma fuori da 3AFB-3B10: nel primo
+  punto di sincronia che copre il ritorno e in cui l'impronta del C
+  coincide con la riga F. I punti sono l'ingresso del corpo (gestori
+  `rst 20` 0008-0026, prima istruzione del corpo, `rst 38` 0038-0042 per
+  0A) e i `NEMICI_PUNTO` del motore dei nemici; se nessuno coincide, dopo
+  il corpo come sopra.
 
 L'impronta del C si confronta con la riga F prima di ogni NMI. Una
 divergenza a una NMI entrata nello spedidore («pulita») ferma il giro e
@@ -144,6 +150,60 @@ NMI pendente con ritorno < 3B0F, la esegue con il valore vecchio e poi
 rimette quello nuovo (lo stesso criterio che il punto di partenza usava
 già per F0). Nessuna correzione nei corpi del lotto 23 né nel C di N1.
 
+### Dopo i corpi 01 e 10 (brief 26)
+
+Con 01 e 10 in `harness/attivita_01_10.c` e le correzioni sotto:
+
+    $ harness/replay out/replay_oracolo.txt out/replay_disp.txt out/replay_2410.bin 2410
+    SANITA F0 2410: hash C A350CF53 MAME A350CF53 coincide
+    spedizioni eseguite: 64686, fino al frame 5499
+    NMI confrontate: 3090 (nello spedidore 1486, a metà attività 1604); divergenti: nello spedidore 0, a metà attività 885
+    prima divergenza a metà attività (attesa): frame 2415
+    nessuna divergenza nello spedidore
+
+exit 0. Con `5499 --oltre` in coda l'uscita è identica, exit 0. Il giro
+arriva in fondo all'oracolo: tutte le 1486 NMI pulite coincidono con MAME
+e ogni spedizione coincide con la riga D. Le 885 divergenze a metà
+attività sono quelle del corpo non spezzabile e riconvergono tutte.
+
+Correzioni fuori perimetro, nell'ordine in cui il giro le ha trovate:
+
+1. **NMI nel gestore `rst 20` dello spedidore** (`replay.c`). Frame 2642,
+   `DISPATCH ... atteso 29/03, ottenuto 29/02`: `N 2642 000B 0` è entrata
+   in 0008-0026 (rst 8, 10, 18, 20 chiamati da 3B10), cioè dopo la D e
+   prima del corpo 02, che in MAME vedeva già c463 incrementato. Prima il
+   C la eseguiva dopo il corpo.
+2. **NMI nel `rst 38` d'ingresso di 0A** (`replay.c`). Frame 2701, 5 byte
+   (c3e1, c42a, c73e, c7ce, c7eb): `N 2700 003D 0` è entrata in 0038-0042
+   dopo che 0A aveva solo letto c2b8. Stesso trattamento del punto 1, e
+   poi anche per il ritorno uguale alla prima istruzione del corpo
+   (frame 5282, `N 5282 4BC6 0`, corpo 03 in attesa di c463).
+3. **Gestori d'urto mancanti della tabella 08AE** (`z80_08xx.c`, banco
+   della NMI). Frame 2897, Dana (c82f, c830, c83b, c842...) in MAME
+   urtava il soffitto e nel C no: l'indice E (0C7C) era NULL dal lotto 7
+   e non faceva nulla, senza avviso. Al frame 3027 lo stesso con l'indice
+   1 (08ED), poi l'indice A (0CCE → 0BF6). Tradotti tutti e nove i
+   gestori NULL (08ED, 09B3, 0A24, 0BBB, 0BF6, 0C2D, 0C7C, 0CCE, 0CDA):
+   la tabella ora è piena.
+4. **NMI a metà della fase 2 di 0A** (`replay.c`, `nemici.c`,
+   `nemici_tipo09.c`). Frame 3093 (c436, contatore +0D dello slot 15),
+   3124 (oggetto c73e acceso da 58CF), 3283, 3854, 5188: la NMI entra fra
+   due slot del ciclo 4EF0-4F06, o dentro un gestore prima della sua prima
+   scrittura (4F11, 7F6B), o a 58E8 e 593F dentro 58CF/5928; il C la
+   eseguiva dopo tutta la fase e lo slot successivo vedeva la RAM di prima
+   della NMI (per esempio (IY+12) non ancora decrementato), con differenze
+   che non riconvergono. Ora il motore chiama `NEMICI_PUNTO(da, a)` nei
+   punti in cui l'originale può essere interrotto (fra due slot di 4EE6
+   per qualunque ritorno, 58DF-58EA, 5928-594E) e `replay.c` esegue lì la
+   NMI se il suo ritorno è nell'intervallo e l'impronta del C coincide con
+   la riga F; altrimenti la esegue dopo il corpo come prima.
+
+In tutto il giro 2410-5499: 456 NMI eseguite all'ingresso del corpo
+(punti 1-2), 415 fra due slot di 4EE6, 2 a 58DF e 5928 (misura con una
+copia strumentata di `replay.c`, non nel sorgente). Nessuna correzione nei
+corpi del lotto 23 né nel C di N1: le divergenze erano tutte nel modello
+della NMI o nel banco.
+
 ## Perimetro misurato dei corpi
 
 Istruzioni eseguite (unione delle sessioni `out/*_eseguiti.txt`) che si
@@ -182,6 +242,9 @@ blocco contiguo misurato nel brief non conta.
 2. **Corpi 01 e 10**: ~870 byte, con 49AE/4938/4592/4B20/4C11/4ADA e le
    piccole 2474/2482/248D/24BE. Sono un lotto a sé, con un modulo
    `attivita_*.c` nuovo (`attivita.c` ha già 350 righe).
+   **Fatto** (brief 26): `harness/attivita_01_10.c`. 2474 e 4ADA restano
+   stub: il giro non le raggiunge. Il giro arriva al frame 5499 senza
+   divergenze nello spedidore (esito sopra).
 3. Poi rifare il giro da F0 = 2410 con `--oltre` e i dump vicini alla prima
    divergenza (`REPLAY_DUMPS`), e classificare con `replay_diff.py`.
 4. I 7 corpi tradotti (02, 03, 0D, 0E, 11, 14, 20) non sono ancora

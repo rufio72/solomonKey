@@ -37,6 +37,15 @@ i frame sono quelli della cattura riuscita.
 | 0x0AC3 | sub_0ac3 | z80_08xx.c | 54 | gestore d'urto (indice C): urto col soffitto, Y alla riga sotto, sottopixel f0; stato 1 e bit 1 direzione, o azzera (IX+0B)/(IX+0C) | verificata | 2 | gioco, tardo | gioco f2441, tardo f4005 (scrivono) |
 | 0x0AF9 | sub_0af9 | z80_08xx.c | 94 | gestore d'urto (indice 9): urto sul lato sinistro, X alla colonna accanto, velocità X azzerata; stato 2 con direzione da bit 7 di (IX+0C), o (IX+7) = ff | verificata | 2 | gioco, tardo | gioco f2850, tardo f4460 (scrivono) |
 | 0x0B57 | sub_0b57 | z80_08xx.c | 100 | gestore d'urto (indice 6): come 0AF9 sul lato destro, direzioni speculari | verificata | 2 | gioco, gioco_n2 | gioco f2588, occorrenza 2 f2639 (scrivono) |
+| 0x08ED | sub_08ed | z80_08xx.c | 96 | gestore d'urto (indice 1): come 094D con la cella a destra, X corretta in avanti (stato 2, direzione 1) | tradotta (replay) | 0 | — | brief 26: eseguita dal replay, nessuna cattura |
+| 0x09B3 | sub_09b3 | z80_08xx.c | 113 | gestore d'urto (indice 8): cella in alto a destra, X in avanti (direzione 1/3) o Y sotto la riga (stato 1) | tradotta (replay) | 0 | — | brief 26: eseguita dal replay |
+| 0x0A24 | sub_0a24 | z80_08xx.c | 116 | gestore d'urto (indice 4): come 09B3 con la cella a sinistra (direzione 0/2) | tradotta (replay) | 0 | — | brief 26: eseguita dal replay |
+| 0x0BBB | sub_0bbb | z80_08xx.c | 59 | gestore d'urto (indice 7, e da 0CDA): angolo in basso a destra, stato 2, direzione 0 | tradotta (replay) | 0 | — | brief 26: tradotta per completare la tabella 08AE, non in onda nel giro 2410-5499 |
+| 0x0BF6 | sub_0bf6 | z80_08xx.c | 55 | gestore d'urto (indice B, e da 0CCE): angolo in basso a sinistra, stato 2, direzione 1 | tradotta (replay) | 0 | — | brief 26: eseguita dal replay via 0CCE |
+| 0x0C2D | sub_0c2d | z80_08xx.c | 79 | gestore d'urto (indice D, e da 0CDA): angolo in alto a sinistra, Y sotto la riga; stato 1 direzione 3 o velocità azzerate | tradotta (replay) | 0 | — | brief 26: eseguita dal replay |
+| 0x0C7C | sub_0c7c | z80_08xx.c | 82 | gestore d'urto (indice E, e da 0CCE): angolo in alto a destra; stato 1 direzione 2 o velocità azzerate | tradotta (replay) | 0 | — | brief 26: eseguita dal replay dal frame 2894 (prima era NULL e Dana non urtava) |
+| 0x0CCE | sub_0cce | z80_08xx.c | 12 | gestore d'urto (indice A): 0C7C col bit 7 di (IX+0C), altrimenti 0BF6 | tradotta (replay) | 0 | — | brief 26: eseguita dal replay |
+| 0x0CDA | sub_0cda | z80_08xx.c | 12 | gestore d'urto (indice 5): 0C2D col bit 7 di (IX+0C), altrimenti 0BBB | tradotta (replay) | 0 | — | brief 26: come 0BBB, non in onda |
 | 0x0CE6 | sub_0ce6 | z80_08xx.c | 13 | stati della chiave: IX = c4ce, IY = c299, esce col bit 7 di c4ce spento (sempre nelle tracce); continuazione 0CF3 (`jp (hl)` sulla tabella 0D18) non tradotta: avviso su stderr | verificata | 2 | gioco, tardo | gioco f2402, tardo f4002; solo registri |
 | 0x1288 | sub_1288 | z80_1xxx.c | 35 | classe della cella al centro di Dana (sub_36f0), esce se ≥ 37 (sempre nelle tracce); continuazione 12AB (raccolta, zona mai eseguita) non tradotta: avviso su stderr | verificata | 2 | gioco, tardo | gioco f2402, tardo f4002; solo registri |
 | 0x234A | sub_234a | z80_2xxx.c | 9 | (HL) = C, (HL+1) = A; A = bit 6-7 di B (Lives, con B = DSW1 a nibble scambiati; da 2980) | verificata | 2 | titolo, titolo_n2 | occorrenze 1 (f152) e 2 (f378) al boot (scrivono) |
@@ -129,11 +138,12 @@ i frame sono quelli della cattura riuscita.
 ## Corpi di attività (lotto 23)
 
 Ingressi della tabella 3B11, raggiunti con `rst 20` dallo spedidore e non con
-`call`: non fanno parte delle 116 routine sopra. Stanno in
+`call`: non fanno parte delle 125 routine sopra. Stanno in
 `harness/attivita.c` (`corpo_attivita_replay[]`) e si verificano col replay
 (`REPLAY.md`), non con le catture. Stato «tradotta (replay)» = C scritto e
-confrontato col giro. Dopo il lotto N1 il giro da F0 = 2410 arriva al
-frame 2589 (corpo 01) con tutte le NMI pulite coincidenti.
+confrontato col giro. Dopo i corpi 01 e 10 (brief 26) il giro da F0 =
+2410 arriva in fondo all'oracolo (frame 5499) con tutte le NMI pulite
+coincidenti. 01 e 10 stanno in `harness/attivita_01_10.c`.
 
 | codice | ingresso | funzione | descrizione | stato |
 |---|---|---|---|---|
@@ -144,9 +154,9 @@ frame 2589 (corpo 01) con tutte le NMI pulite coincidenti.
 | 11 | 0x456E | attivita_11_456e | attende c466 ≥ 6, azzera c49e, si spegne | tradotta (replay) |
 | 14 | 0x44B5 | attivita_14_44b5 | canali di registri c09d (4) e c0b7 (1) via sub_452b | tradotta (replay) |
 | 20 | 0x3E90 | attivita_20_3e90 | il tempo: sottrazione BCD da c093-c095, cifre e colore a d472, fine tempo | tradotta (replay) |
-| 01 | 0x48D1 | — | chiama 49AE, 4938, 4ADA, 4B20, 4C11 non tradotte (~870 B con 10) | non tradotta |
+| 01 | 0x48D1 | attivita_01_48d1 | cella davanti a Dana (c82e) secondo (IY+2C) e (IY+29): 49AE se < 80 (slot = esito, 25 con A = 4 e B = 0), altrimenti 4938 e slot 02 | tradotta (replay) |
 | 0A | 0x4DA2 | attivita_0a_4da2 | `rst 38` su c2b8 verso le fasi 4DAD / 4632 / 4EE6 del motore dei nemici (`nemici.c`, lotto N1) | tradotta (replay) |
-| 10 | 0x457B | — | chiama 4592, 4938, 4C11 non tradotte | non tradotta |
+| 10 | 0x457B | attivita_10_457b | 4592 con IY = c82e e IX = c49e: riporto acceso → slot 0, spento → c466 = 0 e slot 11 | tradotta (replay) |
 
 ## Motore dei nemici (lotto N1)
 
@@ -156,8 +166,12 @@ verificano col giro, non con le catture. Prototipi in `harness/nemici.h`;
 il riporto, dove il chiamante lo legge, è il bit 0 di `z->f`. Le 27
 routine non tradotte che N1 chiama o smista sono stub in `nemici_stub.c`
 (`STUB_NEMICI`): il replay si ferma con `ROUTINE xxxx mancante`. Stato
-«tradotta (replay)»: il giro 2410-2589 coincide con MAME a ogni NMI
-pulita; «non in onda» = nessuna esecuzione in quel tratto (gcov).
+«tradotta (replay)»: il giro coincide con MAME a ogni NMI pulita; «non in
+onda» = nessuna esecuzione nel giro (gcov). Dopo il brief 26 il giro va da
+2410 a 5499 e 2482, 248D, 24BE, 4592, 49AE, 4B20, 4C11 e 55C9 vanno in
+onda (in parte: 49AE al 27% delle righe, 4592 e 4B20 a circa metà).
+`nemici.h` dichiara anche `NEMICI_PUNTO(da, a)`, il punto di sincronia
+per la NMI del replay (4EE6 fra due slot, 58DF, 5928; `REPLAY.md`).
 
 | ingresso | funzione | modulo | descrizione | stato |
 |---|---|---|---|---|
@@ -166,16 +180,16 @@ pulita; «non in onda» = nessuna esecuzione in quel tratto (gcov).
 | 0x4EE6 | sub_4ee6 (statica) | nemici.c | fase 2: 4F0F per ogni oggetto c4fe con (IY+0) ≥ c0, fase a 0 | tradotta (replay) |
 | 0x4F0F | sub_4f0f | nemici.c | gestore per tipo: `rst 38` a 4F1B su (IY+3) − 6 se (IY+4) ≥ 6 | tradotta (replay) |
 | 0x3B62 | sub_3b62 | nemici.c | `ret` solo, voce nulla delle tabelle | tradotta |
-| 0x2482 | sub_2482 | nemici_comuni.c | HL = 32·D + E | tradotta (replay), non in onda |
-| 0x248D | sub_248d | nemici_comuni.c | C nel blocco 2×2 a HL | tradotta (replay), non in onda |
-| 0x24BE | sub_24be | nemici_comuni.c | da coordinate di schermo a cella | tradotta (replay), non in onda |
-| 0x4592 | sub_4592 | nemici_comuni.c | presa del blocco sotto l'oggetto IY, riporto = fallita | tradotta (replay), non in onda |
+| 0x2482 | sub_2482 | nemici_comuni.c | HL = 32·D + E | tradotta (replay) |
+| 0x248D | sub_248d | nemici_comuni.c | C nel blocco 2×2 a HL | tradotta (replay) |
+| 0x24BE | sub_24be | nemici_comuni.c | da coordinate di schermo a cella | tradotta (replay) |
+| 0x4592 | sub_4592 | nemici_comuni.c | presa del blocco sotto l'oggetto IY, riporto = fallita | tradotta (replay) |
 | 0x4938 | sub_4938 | nemici_comuni.c | posa dell'oggetto IX sulla cella E di valore A | tradotta (replay) |
-| 0x49AE | sub_49ae | nemici_comuni.c | posa con contatti (c4ce, Dana e oggetti), A = esito | tradotta (replay), non in onda |
-| 0x4B20 | sub_4b20 | nemici_comuni.c | contatto fra l'oggetto IX e la posizione H, L (riporto) | tradotta (replay), non in onda |
-| 0x4C11 | sub_4c11 | nemici_comuni.c | carattere B e attributo C nel blocco 2×2 della cella D, E | tradotta (replay), non in onda |
+| 0x49AE | sub_49ae | nemici_comuni.c | posa con contatti (c4ce, Dana e oggetti), A = esito | tradotta (replay) |
+| 0x4B20 | sub_4b20 | nemici_comuni.c | contatto fra l'oggetto IX e la posizione H, L (riporto) | tradotta (replay) |
+| 0x4C11 | sub_4c11 | nemici_comuni.c | carattere B e attributo C nel blocco 2×2 della cella D, E | tradotta (replay) |
 | 0x55B2 | sub_55b2 | nemici_tipi_10_13.c | tipo 12: `rst 38` a 55B5 su (IY+1D) | tradotta (replay) |
-| 0x55C9 | sub_55c9 | nemici_tipi_10_13.c | tipo 12, fase 4: cammino dopo l'attesa | tradotta (replay), non in onda |
+| 0x55C9 | sub_55c9 | nemici_tipi_10_13.c | tipo 12, fase 4: cammino dopo l'attesa | tradotta (replay) |
 | 0x561B | sub_561b | nemici_tipi_10_13.c | tipo 12, fase 2: inversione, fase 5 | tradotta (replay) |
 | 0x5640 | sub_5640 | nemici_tipi_10_13.c | tipo 12, fase 5: cammino, vicinanza (5507) | tradotta (replay) |
 | 0x5693 | sub_5693 | nemici_tipi_10_13.c | tipo 12, fase 0: presa o chiusura del blocco davanti | tradotta (replay) |

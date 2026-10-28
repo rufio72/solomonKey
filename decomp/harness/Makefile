@@ -4,7 +4,7 @@ SORGENTI = harness.c comune.c routine.c fondale.c porte.c nmi.c nmi_oggetti.c ro
 SORGENTI_SCHED = sched.c sched_proto.c
 # giro di gioco del replay (brief 23): il banco senza harness.c, più spedidore e corpi;
 # i moduli del motore dei nemici (nemici*.c, brief 25) entrano solo qui
-SORGENTI_REPLAY = $(filter-out harness.c,$(SORGENTI)) sched.c attivita.c replay.c $(wildcard nemici*.c)
+SORGENTI_REPLAY = $(filter-out harness.c,$(SORGENTI)) sched.c attivita.c attivita_01_10.c replay.c $(wildcard nemici*.c)
 SORGENTI_DATI = $(wildcard audio_dati*.c)
 INTESTAZIONI_DATI = $(wildcard audio_dati*.h)
 SORGENTI_DRIVER = audio_piattaforma.c audio_ossatura.c audio_registri.c audio_interprete.c $(SORGENTI_DATI)

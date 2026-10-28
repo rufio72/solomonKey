@@ -94,9 +94,18 @@ void sub_7dea(struct z80 *z);
 void sub_0602(struct z80 *z);
 void sub_08a2(struct z80 *z);
 void sub_08d8(struct z80 *z);
+void sub_08ed(struct z80 *z);
 void sub_094d(struct z80 *z);
 void sub_0a98(struct z80 *z);
 void sub_0ac3(struct z80 *z);
+void sub_0c7c(struct z80 *z);
+void sub_09b3(struct z80 *z);
+void sub_0a24(struct z80 *z);
+void sub_0bbb(struct z80 *z);
+void sub_0bf6(struct z80 *z);
+void sub_0c2d(struct z80 *z);
+void sub_0cce(struct z80 *z);
+void sub_0cda(struct z80 *z);
 void sub_0af9(struct z80 *z);
 void sub_0b57(struct z80 *z);
 

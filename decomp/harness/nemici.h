@@ -53,8 +53,20 @@ static inline uint16_t nemici_rst20(struct z80 *z, uint16_t sito,
     return tab[z->a];
 }
 
+/* Punti di sincronia per la NMI (brief 26): il C del motore chiama
+ * NEMICI_PUNTO(da, a) dove l'originale, interrotto con un ritorno fra
+ * `da` e `a`, avrebbe la stessa RAM. replay.c ci aggancia nemici_punto
+ * per eseguire lì una NMI entrata a metà del corpo 0A; altrove è NULL. */
+extern void (*nemici_punto)(uint16_t da, uint16_t a);
+#define NEMICI_PUNTO(da, a) \
+    do { if (nemici_punto) nemici_punto((da), (a)); } while (0)
+
 /* Corpo dell'attività 0A (nemici.c). */
 void attivita_0a_4da2(uint8_t slot);
+
+/* Corpi 01 e 10 (attivita_01_10.c). */
+void attivita_01_48d1(uint8_t slot);
+void attivita_10_457b(uint8_t slot);
 
 /* 4B98, chiusura dell'oggetto IX (attivita.c). */
 void sub_4b98(uint16_t ix);
