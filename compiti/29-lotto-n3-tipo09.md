@@ -322,3 +322,9 @@ Sonnet, sviluppatore Sonnet, verifica a script senza modello.
 - **Token**: analista Sonnet 107k, sviluppatore Sonnet 204k, verifica 0.
   Totale ~311k, tutto Sonnet, nessuna escalation a Opus. Banco a 412
   catture (165 voci), replay a fine oracolo exit 0.
+
+**Ratifica dell'utente (2026-10-29)**: la soluzione del registro R è accolta —
+i wrapper `banco_r_*` di `nemici_r.c` (il banco verifica che esista un R
+compatibile) sono la regola per tutte le routine che leggono `ld a,r`, da qui
+in poi e anche per la scelta (2) del brief 28. Niente registrazione di R
+nelle catture. Schema economico confermato: si prova su N4.
