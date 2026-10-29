@@ -1,6 +1,6 @@
 # Stato del progetto
 
-Aggiornato al 2026-10-28. Fotografia operativa per riprendere il
+Aggiornato al 2026-10-29. Fotografia operativa per riprendere il
 lavoro; la descrizione del metodo è nel [README](README.md), la storia di
 ogni ciclo nei brief in `compiti/`.
 
@@ -11,12 +11,12 @@ ogni ciclo nei brief in `compiti/`.
 | Destinazioni statiche nel Z80 principale | 299 |
 | Coperte dalle sessioni (lotto 12 compreso) | 235 (78,6%) |
 | Routine osservate nel callgraph | ~120 |
-| Righe in `decomp/ROUTINE.md` | 160 (125 + 35 del lotto N2) |
-| …di cui `verificata` (doppia cattura MAME) | 139 (104 + 35 del lotto N2) |
-| …di cui `tradotta` con nota (cattura singola) | 12 |
-| …di cui `tradotta (replay)` (gestori d'urto 08AE, brief 26) | 9 |
-| Banco di prova (`harness --tutte`) | 147 voci, 321 catture, 0 fallite |
-| Catture `regs` in `decomp/out/` | 323 |
+| Voci con stato in `decomp/ROUTINE.md` | 246 (conteggio `grep` sulla colonna stato) |
+| …di cui `verificata` (doppia cattura MAME non forzata) | 181 |
+| …di cui `tradotta` con nota (senza cattura o cattura singola) | 20 |
+| …di cui `tradotta (replay)` | 45 |
+| Banco di prova (`harness --tutte`) | 189 voci, 539 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 541 |
 | Destinazioni mai osservate | 64, tutte con sito di chiamata mai eseguito (probabile dato o codice raggiungibile solo da zone mai eseguite; 37 a `8000` o sopra) |
 
 ## Fasi
@@ -69,6 +69,17 @@ ogni ciclo nei brief in `compiti/`.
    anche in `harness`). Strumenti nuovi per i lotti seguenti: stato
    `stanzaNN` di `cattura.sh` (stanza forzata) e `SNAP_FORZA` di
    `snap.lua` (byte a IX/IY+n o registri forzati all'ingresso).
+   **Lotti N3 e N4 fatti** (brief 29 e 30, 2026-10-29, schema economico:
+   analista e sviluppatore Sonnet, verifica a script senza modello,
+   ~0,6-1,1 $ a lotto, entrambi al primo colpo): N3 = tipo 9 in
+   `nemici_tipo09.c`/`nemici_tipo09b.c` più 5 dipendenze di N6/N10;
+   N4 = comparsa (tipi 0/4/5) in `nemici_comparsa.c`/`nemici_comparsab.c`
+   con `cattura_oggetti.sh` e 4FC5 (fata) coperta via forzature dei
+   chiamanti. Regola ratificata dall'utente: le routine che leggono il
+   registro R si verificano coi wrapper `banco_r_*` di `nemici_r.c`
+   (esiste un R compatibile), niente R nelle catture — vale anche per la
+   scelta (2) del brief 28. In N3 corretto un bug latente di N1 in
+   `sub_4592` (secondo `rla` perso nell'uscita col riporto).
 1. **Traduzione delle routine censite nel lotto 12**: 40 destinazioni in
    25 blocchi contigui in `decomp/CENSIMENTO-12.md`, due catture pilota
    già fatte (`0x3FCE porta`, `0x51FA finale`). Per i lotti futuri il
