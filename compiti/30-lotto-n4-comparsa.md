@@ -388,3 +388,15 @@ cicli: `V="134B 139C 13AB 13B9 13FC 1413 14D4 1549 2548 4F40 7288 7294 72B6 72CE
 6. **Aggiornamento di `STATO.md` e `README.md`**: lo sviluppatore non li
    legge né li tocca. Proposta: li aggiorna la chat principale dopo la
    verifica. — «preferenza»
+
+## Risoluzioni (chat principale, 2026-10-29)
+
+Tutte le domande sono «preferenza»: accolte tutte con la proposta
+dell'analista.
+1. Divisione in `nemici_comparsa.c` e `nemici_comparsab.c`: sì.
+2. 14FC, 4FC5 e 73C7 senza voce nel banco, coperte dalle forzature dei
+   chiamanti e da gcov: sì.
+3. `cattura_oggetti.sh` nuovo, `cattura.sh` intatto: sì.
+4. Seconda cattura di 7412 da `finale` N=2: sì.
+5. Soglie di copertura 85% (moduli) e 75% (routine senza voce): sì.
+6. `STATO.md` e `README.md` li aggiorna la chat principale: sì.
