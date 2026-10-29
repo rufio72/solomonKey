@@ -276,3 +276,72 @@ e 6D88 (nessuno slot libero), 6E3D (cella davanti senza blocco in 6DCE),
 | 0x70CE | sub_70ce | nemici_tipi_08_14.c | 32 | asse x: allinea E a (B + 8) & 0F (riporto) o bit 7 di C | verificata | 2 | stanza08, stanza11 | stanza08 f1961; stanza11 f1953 |
 | 0x70FE | sub_70fe | nemici_tipi_08_14.c | 77 | le quattro celle attorno a (D, E) (36F0): A = B & 0F, bit 7 delle celle piene | verificata | 2 | stanza08, stanza11 | stanza08 f1953; stanza11 f1953 |
 | 0x80A5 | sub_80a5 | nemici_comparsa.c | 14 | azzera (IX+0), (IX+1), (IY+0), (IY+1); anticipata da N4 | verificata | 2 | stanza11, stanza17 | stanza11 f2128; stanza17 f2143 |
+
+## Motore dei nemici (lotto N3)
+
+Tipo 9 (57CD) del gestore 4F1B (brief 29): `harness/nemici_tipo09.c`
+(57CD, 57E4, 57FB, 580A, 582B, 58A3, 594F e 5894 statica),
+`harness/nemici_tipo09b.c` (5995, 5B12, 5C19, 5C1E, 5C23, 5C29; 5B09 e 5C2D
+statiche) e 5 dipendenze anticipate nei moduli del censimento: 52FD, 5345,
+54C5 da N6 (`nemici_tipo06b.c`) e 51D7, 24DF da N10 (`nemici_tipo06a.c`).
+Catture con lo stato `stanzaNN` di `cattura.sh`; 57E4 e 5C23 hanno anche
+`stanza33_n2` (seconda occorrenza), 5C23 anche `stanza50`.
+
+**Il registro R.** 54C5 e 59E5 leggono R con due `ld a,r` ravvicinati
+(R1 e R1 + 3 sui 7 bit bassi) e ne usano la somma. Le catture non registrano
+R e il «prima» non lo contiene. Le quattro voci che possono arrivare a un
+`ld a,r` (57CD, 5995, 51D7, 54C5) stanno nel banco dietro un wrapper
+(`banco_r_xxxx` in `nemici_r.c`) che riconosce la cattura dai file, prova i
+128 valori di R1 (le 128 coppie dove le letture sono due) e tiene quello per
+cui RAM e registri coincidono con MAME. Il resto della routine resta
+verificato in pieno; di R si verifica solo che esista un valore compatibile
+(lacuna da chiudere se un giorno le catture registreranno R). Il C del
+gioco (`nemici_r_somma`) con i valori a zero vale R1 = 0.
+
+**Catture forzate** (`SNAP_FORZA`, suffisso `forzaNNN`): servono a coprire
+rami che le stanze 33, 45 e 50 non eseguono. Le forzature (campi di IX e IY e
+celle della griglia c0bd-c1bc, queste come `ix+offset` con offset a 16 bit)
+sono state trovate con un esploratore in C fuori dal repository (prove a caso
+da una cattura di base, tenute solo quelle che aggiungono righe di copertura)
+e sono elencate nelle righe `FORZA` dei `.log`. Basi: `stanza33` per 57CD
+(27 catture) e 582B (2); 5995 da `stanza33` (20) e `stanza45` (5); le altre
+voci non hanno forzate (le copre 57CD). Non contano per lo stato `verificata`.
+
+Una forzatura ha scoperto un'imprecisione di N1: in `sub_4592` (45DB, uscita
+col riporto quando nessuna delle due celle sotto i bordi ha il bit 7) A
+restava com'era invece del secondo `rla` ((cella) << 1). Corretto in
+`nemici_comuni.c`; le catture di 4592 di N1 continuano a passare.
+
+Copertura gcov del banco: `nemici_tipo09.c` 98,98 %, `nemici_tipo09b.c`
+97,42 %, `nemici_tipo06a.c` 100 %, `nemici_tipo06b.c` 99,14 %. Righe mai
+eseguite: in `nemici_tipo09.c` il `ret nc` di 7379 in 582B (7379 non esaurisce
+mai gli slot) e il `default` del `switch` di 57CD (indice fuori tabella); in
+`nemici_tipo09b.c` il ramo di 59E5 con somma di R = 2 (`goto 5A2D`, dipende da
+R, non forzabile), l'uscita `5A16 → 5B4B`, il `ret z` di 5AC2 (cella uguale a c2bb) e i tre
+rami di 7379 senza slot libero (5AC7, 5AF2, 5B37; 7379 non li esaurisce
+mai), e dello `switch` di 5BFC le voci 3B62 e 5B09 e il `default`; in `nemici_tipo06b.c` la guardia contro
+C = 0 di 54C5 (l'originale non esce). 5B09 è tradotta senza cattura.
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x24DF | sub_24df | nemici_tipo06a.c | 47 | tre indici a nibble (A, (HL), (HL+1)) → E, D e C = E + B; dipendenza anticipata da N10 | verificata | 2 | stanza33, stanza45 | stanza33 f1953; stanza45 f1953 |
+| 0x51D7 | sub_51d7 | nemici_tipo06a.c | 35 | posizioni dei bit accesi di BC in c06a, C ne conta il numero, 54C5 ne sceglie uno a caso, A = 0d − tabella; R cercato dal banco; anticipata da N10 | verificata | 2 | stanza33, stanza45 | stanza33 f1953; stanza45 f1953 |
+| 0x52FD | sub_52fd | nemici_tipo06b.c | 31 | contatore (IX+8) contro il limite (IX+9/0A): al limite lo azzera e inverte il bit 5 di (IX+0); anticipata da N6 | verificata | 2 | stanza33, stanza45 | stanza33 f1953; stanza45 f1953 |
+| 0x5345 | sub_5345 | nemici_tipo06b.c | 384 | maschere B e C delle celle attorno (c0bd + BC) in tre rami (537B, 53F5, 545E); anticipata da N6 | verificata | 2 | stanza33, stanza45 | stanza33 f1953; stanza45 f1953 |
+| 0x54C5 | sub_54c5 | nemici_tipo06b.c | 19 | numero a caso < C con due `ld a,r` (R cercato dal banco); anticipata da N6 | verificata | 2 | stanza33, stanza45 | stanza33 f1953; stanza45 f1953 |
+| 0x57CD | sub_57cd | nemici_tipo09.c | 7 | tipo 09: 52FD, poi `rst 38` a 57D3 su (IY+1D) (8 voci); R cercato dal banco | verificata | 29 | stanza33, stanza45 | stanza33 f1953; stanza45 f1953 — 27 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x57E4 | sub_57e4 | nemici_tipo09.c | 23 | tipo 09, fase 4: a 0x20 fotogrammi inverte la direzione, fase 5 | verificata | 2 | stanza33 | stanza33_n2 f1955; stanza33 f1953 |
+| 0x57FB | sub_57fb | nemici_tipo09.c | 15 | tipo 09, fase 0: a 4 fotogrammi spegne il bit 3 di (IY+1), fase 3 | verificata | 2 | stanza33, stanza45 | stanza33 f2035; stanza45 f1993 |
+| 0x580A | sub_580a | nemici_tipo09.c | 33 | tipo 09, fase 2: accende il bit 1 della direzione; a 8 fotogrammi 5894 o fase 6 | verificata | 2 | stanza33, stanza45 | stanza33 f2046; stanza45 f2013 |
+| 0x582B | sub_582b | nemici_tipo09.c | 105 | tipo 09, fase 1: presa del blocco (7379, 4592) o, col bit 2 di (IY+1), a 8 fotogrammi fase 5 e 5894 | verificata | 4 | stanza33, stanza45 | stanza33 f1977; stanza45 f1982 — 2 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x5894 | sub_5894 | nemici_tipo09.c | 15 | statica, ingresso interno di 580A e 582B: lascia il blocco, fase 6, 6EB7 | tradotta | - | - | senza voce propria: coperta dalle catture dei chiamanti (580A, 582B) |
+| 0x58A3 | sub_58a3 | nemici_tipo09.c | 44 | tipo 09, fase 7: prende (58CF) o posa (5917) il blocco, poi lascia il portato (6EB7) | verificata | 2 | stanza33, stanza45 | stanza33 f2001; stanza45 f1964 |
+| 0x594F | sub_594f | nemici_tipo09.c | 70 | tipo 09, fase 6: con (IY+0C) = ff flag di (IX+1) e direzione, fase 7 o c2ba | verificata | 2 | stanza33, stanza45 | stanza33 f1953; stanza45 f1953 |
+| 0x5995 | sub_5995 | nemici_tipo09b.c | 597 | tipo 09, fase 5: sceglie la mossa dalle maschere di 5345, dal caso (59E5) e dalle celle davanti; 51D7 e `rst 38` a 5BFC (14 voci); R cercato dal banco | verificata | 27 | stanza33, stanza45 | stanza33 f1953; stanza45 f1953 — 25 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x5B09 | sub_5b09 | nemici_tipo09b.c | 9 | statica: fase 0, bit 1 della direzione; mai eseguita nelle sessioni storiche | tradotta | - | - | senza cattura: nessuna sessione l'ha eseguita e snap.lua non forza le celle che 5C32 scrive in c07e-c081 |
+| 0x5B12 | sub_5b12 | nemici_tipo09b.c | 10 | A = ((IY+15) − 6) & 0f, riporto se < 5 | verificata | 2 | stanza33, stanza45 | stanza33 f1986; stanza45 f1961 |
+| 0x5C19 | sub_5c19 | nemici_tipo09b.c | 5 | 5BFC[0], [2]: direzione 0 | verificata | 2 | stanza33, stanza50 | stanza33 f1953; stanza50 f2156 |
+| 0x5C1E | sub_5c1e | nemici_tipo09b.c | 5 | 5BFC[7], [9]: direzione 1 | verificata | 2 | stanza33, stanza45 | stanza33 f2023; stanza45 f1953 |
+| 0x5C23 | sub_5c23 | nemici_tipo09b.c | 6 | 5BFC[1], [3], [4], [5]: direzione 0, cade in 5C2D | verificata | 3 | stanza33, stanza50 | stanza33_n2 f2035; stanza33 f2034; stanza50 f2038 |
+| 0x5C29 | sub_5c29 | nemici_tipo09b.c | 4 | 5BFC[8], [10], [11], [12]: direzione 1, cade in 5C2D | verificata | 2 | stanza33, stanza45 | stanza33 f2346; stanza45 f2041 |
+| 0x5C2D | sub_5c2d | nemici_tipo09b.c | 5 | statica, coda di 5C23 e 5C29: fase 0 | tradotta | - | - | senza voce propria: coperta dalle catture dei chiamanti (5C23, 5C29) |

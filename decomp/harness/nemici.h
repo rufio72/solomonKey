@@ -147,6 +147,37 @@ void sub_80a5(struct z80 *z);              /* nemici_comparsa.c (N4) */
 void sub_6eb7(struct z80 *z);              /* nemici_tipo09.c (N3) */
 void sub_6ec1(struct z80 *z);              /* nemici_tipo09.c (N3) */
 
+/* Lotto N3, tipo 09 (brief 29): nemici_tipo09.c, nemici_tipo09b.c, con le
+ * dipendenze anticipate da N6 (nemici_tipo06b.c) e N10 (nemici_tipo06a.c).
+ * 5894, 5C2D e 5B09 sono statiche. */
+void sub_57cd(struct z80 *z);
+void sub_57e4(struct z80 *z);
+void sub_57fb(struct z80 *z);
+void sub_580a(struct z80 *z);
+void sub_582b(struct z80 *z);
+void sub_58a3(struct z80 *z);
+void sub_594f(struct z80 *z);
+void sub_5995(struct z80 *z);
+void sub_5b12(struct z80 *z);
+void sub_5c19(struct z80 *z);
+void sub_5c1e(struct z80 *z);
+void sub_5c23(struct z80 *z);
+void sub_5c29(struct z80 *z);
+void sub_52fd(struct z80 *z);
+void sub_5345(struct z80 *z);
+void sub_54c5(struct z80 *z);
+void sub_51d7(struct z80 *z);
+void sub_24df(struct z80 *z);
+
+/* Il registro R (nemici_r.c): somma R1 + R2 dei due `ld a,r` di 54C5 e
+ * 59E5; nel banco i quattro wrapper cercano il valore di R che riproduce
+ * la cattura (vedi l'intestazione di nemici_r.c). */
+uint8_t nemici_r_somma(void);
+void banco_r_54c5(struct z80 *z);
+void banco_r_51d7(struct z80 *z);
+void banco_r_5995(struct z80 *z);
+void banco_r_57cd(struct z80 *z);
+
 /* Stub (nemici_stub.c): registrano l'ingresso con nemici_manca. */
 void sub_2474(struct z80 *z);
 void sub_4649(struct z80 *z);
@@ -157,7 +188,6 @@ void sub_4fd4(struct z80 *z);
 void sub_54d8(struct z80 *z);
 void sub_55c4(struct z80 *z);
 void sub_56e9(struct z80 *z);
-void sub_57cd(struct z80 *z);
 void sub_5cfb(struct z80 *z);
 void sub_6b43(struct z80 *z);
 void sub_6c0b(struct z80 *z);

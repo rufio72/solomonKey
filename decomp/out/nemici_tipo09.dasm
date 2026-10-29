@@ -1,0 +1,958 @@
+sub_24dfh:
+	ld e,a			;24df
+	xor a			;24e0
+	inc a			;24e1
+	add a,a			;24e2
+	add a,a			;24e3
+	add a,a			;24e4
+	add a,e			;24e5
+	add a,(hl)			;24e6
+	ld e,a			;24e7
+	inc hl			;24e8
+	rrca			;24e9
+	rrca			;24ea
+	rrca			;24eb
+	rrca			;24ec
+	ld d,a			;24ed
+	xor a			;24ee
+	inc a			;24ef
+	add a,a			;24f0
+	inc a			;24f1
+	add a,a			;24f2
+	inc a			;24f3
+	add a,a			;24f4
+	inc a			;24f5
+	and d			;24f6
+	ld d,a			;24f7
+	ld a,(hl)			;24f8
+	add a,e			;24f9
+	rrca			;24fa
+	rrca			;24fb
+	rrca			;24fc
+	rrca			;24fd
+	ld e,a			;24fe
+	xor a			;24ff
+	inc a			;2500
+	add a,a			;2501
+	inc a			;2502
+	add a,a			;2503
+	inc a			;2504
+	add a,a			;2505
+	inc a			;2506
+	and e			;2507
+	ld e,a			;2508
+	add a,b			;2509
+	ld c,a			;250a
+	xor a			;250b
+	ld b,a			;250c
+	ret			;250d
+sub_51d7h:
+	ld e,c			;51d7
+	ld d,b			;51d8
+	ld bc,00e00h		;51d9
+	ld hl,lc06ah		;51dc
+l51dfh:
+	rr d		;51df
+	rr e		;51e1
+	jr nc,l51eah		;51e3
+	dec b			;51e5
+	ld (hl),b			;51e6
+	inc b			;51e7
+	inc c			;51e8
+	inc hl			;51e9
+l51eah:
+	djnz l51dfh		;51ea
+	call sub_54c5h		;51ec
+	ld e,c			;51ef
+	ld d,000h		;51f0
+	ld hl,lc06ah		;51f2
+	add hl,de			;51f5
+	ld a,00dh		;51f6
+	sub (hl)			;51f8
+	ret			;51f9
+sub_52fdh:
+	ld a,(ix+008h)		;52fd
+	bit 5,(ix+000h)		;5300
+	jr nz,l530bh		;5304
+	cp (ix+009h)		;5306
+	jr l530eh		;5309
+l530bh:
+	cp (ix+00ah)		;530b
+l530eh:
+	ret c			;530e
+	xor a			;530f
+	ld (ix+008h),a		;5310
+	or 020h		;5313
+	xor (ix+000h)		;5315
+	ld (ix+000h),a		;5318
+	ret			;531b
+sub_5345h:
+	ld a,(ix+002h)		;5345
+	add a,008h		;5348
+	cpl			;534a
+	and 0f0h		;534b
+	ld b,a			;534d
+	ld a,(iy+004h)		;534e
+	cp 009h		;5351
+	jr c,l5358h		;5353
+	ld a,(iy+003h)		;5355
+l5358h:
+	ld l,a			;5358
+	ld h,000h		;5359
+	ld de,l9495h		;535b
+	add hl,hl			;535e
+	add hl,hl			;535f
+	add hl,hl			;5360
+	add hl,de			;5361
+	inc hl			;5362
+	ld a,(ix+003h)		;5363
+	call sub_24dfh		;5366
+	ld hl,lc0bdh		;5369
+	add hl,bc			;536c
+	ld a,e			;536d
+	cp d			;536e
+	jp z,l537bh		;536f
+	bit 7,(hl)		;5372
+	jp nz,l545eh		;5374
+	dec hl			;5377
+	jp l53f5h		;5378
+l537bh:
+	ld bc,00c4ch		;537b
+	inc hl			;537e
+	inc hl			;537f
+	bit 7,(hl)		;5380
+	jr z,l5388h		;5382
+	set 4,c		;5384
+	res 3,c		;5386
+l5388h:
+	dec hl			;5388
+	bit 7,(hl)		;5389
+	jr z,l5391h		;538b
+	res 2,c		;538d
+	set 0,c		;538f
+l5391h:
+	dec hl			;5391
+	dec hl			;5392
+	bit 7,(hl)		;5393
+	jr z,l539bh		;5395
+	res 2,b		;5397
+	set 0,b		;5399
+l539bh:
+	dec hl			;539b
+	bit 7,(hl)		;539c
+	jr z,l53a4h		;539e
+	set 4,b		;53a0
+	res 3,b		;53a2
+l53a4h:
+	ld de,lfff4h		;53a4
+	add hl,de			;53a7
+	bit 7,(hl)		;53a8
+	jr z,l53b0h		;53aa
+	res 4,c		;53ac
+	res 3,c		;53ae
+l53b0h:
+	dec hl			;53b0
+	bit 7,(hl)		;53b1
+	jr z,l53bbh		;53b3
+	set 1,c		;53b5
+	res 0,c		;53b7
+	res 2,c		;53b9
+l53bbh:
+	dec hl			;53bb
+	dec hl			;53bc
+	bit 7,(hl)		;53bd
+	jr z,l53c7h		;53bf
+	set 1,b		;53c1
+	res 0,b		;53c3
+	res 2,b		;53c5
+l53c7h:
+	dec hl			;53c7
+	bit 7,(hl)		;53c8
+	jr z,l53d0h		;53ca
+	res 4,b		;53cc
+	res 3,b		;53ce
+l53d0h:
+	ld de,lfff3h		;53d0
+	add hl,de			;53d3
+	bit 7,(hl)		;53d4
+	jr z,l53dch		;53d6
+	ld a,c			;53d8
+	and 0e5h		;53d9
+	ld c,a			;53db
+l53dch:
+	dec hl			;53dc
+	bit 7,(hl)		;53dd
+	jr z,l53ebh		;53df
+	set 6,b		;53e1
+	ld a,c			;53e3
+	and 0c5h		;53e4
+	ld c,a			;53e6
+	ld a,b			;53e7
+	and 0c5h		;53e8
+	ld b,a			;53ea
+l53ebh:
+	dec hl			;53eb
+	bit 7,(hl)		;53ec
+	jr z,l53f4h		;53ee
+	ld a,b			;53f0
+	and 0e5h		;53f1
+	ld b,a			;53f3
+l53f4h:
+	ret			;53f4
+l53f5h:
+	ld bc,0054ch		;53f5
+	inc hl			;53f8
+	inc hl			;53f9
+	bit 7,(hl)		;53fa
+	jr z,l5402h		;53fc
+	res 3,c		;53fe
+	set 4,c		;5400
+l5402h:
+	dec hl			;5402
+	bit 7,(hl)		;5403
+	jr z,l540bh		;5405
+	res 2,c		;5407
+	set 0,c		;5409
+l540bh:
+	dec hl			;540b
+	dec hl			;540c
+	bit 7,(hl)		;540d
+	jr z,l5413h		;540f
+	res 2,b		;5411
+l5413h:
+	ld de,lfff3h		;5413
+	add hl,de			;5416
+	bit 7,(hl)		;5417
+	jr z,l5421h		;5419
+	res 4,c		;541b
+	res 3,c		;541d
+	set 5,c		;541f
+l5421h:
+	dec hl			;5421
+	bit 7,(hl)		;5422
+	jr z,l542ch		;5424
+	res 0,c		;5426
+	res 2,c		;5428
+	set 1,c		;542a
+l542ch:
+	dec hl			;542c
+	dec hl			;542d
+	bit 7,(hl)		;542e
+	jr z,l5436h		;5430
+	res 2,b		;5432
+	set 1,b		;5434
+l5436h:
+	ld de,lfff3h		;5436
+	add hl,de			;5439
+	bit 7,(hl)		;543a
+	jr z,l5442h		;543c
+	ld a,c			;543e
+	and 0c7h		;543f
+	ld c,a			;5441
+l5442h:
+	dec hl			;5442
+	bit 7,(hl)		;5443
+	jr z,l544dh		;5445
+	ld a,c			;5447
+	and 0c5h		;5448
+	ld c,a			;544a
+	set 6,b		;544b
+l544dh:
+	dec hl			;544d
+	bit 7,(hl)		;544e
+l5450h:
+	jr z,l5456h		;5450
+	set 6,b		;5452
+	res 1,b		;5454
+l5456h:
+	dec hl			;5456
+	bit 7,(hl)		;5457
+	jr z,l545dh		;5459
+	res 1,b		;545b
+l545dh:
+	ret			;545d
+l545eh:
+	ld bc,l0c45h		;545e
+	dec hl			;5461
+	dec hl			;5462
+	bit 7,(hl)		;5463
+	jr z,l546bh		;5465
+	res 3,b		;5467
+	set 4,b		;5469
+l546bh:
+	inc hl			;546b
+	bit 7,(hl)		;546c
+	jr z,l5474h		;546e
+	res 2,b		;5470
+	set 0,b		;5472
+l5474h:
+	inc hl			;5474
+	inc hl			;5475
+	bit 7,(hl)		;5476
+	jr z,l547ch		;5478
+	res 2,c		;547a
+l547ch:
+	ld de,lffedh		;547c
+	add hl,de			;547f
+	bit 7,(hl)		;5480
+	jr z,l548ah		;5482
+	res 4,b		;5484
+	res 3,b		;5486
+	set 5,b		;5488
+l548ah:
+	inc hl			;548a
+	bit 7,(hl)		;548b
+	jr z,l5495h		;548d
+	res 0,b		;548f
+	res 2,b		;5491
+	set 1,b		;5493
+l5495h:
+	inc hl			;5495
+	inc hl			;5496
+	bit 7,(hl)		;5497
+	jr z,l549dh		;5499
+	set 1,c		;549b
+l549dh:
+	ld de,lffedh		;549d
+	add hl,de			;54a0
+	bit 7,(hl)		;54a1
+	jr z,l54a9h		;54a3
+	ld a,b			;54a5
+	and 0c7h		;54a6
+	ld b,a			;54a8
+l54a9h:
+	inc hl			;54a9
+	bit 7,(hl)		;54aa
+	jr z,l54b4h		;54ac
+	ld a,b			;54ae
+	and 0c5h		;54af
+	ld b,a			;54b1
+	set 6,b		;54b2
+l54b4h:
+	inc hl			;54b4
+	bit 7,(hl)		;54b5
+	jr z,l54bdh		;54b7
+	set 6,b		;54b9
+	res 1,c		;54bb
+l54bdh:
+	inc hl			;54bd
+	bit 7,(hl)		;54be
+	jr z,l54c4h		;54c0
+	res 1,c		;54c2
+l54c4h:
+	ret			;54c4
+sub_54c5h:
+	ld a,r		;54c5
+	ld e,a			;54c7
+	ld a,r		;54c8
+	add a,e			;54ca
+	rrca			;54cb
+	ld e,a			;54cc
+	ld d,0ffh		;54cd
+l54cfh:
+	srl d		;54cf
+	ld a,d			;54d1
+	and e			;54d2
+	cp c			;54d3
+	jr nc,l54cfh		;54d4
+	ld c,a			;54d6
+	ret			;54d7
+	call sub_52fdh		;57cd
+	ld e,(iy+01dh)		;57d0
+	rst 38h			;57d3
+	ei			;57d4
+	ld d,a			;57d5
+	dec hl			;57d6
+	ld e,b			;57d7
+	ld a,(bc)			;57d8
+	ld e,b			;57d9
+	ld h,d			;57da
+	dec sp			;57db
+	call po,sub_9557h		;57dc
+	ld e,c			;57df
+	ld c,a			;57e0
+	ld e,c			;57e1
+	and e			;57e2
+	ld e,b			;57e3
+	ld a,(ix+00dh)		;57e4
+	cp 020h		;57e7
+	ret c			;57e9
+	ld a,001h		;57ea
+	xor (iy+01eh)		;57ec
+	ld (iy+01eh),a		;57ef
+	set 0,(ix+001h)		;57f2
+	ld (iy+01dh),005h		;57f6
+	ret			;57fa
+	ld a,(ix+00dh)		;57fb
+	cp 004h		;57fe
+	ret c			;5800
+	res 3,(iy+001h)		;5801
+	ld (iy+01dh),003h		;5805
+	ret			;5809
+	bit 1,(iy+01eh)		;580a
+	jr nz,l5819h		;580e
+	set 1,(iy+01eh)		;5810
+l5814h:
+	ld (ix+00dh),000h		;5814
+	ret			;5818
+l5819h:
+	ld a,(ix+00dh)		;5819
+	cp 008h		;581c
+	ret c			;581e
+	bit 3,(ix+001h)		;581f
+	jp nz,l5894h		;5823
+	ld (iy+01dh),006h		;5826
+	ret			;582a
+	bit 2,(iy+001h)		;582b
+	jr nz,l587bh		;582f
+	bit 1,(iy+01eh)		;5831
+	jr z,l5844h		;5835
+	set 2,(iy+001h)		;5837
+	res 5,(ix+001h)		;583b
+	ld (ix+00dh),000h		;583f
+	ret			;5843
+l5844h:
+	bit 1,(ix+001h)		;5844
+	jr z,l5858h		;5848
+	ld a,(ix+00eh)		;584a
+	res 1,(ix+001h)		;584d
+	ld hl,lc2bah		;5851
+l5854h:
+	res 0,(hl)		;5854
+	jr l5861h		;5856
+l5858h:
+	call sub_7379h		;5858
+	ret nc			;585b
+	ld (ix+00eh),a		;585c
+	ld (hl),080h		;585f
+l5861h:
+	set 2,(iy+001h)		;5861
+	set 3,(ix+001h)		;5865
+	ld (ix+00dh),000h		;5869
+	ld hl,l48afh		;586d
+	rst 8			;5870
+	rst 10h			;5871
+	push de			;5872
+	ex (sp),ix		;5873
+	call sub_4592h		;5875
+	pop ix		;5878
+	ret			;587a
+l587bh:
+	ld a,(ix+00dh)		;587b
+	cp 008h		;587e
+	ret c			;5880
+	ld (iy+01dh),005h		;5881
+	res 2,(iy+001h)		;5885
+	ld a,002h		;5889
+	xor (iy+01eh)		;588b
+	ld (iy+01eh),a		;588e
+	bit 1,a		;5891
+	ret z			;5893
+l5894h:
+	res 3,(ix+001h)		;5894
+	ld (iy+01dh),006h		;5898
+	ld a,(ix+00eh)		;589c
+	call sub_6eb7h		;589f
+	ret			;58a2
+	bit 3,(ix+001h)		;58a3
+	jr nz,l58afh		;58a7
+	call sub_58cfh		;58a9
+	jr c,l58b8h		;58ac
+sub_58aeh:
+	ret			;58ae
+l58afh:
+	ld a,(ix+00dh)		;58af
+	cp 016h		;58b2
+	ret c			;58b4
+	call sub_5917h		;58b5
+l58b8h:
+	res 3,(ix+001h)		;58b8
+	set 5,(iy+000h)		;58bc
+	set 1,(iy+01eh)		;58c0
+	ld (iy+01dh),006h		;58c4
+	ld a,(ix+00eh)		;58c8
+	call sub_6eb7h		;58cb
+	ret			;58ce
+sub_58cfh:
+	set 6,(iy+000h)		;58cf
+	res 5,(iy+000h)		;58d3
+	ld (ix+00dh),000h		;58d7
+	set 3,(ix+001h)		;58db
+	ld a,(ix+00eh)		;58df
+	ld hl,l48afh		;58e2
+	rst 8			;58e5
+	rst 10h			;58e6
+	push de			;58e7
+	ex (sp),ix		;58e8
+	call sub_5928h		;58ea
+	ld a,(hl)			;58ed
+	cp 008h		;58ee
+	jr nc,l58f5h		;58f0
+	pop ix		;58f2
+	ret			;58f4
+l58f5h:
+	cp 080h		;58f5
+	ld hl,lc08ah		;58f7
+	ld (hl),000h		;58fa
+	jr nc,l590bh		;58fc
+	set 0,(iy+001h)		;58fe
+	call sub_49aeh		;5902
+	res 0,(iy+001h)		;5905
+	jr l590eh		;5909
+l590bh:
+	call sub_4938h		;590b
+l590eh:
+	ld a,0ffh		;590e
+	ld (lc835h),a		;5910
+	pop ix		;5913
+	or a			;5915
+	ret			;5916
+sub_5917h:
+	ld a,(ix+00eh)		;5917
+	ld hl,l48afh		;591a
+	rst 8			;591d
+	rst 10h			;591e
+	push de			;591f
+	ex (sp),ix		;5920
+	call sub_4b98h		;5922
+	pop ix		;5925
+	ret			;5927
+sub_5928h:
+	ld b,(iy+01eh)		;5928
+	ld a,008h		;592b
+	bit 1,b		;592d
+	ld b,000h		;592f
+	jr z,l5937h		;5931
+	ld a,0f8h		;5933
+	set 1,b		;5935
+l5937h:
+	add a,(iy+00eh)		;5937
+	ld h,a			;593a
+	bit 0,(iy+01eh)		;593b
+	ld a,01ah		;593f
+	jr z,l5947h		;5941
+	ld a,0f6h		;5943
+	set 0,b		;5945
+l5947h:
+	add a,(iy+015h)		;5947
+	ld l,a			;594a
+	call sub_36f0h		;594b
+	ret			;594e
+	ld a,(iy+00ch)		;594f
+	inc a			;5952
+	ret nz			;5953
+	ld a,(ix+001h)		;5954
+	bit 5,a		;5957
+	jr nz,l5967h		;5959
+	set 5,a		;595b
+	ld c,a			;595d
+	ld a,002h		;595e
+	xor (iy+01eh)		;5960
+	ld (iy+01eh),a		;5963
+	ld a,c			;5966
+l5967h:
+	ld (ix+001h),a		;5967
+	bit 1,a		;596a
+	ret z			;596c
+	bit 4,a		;596d
+	jr nz,l597fh		;596f
+	set 4,a		;5971
+	ld (ix+001h),a		;5973
+	ld (iy+01dh),007h		;5976
+	res 1,(iy+01eh)		;597a
+	ret			;597e
+l597fh:
+	ld c,a			;597f
+	ld a,0edh		;5980
+	and c			;5982
+	ld (ix+001h),a		;5983
+	ld hl,lc2bah		;5986
+	res 0,(hl)		;5989
+	bit 1,(iy+001h)		;598b
+	ret z			;598f
+	res 1,(iy+01eh)		;5990
+	ret			;5994
+	call sub_5345h		;5995
+	ld (ix+011h),c		;5998
+	ld (ix+012h),b		;599b
+	bit 5,(ix+000h)		;599e
+	jr z,l59e5h		;59a2
+	res 2,(ix+001h)		;59a4
+	ld a,(ix+005h)		;59a8
+	ld b,(iy+01eh)		;59ab
+	srl b		;59ae
+	add a,a			;59b0
+	jr nc,l59b5h		;59b1
+	neg		;59b3
+l59b5h:
+	ld e,a			;59b5
+	ccf			;59b6
+	rl b		;59b7
+	cp 020h		;59b9
+	jr c,l59c1h		;59bb
+	res 0,(ix+001h)		;59bd
+l59c1h:
+	bit 0,(ix+001h)		;59c1
+	jr nz,l59ceh		;59c5
+	cp 020h		;59c7
+	jr c,l59ceh		;59c9
+	ld (iy+01eh),b		;59cb
+l59ceh:
+	ld a,(ix+004h)		;59ce
+	add a,a			;59d1
+	jr z,l59d6h		;59d2
+	jr nc,l59dfh		;59d4
+l59d6h:
+	neg		;59d6
+	cp 020h		;59d8
+	jp nc,l5a66h		;59da
+	jr l59e2h		;59dd
+l59dfh:
+	cp e			;59df
+	jr nc,l5a2dh		;59e0
+l59e2h:
+	jp l5b4bh		;59e2
+l59e5h:
+	ld a,r		;59e5
+	ld c,a			;59e7
+	ld a,r		;59e8
+	add a,c			;59ea
+	and 00fh		;59eb
+	cp 002h		;59ed
+	jr z,l5a2dh		;59ef
+	ld bc,l0000h		;59f1
+	ld hl,l3f0fh		;59f4
+	ld a,(ix+011h)		;59f7
+	and h			;59fa
+	ld e,a			;59fb
+	ld a,(ix+012h)		;59fc
+	and h			;59ff
+	ld d,a			;5a00
+	bit 0,(iy+01eh)		;5a01
+	jr z,l5a18h		;5a05
+	ld a,d			;5a07
+	and l			;5a08
+	ld b,a			;5a09
+	jr nz,l5a2ah		;5a0a
+	ld a,d			;5a0c
+	or a			;5a0d
+	ld b,a			;5a0e
+	jr nz,l5a2ah		;5a0f
+	ld a,e			;5a11
+	or a			;5a12
+	ld c,a			;5a13
+	jr nz,l5a2ah		;5a14
+	jr l5a27h		;5a16
+l5a18h:
+	ld a,e			;5a18
+	and l			;5a19
+	ld c,a			;5a1a
+	jr nz,l5a2ah		;5a1b
+	ld a,e			;5a1d
+	or a			;5a1e
+	ld c,a			;5a1f
+	jr nz,l5a2ah		;5a20
+	ld a,d			;5a22
+	or a			;5a23
+	ld b,a			;5a24
+	jr nz,l5a2ah		;5a25
+l5a27h:
+	jp l5b4bh		;5a27
+l5a2ah:
+	jp l5bf2h		;5a2a
+l5a2dh:
+	ld c,(ix+011h)		;5a2d
+	ld b,(ix+012h)		;5a30
+	bit 0,(iy+01eh)		;5a33
+	ld a,00ch		;5a37
+	jr z,l5a44h		;5a39
+	and b			;5a3b
+	jr z,l5a4ch		;5a3c
+	ld b,a			;5a3e
+	ld c,000h		;5a3f
+l5a41h:
+	jp l5bf2h		;5a41
+l5a44h:
+	and c			;5a44
+	jr z,l5a4ch		;5a45
+	ld c,a			;5a47
+	ld b,000h		;5a48
+	jr l5a41h		;5a4a
+l5a4ch:
+	call sub_5c32h		;5a4c
+	ld bc,lc080h		;5a4f
+	ld a,(bc)			;5a52
+	bit 1,a		;5a53
+	jr z,l5a5eh		;5a55
+	rra			;5a57
+	jp nc,l5addh		;5a58
+	jp l5b4bh		;5a5b
+l5a5eh:
+	inc bc			;5a5e
+	ld a,(bc)			;5a5f
+	rra			;5a60
+	jp c,l5b4bh		;5a61
+	jr nc,l5aabh		;5a64
+l5a66h:
+	ld c,(ix+011h)		;5a66
+	ld b,(ix+012h)		;5a69
+	bit 0,(iy+01eh)		;5a6c
+	ld a,022h		;5a70
+	jr z,l5a7dh		;5a72
+	and b			;5a74
+	jr z,l5a85h		;5a75
+	ld b,a			;5a77
+	ld c,000h		;5a78
+l5a7ah:
+	jp l5bf2h		;5a7a
+l5a7dh:
+	and c			;5a7d
+	jr z,l5a85h		;5a7e
+	ld c,a			;5a80
+	ld b,000h		;5a81
+	jr l5a7ah		;5a83
+l5a85h:
+	call sub_5c32h		;5a85
+	ld bc,lc07eh		;5a88
+	ld a,(bc)			;5a8b
+	bit 1,a		;5a8c
+	jr z,l5a96h		;5a8e
+	rra			;5a90
+	jp c,l5b4bh		;5a91
+	jr l5b09h		;5a94
+l5a96h:
+	inc bc			;5a96
+	ld a,(bc)			;5a97
+	bit 1,a		;5a98
+	jr z,l5aa3h		;5a9a
+	rra			;5a9c
+	jp nc,l5b2bh		;5a9d
+	jp l5b4bh		;5aa0
+l5aa3h:
+	inc bc			;5aa3
+	ld a,(bc)			;5aa4
+	rra			;5aa5
+	jp c,l5b4bh		;5aa6
+	jr l5addh		;5aa9
+l5aabh:
+	call sub_5b12h		;5aab
+	ret nc			;5aae
+	set 1,(iy+01eh)		;5aaf
+	call sub_5928h		;5ab3
+	res 1,(iy+01eh)		;5ab6
+	cp (ix+014h)		;5aba
+	jr z,l5ac4h		;5abd
+	ld a,(lc2bbh)		;5abf
+	cp e			;5ac2
+	ret z			;5ac3
+l5ac4h:
+	call sub_7379h		;5ac4
+	ret nc			;5ac7
+	ld (ix+00eh),a		;5ac8
+	ld (hl),080h		;5acb
+	ld a,e			;5acd
+	ld (ix+014h),a		;5ace
+	ld (lc2bbh),a		;5ad1
+	ld (iy+01dh),007h		;5ad4
+	set 1,(iy+01eh)		;5ad8
+	ret			;5adc
+l5addh:
+	call sub_5b12h		;5add
+	jr nc,l5b04h		;5ae0
+	call sub_5928h		;5ae2
+	cp (ix+014h)		;5ae5
+	jr z,l5aefh		;5ae8
+	ld a,(lc2bbh)		;5aea
+	cp e			;5aed
+	ret z			;5aee
+l5aefh:
+	call sub_7379h		;5aef
+	jr nc,l5b04h		;5af2
+	ld (hl),080h		;5af4
+	ld (ix+00eh),a		;5af6
+	ld a,e			;5af9
+	ld (ix+014h),a		;5afa
+	ld (lc2bbh),a		;5afd
+	ld (iy+01dh),007h		;5b00
+l5b04h:
+	res 1,(iy+01eh)		;5b04
+	ret			;5b08
+l5b09h:
+	ld (iy+01dh),000h		;5b09
+	set 1,(iy+01eh)		;5b0d
+	ret			;5b11
+sub_5b12h:
+	ld a,(iy+015h)		;5b12
+	sub 006h		;5b15
+	and 00fh		;5b17
+	cp 005h		;5b19
+	ret			;5b1b
+l5b1ch:
+	ld (iy+01dh),004h		;5b1c
+	ld (ix+00dh),000h		;5b20
+	ret			;5b24
+l5b25h:
+	res 1,(iy+001h)		;5b25
+	jr l5b2fh		;5b29
+l5b2bh:
+	set 1,(iy+001h)		;5b2b
+l5b2fh:
+	ld a,(lc2bah)		;5b2f
+	rra			;5b32
+	ret c			;5b33
+	call sub_7379h		;5b34
+	ret nc			;5b37
+	ld (ix+00eh),a		;5b38
+	ld (hl),080h		;5b3b
+	ld hl,lc2bah		;5b3d
+	set 0,(hl)		;5b40
+	set 1,(ix+001h)		;5b42
+	ld (iy+01dh),000h		;5b46
+	ret			;5b4a
+l5b4bh:
+	ld c,(ix+011h)		;5b4b
+	ld b,(ix+012h)		;5b4e
+	bit 0,(iy+01eh)		;5b51
+	ld a,033h		;5b55
+	jr z,l5b6bh		;5b57
+	ld de,l0200h		;5b59
+	and b			;5b5c
+	jr z,l5b7ch		;5b5d
+	bit 0,a		;5b5f
+	jr z,l5b65h		;5b61
+	and 0cfh		;5b63
+l5b65h:
+	ld b,a			;5b65
+	ld c,000h		;5b66
+l5b68h:
+	jp l5bf2h		;5b68
+l5b6bh:
+	ld de,l0004h		;5b6b
+	and c			;5b6e
+	jr z,l5b7ch		;5b6f
+	bit 0,a		;5b71
+	jr z,l5b77h		;5b73
+	and 0cfh		;5b75
+l5b77h:
+	ld c,a			;5b77
+	ld b,000h		;5b78
+	jr l5b68h		;5b7a
+l5b7ch:
+	push de			;5b7c
+	call sub_5c32h		;5b7d
+	pop de			;5b80
+	ld bc,lc081h		;5b81
+	ld a,(bc)			;5b84
+	bit 1,a		;5b85
+	jr nz,l5b95h		;5b87
+	rra			;5b89
+	jr c,l5bbeh		;5b8a
+	dec bc			;5b8c
+	ld a,(bc)			;5b8d
+	cp 003h		;5b8e
+	jr z,l5ba0h		;5b90
+	jp l5aabh		;5b92
+l5b95h:
+	dec bc			;5b95
+	ld a,(bc)			;5b96
+	bit 1,a		;5b97
+	ret z			;5b99
+	rra			;5b9a
+	jr c,l5ba0h		;5b9b
+	jp l5addh		;5b9d
+l5ba0h:
+	dec bc			;5ba0
+	dec bc			;5ba1
+	ld a,(bc)			;5ba2
+	bit 1,a		;5ba3
+	jr z,l5bb5h		;5ba5
+	rra			;5ba7
+	jp c,l5b1ch		;5ba8
+	inc bc			;5bab
+	ld a,(bc)			;5bac
+	cp 003h		;5bad
+	jp z,l5b1ch		;5baf
+	jp l5b09h		;5bb2
+l5bb5h:
+	inc bc			;5bb5
+	ld a,(bc)			;5bb6
+	rra			;5bb7
+	jp c,l5b1ch		;5bb8
+	jp l5b25h		;5bbb
+l5bbeh:
+	ld bc,lc07eh		;5bbe
+	ld a,(bc)			;5bc1
+	cp 003h		;5bc2
+	jr z,l5be4h		;5bc4
+	inc bc			;5bc6
+	ld a,(bc)			;5bc7
+	dec bc			;5bc8
+	cp 003h		;5bc9
+	jr z,l5be4h		;5bcb
+	ld a,(bc)			;5bcd
+	bit 1,a		;5bce
+	jp nz,l5b09h		;5bd0
+	inc bc			;5bd3
+	ld a,(bc)			;5bd4
+	bit 1,a		;5bd5
+	jp nz,l5b2bh		;5bd7
+	inc bc			;5bda
+	ld a,(bc)			;5bdb
+	rra			;5bdc
+	jp nc,l5addh		;5bdd
+l5be0h:
+	ld c,e			;5be0
+	ld b,d			;5be1
+	jr l5bf2h		;5be2
+l5be4h:
+	inc bc			;5be4
+	inc bc			;5be5
+	ld a,(bc)			;5be6
+	bit 1,a		;5be7
+	jr z,l5be0h		;5be9
+	rra			;5beb
+	jp nc,l5addh		;5bec
+	jp l5b1ch		;5bef
+l5bf2h:
+	rl c		;5bf2
+	srl b		;5bf4
+	rr c		;5bf6
+	call sub_51d7h		;5bf8
+	ld e,a			;5bfb
+	rst 38h			;5bfc
+	add hl,de			;5bfd
+	ld e,h			;5bfe
+	inc hl			;5bff
+	ld e,h			;5c00
+	add hl,de			;5c01
+	ld e,h			;5c02
+	inc hl			;5c03
+	ld e,h			;5c04
+	inc hl			;5c05
+	ld e,h			;5c06
+	inc hl			;5c07
+	ld e,h			;5c08
+	ld h,d			;5c09
+	dec sp			;5c0a
+	ld e,05ch		;5c0b
+	add hl,hl			;5c0d
+	ld e,h			;5c0e
+	ld e,05ch		;5c0f
+	add hl,hl			;5c11
+	ld e,h			;5c12
+	add hl,hl			;5c13
+	ld e,h			;5c14
+	add hl,hl			;5c15
+	ld e,h			;5c16
+	add hl,bc			;5c17
+	ld e,e			;5c18
+	ld (iy+01eh),000h		;5c19
+	ret			;5c1d
+	ld (iy+01eh),001h		;5c1e
+	ret			;5c22
+	ld (iy+01eh),000h		;5c23
+	jr l5c2dh		;5c27
+	ld (iy+01eh),001h		;5c29
+l5c2dh:
+	ld (iy+01dh),000h		;5c2d
+	ret			;5c31

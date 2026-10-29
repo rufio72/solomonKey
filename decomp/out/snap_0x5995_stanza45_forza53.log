@@ -1,0 +1,10 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+FORZA iy+00 (C5EE) = 00
+FORZA iy+03 (C5F1) = 2A
+FORZA ix+01 (C33A) = 00
+FORZA ix+00 (C339) = 26
+FORZA iy+03 (C5F1) = 02
+FORZA iy+01 (C5EF) = 02
+FORZA ix+05 (C33E) = 00
+SNAP: catturata occorrenza 1 di 0x5995 [stanza45_forza53] al frame 1953, scartate 0
+Average speed: 2976.20% (31 seconds)

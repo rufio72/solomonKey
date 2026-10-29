@@ -113,6 +113,7 @@ void sub_4592(struct z80 *z)
     sub_36f0(z);                               /* 45D6 */
     uint8_t cella2 = (uint8_t)(M(HL(z)) >> 7); /* 45D9 rla */
     if (!cella1 && !cella2) {                  /* 45DB rl b; jr z */
+        z->a = (uint8_t)(M(HL(z)) << 1);       /* 45DA rla: A resta così (riporto di 36F0 = 0) */
         z->b = (uint8_t)((b << 1) | cella2);
         NEMICI_PONI_RIPORTO(z, 1);
         return;

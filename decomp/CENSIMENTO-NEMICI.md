@@ -399,6 +399,17 @@ entrano anche nel banco (`harness`) e ogni lotto si verifica con catture
 MAME (stato `stanzaNN` di `cattura.sh`, forzature `SNAP_FORZA`); elenco e
 stati in `ROUTINE.md`, sezione «Motore dei nemici (lotto N2)».
 
+**Lotto N3 fatto** (brief 29, 2026-10-29): il tipo 9 (57CD) in
+`nemici_tipo09.c` (57CD, 57E4, 57FB, 580A, 582B, 58A3, 594F, 5894 statica) e
+`nemici_tipo09b.c` (5995, 5B12, 5C19, 5C1E, 5C23, 5C29, 5B09 e 5C2D statiche),
+diviso in due per stare sotto le 700 righe. Con N3 sono state anticipate 5
+dipendenze di altri lotti, ognuna nel modulo prescritto: 52FD, 5345, 54C5 da N6
+(`nemici_tipo06b.c`) e 51D7, 24DF da N10 (`nemici_tipo06a.c`). 18 voci nuove
+nel banco; 5B09 senza cattura (mai eseguita). Il registro R dei due `ld a,r`
+(54C5, 59E5) non sta nelle catture: lo cerca il banco (`nemici_r.c`), vedi
+`ROUTINE.md`, sezione «Motore dei nemici (lotto N3)». N6 e N10 non hanno più
+da tradurre quelle cinque routine.
+
 **Lotti N2-N12**: le routine non coperte, un lotto per modulo. Sono in
 ordine di utilità, cioè di byte eseguiti nell'unione storica delle sessioni.
 Ingressi completi in `out/censimento_nemici_lotti.txt`.

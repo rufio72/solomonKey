@@ -1,0 +1,12 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+FORZA ix+00 (C3C9) = C8
+FORZA iy+01 (C70F) = 07
+FORZA iy+01 (C70F) = 0D
+FORZA ix+03 (C3CC) = 00
+FORZA ix+14 (C3DD) = 3D
+FORZA iy+01 (C70F) = 02
+FORZA iy+1E (C72C) = 03
+FORZA ix+FD3E (C107) = 00
+FORZA ix+FD2D (C0F6) = 00
+SNAP: catturata occorrenza 1 di 0x5995 [stanza33_forza944] al frame 1953, scartate 0
+Average speed: 3036.32% (31 seconds)
