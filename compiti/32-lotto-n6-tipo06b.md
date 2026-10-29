@@ -359,3 +359,16 @@ dove è scritto `>=` o «attesa, non misurata». Abbreviazione:
 4. 5292 con una sola cattura non forzata, stato `tradotta`: sì.
 5. Soglia gcov 90% sui due file: sì.
 6. `STATO.md` e `README.md` li aggiorna la chat principale: sì.
+
+## Esito (chat principale, 2026-10-29)
+
+Quarto ciclo dello schema economico, passato al primo colpo.
+- Le 15 verifiche rieseguite dalla chat principale passano tutte, compresa
+  la copertura (11) col filtro del brief: `2 0` (97,83% e 97,74%). Banco a
+  671 catture (209 voci, 0 fallite), replay a fine oracolo, le 5 voci
+  precedenti (51D7, 52FD, 5345, 54C5, 6C2C) invariate a 2/2.
+- La forzatura `BC = 1<<j` su 51FA ha aperto tutte le 14 voci della
+  tabella 5207 (30 catture su 51FA). Anticipate da N10 le 5 routine
+  risolte in apertura. Nuovo wrapper `banco_r_51fa` in `nemici_r.c`.
+- **Token**: analista Sonnet ~139k, sviluppatore Sonnet ~60k (nuovo
+  minimo), verifica 0. Totale ~199k ≈ 0,4-0,7 $.
