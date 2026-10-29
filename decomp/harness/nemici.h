@@ -103,6 +103,34 @@ void sub_5928(struct z80 *z);
 /* Lotto N1, nemici_comparsa.c. */
 void sub_734d(struct z80 *z);
 
+/* Lotto N4, comparsa (brief 30): nemici_comparsa.c e nemici_comparsab.c.
+ * 14FC, 73C7 e 7456 sono statiche; 4FC5 non ha voce nel banco. */
+void sub_134b(struct z80 *z);
+void sub_139c(struct z80 *z);
+void sub_13ab(struct z80 *z);
+void sub_13b9(struct z80 *z);
+void sub_13fc(struct z80 *z);
+void sub_1413(struct z80 *z);
+void sub_14d4(struct z80 *z);
+void sub_1549(struct z80 *z);
+void sub_2548(struct z80 *z);
+void sub_4f40(struct z80 *z);
+void sub_4fc5(struct z80 *z);
+void sub_7288(struct z80 *z);
+void sub_7294(struct z80 *z);
+void sub_72b6(struct z80 *z);
+void sub_72ce(struct z80 *z);
+void sub_72da(struct z80 *z);
+void sub_738f(struct z80 *z);
+void sub_73a3(struct z80 *z);
+void sub_7412(struct z80 *z);
+void sub_741d(struct z80 *z);
+void sub_7470(struct z80 *z);
+void sub_74ab(struct z80 *z);
+void sub_756c(struct z80 *z);
+void sub_758e(struct z80 *z);
+void sub_759f(struct z80 *z);
+
 /* Lotto N1, nemici_tipi_15_17.c. */
 void sub_7f51(struct z80 *z);
 void sub_7f68(struct z80 *z);
@@ -183,7 +211,6 @@ void sub_2474(struct z80 *z);
 void sub_4649(struct z80 *z);
 void sub_46a3(struct z80 *z);
 void sub_4ada(struct z80 *z);
-void sub_4f40(struct z80 *z);
 void sub_4fd4(struct z80 *z);
 void sub_54d8(struct z80 *z);
 void sub_55c4(struct z80 *z);
@@ -193,8 +220,6 @@ void sub_6b43(struct z80 *z);
 void sub_6c0b(struct z80 *z);
 void sub_6c1d(struct z80 *z);
 void sub_719e(struct z80 *z);
-void sub_7288(struct z80 *z);
-void sub_73a3(struct z80 *z);
 void sub_7f48(struct z80 *z);
 void sub_7f81(struct z80 *z);
 void sub_7f8a(struct z80 *z);

@@ -1,0 +1,9 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+FORZA iy+1D (C66B) = 02
+FORZA ix+01 (C36A) = 02
+FORZA ix+08 (C371) = 05
+FORZA iy+1A (C668) = 01
+FORZA iy+0B (C659) = 00
+FORZA iy+12 (C660) = 00
+SNAP: catturata occorrenza 1 di 0x7288 [stanza11_forza_e02] al frame 2052, scartate 0
+Average speed: 2949.34% (33 seconds)

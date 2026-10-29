@@ -1,0 +1,8 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+FORZA iy+1D (C7EB) = 00
+FORZA ix+04 (C42D) = 00
+FORZA ix+05 (C42E) = 00
+FORZA ix+01 (C42A) = 00
+FORZA ix+FE0F (C238) = 09
+SNAP: catturata occorrenza 1 di 0x73A3 [stanza03_forza16] al frame 1953, scartate 0
+Average speed: 2933.13% (31 seconds)

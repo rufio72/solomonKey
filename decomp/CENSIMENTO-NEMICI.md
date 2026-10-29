@@ -410,6 +410,15 @@ nel banco; 5B09 senza cattura (mai eseguita). Il registro R dei due `ld a,r`
 `ROUTINE.md`, sezione «Motore dei nemici (lotto N3)». N6 e N10 non hanno più
 da tradurre quelle cinque routine.
 
+**Lotto N4 fatto** (brief 30, 2026-10-29): la comparsa (tipi 0, 4 e 5 di 4F1B),
+28 routine, divisa in `nemici_comparsa.c` (4F40, 4FC5, 738F, 13xx/14xx, 1549 e
+le 734D e 80A5 già tradotte) e `nemici_comparsab.c` (7288, 73A3 e le loro fasi,
+756C, 758E, 759F, 2548), per stare sotto le 700 righe. 24 voci nuove nel banco;
+14FC, 4FC5 e 73C7 (e la coda 7456) sono tradotte senza voce propria, perché
+nessuna sessione le ha mai eseguite: le coprono le catture forzate di 4F40 e
+73A3 e gcov. Nuovo script `cattura_oggetti.sh` per lo stato «oggetti» (4F40 e
+13xx/14xx), vedi `ROUTINE.md`, sezione «Motore dei nemici (lotto N4)».
+
 **Lotti N2-N12**: le routine non coperte, un lotto per modulo. Sono in
 ordine di utilità, cioè di byte eseguiti nell'unione storica delle sessioni.
 Ingressi completi in `out/censimento_nemici_lotti.txt`.
@@ -450,6 +459,7 @@ gli indici del 4F1B. L'unica ipotesi semantica è `comparsa`, per 4FC5.
 | `nemici.c` | corpo 0A (4DA2), smistatori 4DA6 e 4F1B, ramo 4632, voce nulla 3B62 | 11 | 625 | 375 |
 | `nemici_comuni.c` | routine condivise con i corpi 01 e 10 | 10 | 812 | 487 |
 | `nemici_comparsa.c` | tipi 0, 4 e 5 di 4F1B; 4FC5 (comparsa) condivisa da 0 e 4 | 30 | 1040 | 624 |
+| `nemici_comparsab.c` | seconda parte di `nemici_comparsa.c` (brief 30): 7288, 73A3 e le loro fasi, 756C, 758E, 759F, 2548 | - | - | - |
 | `nemici_tipo06a.c` | tipo 6 di 4F1B (4FD4), prima metà per indirizzo | 27 | 647 | 388 |
 | `nemici_tipo06b.c` | tipo 6 di 4F1B (4FD4), seconda metà | 11 | 612 | 367 |
 | `nemici_tipo07a.c` | tipo 7 di 4F1B (5CFB), prima metà per indirizzo | 15 | 677 | 406 |

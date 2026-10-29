@@ -1,0 +1,16 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+FORZA iy+1D (C7EB) = 06
+FORZA ix+04 (C42D) = 40
+FORZA ix+01 (C42A) = 02
+FORZA iy+0C (C7DA) = 00
+FORZA iy+13 (C7E1) = 00
+FORZA iy+08 (C7D6) = 01
+FORZA iy+09 (C7D7) = 00
+FORZA iy+0A (C7D8) = 00
+FORZA iy+0B (C7D9) = FF
+FORZA iy+0F (C7DD) = 01
+FORZA iy+10 (C7DE) = 00
+FORZA iy+11 (C7DF) = 00
+FORZA iy+12 (C7E0) = FF
+SNAP: catturata occorrenza 1 di 0x73A3 [stanza03_forza20] al frame 1953, scartate 0
+Average speed: 2919.81% (31 seconds)

@@ -345,3 +345,71 @@ C = 0 di 54C5 (l'originale non esce). 5B09 è tradotta senza cattura.
 | 0x5C23 | sub_5c23 | nemici_tipo09b.c | 6 | 5BFC[1], [3], [4], [5]: direzione 0, cade in 5C2D | verificata | 3 | stanza33, stanza50 | stanza33_n2 f2035; stanza33 f2034; stanza50 f2038 |
 | 0x5C29 | sub_5c29 | nemici_tipo09b.c | 4 | 5BFC[8], [10], [11], [12]: direzione 1, cade in 5C2D | verificata | 2 | stanza33, stanza45 | stanza33 f2346; stanza45 f2041 |
 | 0x5C2D | sub_5c2d | nemici_tipo09b.c | 5 | statica, coda di 5C23 e 5C29: fase 0 | tradotta | - | - | senza voce propria: coperta dalle catture dei chiamanti (5C23, 5C29) |
+
+## Motore dei nemici (lotto N4)
+
+Comparsa (tipi 0, 4 e 5 del gestore 4F1B, brief 30): `harness/nemici_comparsa.c`
+(4F40, 4FC5, 738F, 13xx/14xx, 1549, con 734D e 80A5 dei lotti N1 e N2; 14FC
+statica) e `harness/nemici_comparsab.c` (7288 e le fasi del tipo 5, 73A3 e le
+fasi del tipo 4, 756C, 758E, 759F, 2548; 73C7 e 7456 statiche), divisi per
+stare sotto le 700 righe. Nessun `ld a,r`: niente wrapper `banco_r_*`.
+
+**Stato «oggetti».** Le routine 4F40 e 13xx/14xx si eseguono solo nella sessione
+«oggetti» (oggetti 08-1B in coda c05b e posta 22): l'attività 22 / 12D6 le
+chiama dalla tabella 130A, per cui le catture hanno «dopo» a PC=12E8.
+`cattura_oggetti.sh` replica quello stato (oggetti e posta ripetuti due
+volte, perché 13AB, 13B9 e 14D4 si eseguano almeno due volte) passando per
+`cattura.sh`; i file hanno tag `gioco_oggetti[_n2|_forzaNN]`. Le altre voci
+usano `stanzaNN` (tipo 5: stanze 02, 11, 17; tipo 4: 03, 12) e `finale`
+(7412, che nelle stanze non scatta in cattura; seconda cattura `finale_n2`).
+
+**Catture forzate** (`SNAP_FORZA`, suffisso `forza*`, righe FORZA nei `.log`):
+non contano per lo stato `verificata`. 4F40 (oggetti): `iy+1d`/`iy+1e` per
+ognuna delle sei voci di 4FAC (14FC, 13AB, 139C, 13B9, 1413, 14D4), il ramo
+4FB9 (indice 6), il ramo con `iy+1d:00` (80A5 e traduzione della direzione), le
+uscite di 738F e i due rami dopo la distanza; 73A3 (stanza03): `iy+1d:07` con
+`ix+1:00` (primo ramo di 73C7), con `iy+4:0d`, con `ix+1:10` e `ix+8` a 20 e 05
+(ramo 7409 e `ret c`), il ramo con c238 portato a 9 (cella assoluta, con
+scostamento a 16 bit da IX), le fasi 0-3 e 6 di (IY+1D) e gli urti di 74AB; 7288
+(stanza11): fasi 0-3 con vari `ix+1`, `ix+8`, `iy+1a` e la cella davanti (c170,
+con scostamento a 16 bit) per 72B6 e 72DA; 7412 (finale): `ix+8` a 20 e 00; 13FC
+con `a:36` (apre 14FC); 13B9 con c25a a 0200 (134B oltre il limite). 14FC, 4FC5
+e 73C7 non hanno voce nel banco (il breakpoint d'ingresso non scatta mai:
+nessuna sessione le ha eseguite) e sono verificate dalle catture forzate dei
+chiamanti e dalla copertura gcov.
+
+Copertura gcov del banco: `nemici_comparsa.c` 98,46 %, `nemici_comparsab.c`
+99,32 %; 14FC, 4FC5 e 73C7 al 100 %. Righe mai eseguite: in `nemici_comparsa.c`
+il ramo di 734D senza bit accesi nei bit 0-3 (N1, `ld (0000h),a`); nei due
+file il `default` degli `switch` sui `rst 38` (indice sempre in tabella).
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x134B | sub_134b | nemici_comparsa.c | 16 | (c25a) += DE; con il bit 9 acceso vale 0200 | verificata | 2 | oggetti | oggetti_n2 f2702; oggetti f2402 |
+| 0x139C | sub_139c | nemici_comparsa.c | 15 | 4FAC[2]: (c1ad) = 0b, posta l'attività 19, 13FC con A = 2a | verificata | 2 | oggetti | oggetti_n2 f2802; oggetti f2502 |
+| 0x13AB | sub_13ab | nemici_comparsa.c | 14 | 4FAC[1]: (c1ad) = 0c, posta l'attività 19, 13FC con A = 2b | verificata | 2 | oggetti | oggetti_n2 f3502; oggetti f2802 |
+| 0x13B9 | sub_13b9 | nemici_comparsa.c | 10 | 4FAC[3]: 134B con DE = 10, 13FC con A = 2a | verificata | 3 | oggetti | oggetti_n2 f3102; oggetti f2402 — 1 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x13FC | sub_13fc | nemici_comparsa.c | 23 | tabella ROM 150C (3 byte per voce) sommata con 1549, posta l'attività 05; con A = 0d va a 14FC | verificata | 3 | oggetti | oggetti_n2 f2403; oggetti f2402 — 1 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x1413 | sub_1413 | nemici_comparsa.c | 17 | 4FAC[4]: c259 sale fino a 9, tabellone (349F), 13FC con A = 2a | verificata | 2 | oggetti | oggetti_n2 f2802; oggetti f2502 |
+| 0x14D4 | sub_14d4 | nemici_comparsa.c | 40 | 4FAC[5]: cerca la maschera libera in c25c, la somma e ridisegna (349F), 13FC con A = 2a | verificata | 2 | oggetti | oggetti_n2 f3602; oggetti f2902 |
+| 0x14FC | sub_14fc | nemici_comparsa.c | 16 | statica, 4FAC[0] e salto di 13FC con A = 0d: suono 12, c237 += 1, barra 31E9, 13FC con A = 2c | tradotta | - | - | senza cattura diretta: coperta dalle catture forzate di 4F40 e 13FC |
+| 0x1549 | sub_1549 | nemici_comparsa.c | 14 | (c1aa) += DE, (c1ac) += L + riporto | verificata | 2 | oggetti | oggetti_n2 f2403; oggetti f2402 |
+| 0x2548 | sub_2548 | nemici_comparsab.c | 9 | HL += 8 * A, E = A * 8, D = 0 | verificata | 2 | stanza03, stanza12 | stanza03 f1953; stanza12 f1953 |
+| 0x4F40 | sub_4f40 | nemici_comparsa.c | 121 | tipo 0 di 4F1B: comparsa dell'entità; 738F, 4FC5, suono 15, `rst 38` su 4FAC (6 voci), poi 80A5 | verificata | 20 | oggetti | oggetti_n2 f2458; oggetti f2456 — 18 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x4FC5 | sub_4fc5 | nemici_comparsa.c | 15 | c05a = 80, (c058) = posizione (IY+0E, IY+15); condivisa da 4F40 e 73C7 | tradotta | - | - | senza cattura diretta: coperta dalle catture forzate di 4F40 e 73A3 |
+| 0x7288 | sub_7288 | nemici_comparsab.c | 4 | tipo 5 di 4F1B: `rst 38` a 728B su (IY+1D) (4 voci) | verificata | 39 | stanza02, stanza11 | stanza02 f1988; stanza11 f2052 — 37 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x7294 | sub_7294 | nemici_comparsab.c | 34 | tipo 5, fase 0: a 10 fotogrammi fase 3 | verificata | 2 | stanza02, stanza11 | stanza02 f1988; stanza11 f2052 |
+| 0x72B6 | sub_72b6 | nemici_comparsab.c | 24 | tipo 5, fase 2: cella vicina (734D) con il bit 7, fase 1 | verificata | 2 | stanza02, stanza11 | stanza02 f2006; stanza11 f2070 |
+| 0x72CE | sub_72ce | nemici_comparsab.c | 12 | tipo 5, fase 3: con (IY+0B) o (IY+12) non nulli fase 2 | verificata | 2 | stanza02, stanza11 | stanza02 f2005; stanza11 f2068 |
+| 0x72DA | sub_72da | nemici_comparsab.c | 115 | tipo 5, fase 1: bit 1 e 0 di (IX+1), cella vicina (734D), 4938, 4AF6 o 80A5 | verificata | 2 | stanza11, stanza17 | stanza11 f2111; stanza17 f2124 |
+| 0x738F | sub_738f | nemici_comparsa.c | 20 | distanza |(IX+4)| < B e |(IX+5)| < C, riporto in F | verificata | 2 | stanza03, stanza12 | stanza03 f1953; stanza12 f1953 |
+| 0x73A3 | sub_73a3 | nemici_comparsab.c | 20 | tipo 4 di 4F1B: 738F (08, 08) poi `rst 38` a 73B6 su (IY+1D) (8 voci) | verificata | 22 | stanza03, stanza12 | stanza03 f1953; stanza12 f1953 — 20 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x73C7 | sub_73c7 | nemici_comparsab.c | 75 | statica, 73A3[7]: prima volta suono 32, c250 += 1, c238 sale (a 10 barra), 4FC5, 13FC; poi a 10 fotogrammi 80A5 | tradotta | - | - | senza cattura diretta: coperta dalle catture forzate di 73A3 |
+| 0x7412 | sub_7412 | nemici_comparsab.c | 11 | tipo 4, fase 0: a 20 fotogrammi fase 2 | verificata | 4 | finale | finale_n2 f2809; finale f2806 — 2 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x741D | sub_741d | nemici_comparsab.c | 57 | tipo 4, fase 1: velocità da 7468 con i segni di (IX+1) e (IX+11); coda 7456 | verificata | 2 | stanza03, stanza12 | stanza03 f1957; stanza12 f1957 |
+| 0x7456 | sub_7456 | nemici_comparsab.c | 18 | statica, coda di 741D e 7470: fase 6 e velocità azzerate | tradotta | - | - | senza cattura diretta: coperta dalle catture forzate di 741D e 7470 |
+| 0x7470 | sub_7470 | nemici_comparsab.c | 59 | tipo 4, fase 2: come 741D con gli assi scambiati; coda 7456 | verificata | 2 | stanza03, stanza12 | stanza03 f2052; stanza12 f2053 |
+| 0x74AB | sub_74ab | nemici_comparsab.c | 161 | tipo 4, fase 6: urti contro le celle (756C, 758E, 759F) e tabelle 754C e 755C | verificata | 2 | stanza03, stanza12 | stanza03 f1953; stanza12 f1953 |
+| 0x756C | sub_756c | nemici_comparsab.c | 34 | distanza con segno fra due parole, riporto in F | verificata | 2 | stanza03, stanza12 | stanza03 f1953; stanza12 f1953 |
+| 0x758E | sub_758e | nemici_comparsab.c | 17 | confronto di DE con 0050 / FFB0, riporto in F | verificata | 2 | stanza03, stanza12 | stanza03 f1953; stanza12 f1953 |
+| 0x759F | sub_759f | nemici_comparsab.c | 11 | HL += 8 * (B - 0A), A = (IX+6) ^ C | verificata | 2 | stanza03, stanza12 | stanza03 f1953; stanza12 f1953 |
