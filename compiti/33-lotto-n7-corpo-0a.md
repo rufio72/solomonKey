@@ -319,3 +319,16 @@ dell'analista.
    rapporto: sì.
 5. Catture `SNAP_COND` valide come non forzate (precedente 4E87): sì.
 6. `STATO.md` e `README.md` li aggiorna la chat principale: sì.
+
+## Esito (chat principale, 2026-10-29)
+
+Quinto ciclo dello schema economico, passato al primo colpo.
+- Le 15 verifiche rieseguite dalla chat principale passano tutte; gcov
+  conta 5 righe nuove scoperte (limite 8: i rami di 46A3 senza slot
+  libero, non esercitabili). Banco a 706 catture (214 voci, 0 fallite),
+  replay a fine oracolo, voci precedenti invariate.
+- Deviazioni accolte: `leggi()` al posto di `M()` per le liste in ROM
+  (con `M()` 6 catture fallivano); riporto di 4767 non modellato (conta
+  solo in un ramo che le catture non raggiungono, annotato in ROUTINE.md).
+- **Token**: analista Sonnet ~115k, sviluppatore Sonnet ~70k, verifica 0.
+  Totale ~185k ≈ 0,4-0,7 $.
