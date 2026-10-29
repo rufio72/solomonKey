@@ -1,0 +1,8 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+FORZA iy+1E (C75C) = 00
+FORZA ix+0D (C3EE) = 1C
+SNAP: occorrenza 1 scartata (NMI)
+FORZA iy+1E (C75C) = 00
+FORZA ix+0D (C3EE) = 1C
+SNAP: catturata occorrenza 2 di 0x5584 [stanza30_forza01] al frame 2362, scartate 1
+Average speed: 2833.19% (38 seconds)

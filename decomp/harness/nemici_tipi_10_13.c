@@ -3,8 +3,10 @@
  * 5693 (presa di un blocco), 561B (inversione), 55C9 e 5640 (cammino);
  * per 714B 7155 (partenza dalla direzione di (IY+4)) e 7235 (cammino col
  * controllo della cella davanti). Ingressi: 55B2, 55C9, 561B, 5640, 5693,
- * 714B, 7155, 7235. Dal lotto N5, anticipate dal lotto N2 (brief 27) per
- * il tipo 14: 571D, 57AA, 57B3.
+ * 714B, 7155, 7235. Dal lotto N5 (brief 31) anche 55C4 e 6C1D (tipo 12)
+ * e 719E (tipo 10); il resto del lotto (tipi 13 e 11: 54D8, 56E9 e le
+ * loro fasi) sta in nemici_tipi_10_13b.c. Anticipate dal lotto N2
+ * (brief 27) per il tipo 14: 571D, 57AA, 57B3.
  *
  * IX = slot (c2c1 + i·0x18), IY = oggetto (c4fe + i·0x30). Tradotto da
  * out/main64.dasm; tabelle da rst38_tables.h. */
@@ -16,6 +18,7 @@
 #define CLASSI_C081    0xc081
 #define OGGETTI_488D   0x488d   /* ROM: indirizzo per indice (IX+0E) */
 #define DIREZIONI_7196 0x7196   /* ROM: quattro velocità a 16 bit */
+#define PORTATI_48AF   0x48af   /* ROM: indirizzo dell'oggetto per indice */
 
 /* ------------------------------------------------------------------ */
 /* 0x55B2: tipo 12, smista con `rst 38h` a 55B5 sulla fase (IY+1D). */
@@ -312,4 +315,110 @@ void sub_57b3(struct z80 *z)
     M(z->ix + 0x0d) = z->a;                    /* 57C3 */
     M(z->ix + 0x0b) = z->a;                    /* 57C6 */
     M(z->ix + 0x0c) = z->a;                    /* 57C9 */
+}
+
+/* ------------------------------------------------------------------ */
+/* Lotto N5 (brief 31): tipo 12 (55C4, 6C1D) e tipo 10 (719E). */
+
+/* 0x55C4, fase 3 di 55B5: passa alla fase 2. */
+void sub_55c4(struct z80 *z)
+{
+    M(z->iy + 0x1d) = 0x02;                    /* 55C4 */
+}
+
+/* 0x6C1D, fase 1 di 55B5: 6C2C con A = 3; senza riporto esce; con
+ * (IX+0D) >= 0d chiude slot e oggetto (80A5). */
+void sub_6c1d(struct z80 *z)
+{
+    z->a = 0x03;                               /* 6C1D */
+    sub_6c2c(z);                               /* 6C1F */
+    if (!NEMICI_RIPORTO_ACCESO(z))             /* 6C22 ret nc */
+        return;
+    z->a = M(z->ix + 0x0d);                    /* 6C23 */
+    if (z->a < 0x0d)                           /* 6C26-6C28 ret c */
+        return;
+    sub_80a5(z);                               /* 6C29 jp */
+}
+
+/* 0x719E, fase 1 di 714E. Col bit 0 di (IX+1) spento attende (IX+8) >= 0b
+ * e lo accende. Con il bit 0 acceso e uno dei bit 2-3 acceso attende
+ * (IX+8) >= 16, chiama 6EB7 con (IX+0E) se il bit 2 è spento, spegne i
+ * bit 2-3 e (con E = (IY+4) ^ 4) riaggancia l'oggetto con 4AF6 (71D4,
+ * con IX = IY). Senza bit 2-3: se (IY+1A) & 0f è nullo riaggancia con
+ * E = (IY+4); altrimenti guarda la cella davanti (734D): >= f8 accende il
+ * bit 2, altrimenti prende uno slot (7379), accende il bit 3, crea
+ * l'oggetto portato con 4938 e pone (c835) = ff. */
+void sub_719e(struct z80 *z)
+{
+    z->a = M(z->ix + 0x01);                    /* 719E */
+    if (!(z->a & 0x01)) {                      /* 71A1-71A3 */
+        z->a = M(z->ix + 0x08);                /* 71A5 */
+        if (z->a < 0x0b)                       /* 71A8-71AA ret c */
+            return;
+        M(z->ix + 0x01) |= 0x01;               /* 71AB */
+        return;
+    }
+    z->a &= 0x0c;                              /* 71B0 */
+    if (z->a != 0) {                           /* 71B2 jr z 71E9 */
+        z->a = M(z->ix + 0x08);                /* 71B4 */
+        if (z->a < 0x16)                       /* 71B7-71B9 ret c */
+            return;
+        if (!(M(z->ix + 0x01) & 0x04)) {       /* 71BA-71BE */
+            z->a = M(z->ix + 0x0e);            /* 71C0 */
+            sub_6eb7(z);                       /* 71C3 */
+        }
+        M(z->ix + 0x01) &= ~0x04;              /* 71C6 */
+        M(z->ix + 0x01) &= ~0x08;              /* 71CA */
+        z->a = (uint8_t)(M(z->iy + 0x04) ^ 0x04);  /* 71CE-71D1 */
+        z->e = z->a;                           /* 71D3 */
+        goto l71d4;
+    }
+    z->a = M(z->iy + 0x1a) & 0x0f;             /* 71E9-71EC */
+    if (z->a == 0) {                           /* 71EE jr nz */
+        z->e = M(z->iy + 0x04);                /* 71F0 */
+        goto l71d4;
+    }
+    M(z->ix + 0x08) = 0x00;                    /* 71F5 */
+    z->b = 0x0e;                               /* 71F9 */
+    z->c = 0x01;
+    sub_734d(z);                               /* 71FC */
+    z->a = leggi(HL(z));                       /* 71FF */
+    if (z->a >= 0xf8) {                        /* 7200-7202 */
+        M(z->ix + 0x01) |= 0x04;               /* 7204 */
+        return;
+    }
+    z->d = z->a;                               /* 7209 */
+    sub_7379(z);                               /* 720A */
+    if (!NEMICI_RIPORTO_ACCESO(z))             /* 720D ret nc */
+        return;
+    M(z->ix + 0x01) |= 0x08;                   /* 720E */
+    M(z->ix + 0x0e) = z->a;                    /* 7212 */
+    z->c = z->e;                               /* 7215 */
+    z->b = z->d;                               /* 7216 */
+    M(HL(z)) = 0x80;                           /* 7217 */
+    M(0xc08a) = 0x00;                          /* 7219-721C */
+    SET_HL(z, PORTATI_48AF);                   /* 721E */
+    sub_0008(z);                               /* 7221 rst 8 */
+    sub_0010(z);                               /* 7222 rst 10 */
+    uint16_t ix0 = z->ix;
+    z->ix = DE(z);                             /* 7223-7224 push de; ex (sp),ix */
+    z->a = z->b;                               /* 7226 */
+    z->e = z->c;                               /* 7227 */
+    z->b = 0x00;                               /* 7228 */
+    sub_4938(z);                               /* 722A */
+    z->ix = ix0;                               /* 722D pop ix */
+    z->a = 0xff;                               /* 722F */
+    M(0xc835) = z->a;                          /* 7231 */
+    return;
+l71d4:
+    M(z->ix + 0x01) &= ~0x01;                  /* 71D4 */
+    {
+        uint16_t ix1 = z->ix;
+        z->ix = z->iy;                         /* 71D8-71DA push iy; ex (sp),ix */
+        z->a = 0xc0;                           /* 71DC */
+        z->b = 0x00;                           /* 71DE */
+        z->c = M(z->ix + 0x1e);                /* 71E0 */
+        sub_4af6(z);                           /* 71E3 */
+        z->ix = ix1;                           /* 71E6 pop ix */
+    }
 }

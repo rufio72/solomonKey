@@ -413,3 +413,54 @@ file il `default` degli `switch` sui `rst 38` (indice sempre in tabella).
 | 0x756C | sub_756c | nemici_comparsab.c | 34 | distanza con segno fra due parole, riporto in F | verificata | 2 | stanza03, stanza12 | stanza03 f1953; stanza12 f1953 |
 | 0x758E | sub_758e | nemici_comparsab.c | 17 | confronto di DE con 0050 / FFB0, riporto in F | verificata | 2 | stanza03, stanza12 | stanza03 f1953; stanza12 f1953 |
 | 0x759F | sub_759f | nemici_comparsab.c | 11 | HL += 8 * (B - 0A), A = (IX+6) ^ C | verificata | 2 | stanza03, stanza12 | stanza03 f1953; stanza12 f1953 |
+
+## Motore dei nemici (lotto N5)
+
+Tipi 10-13 di 4F1B (brief 31): `harness/nemici_tipi_10_13.c` (55C4 e 6C1D del
+tipo 12, 719E del tipo 10, con le routine dei lotti N1 e N2) e
+`harness/nemici_tipi_10_13b.c` (tipo 13: 54D8, 54EA, 551A, 5529, 5584, 6BCD;
+tipo 11: 56E9, 5713, 5726, 573C, 5749), divisi per stare sotto le 700 righe.
+Nessun `ld a,r`: niente wrapper `banco_r_*`. Tutti e quattro i tipi (10, 11,
+12, 13) hanno ora ogni fase tradotta; 55C4, 6C1D e 719E non fermano più il
+replay perché gli stub sono tolti. Le catture hanno «dopo» a PC=4EFB (ritorno a
+4F0F); quelle di 6BCD a PC=6B78. 551A si cattura solo dallo stato `finale` e
+5584 solo da `stanza30` (nelle altre stanze non scattano): la seconda cattura
+non forzata è `finale_n2` / `stanza30_n2` (occorrenza 2).
+
+**`sub_6c2c` ora imposta il riporto** (bit 0 di `z->f`, come 5507 e 7379), che 551A
+e 6C1D leggono: 1 se e solo se (IX+1) & 21 == 21 all'ingresso, 0 negli altri
+rami. Le sue catture (2) restano OK perché il banco non confronta F.
+
+**Catture forzate** (`SNAP_FORZA`, suffisso `forzaNN`, righe FORZA nei `.log`;
+non contano per lo stato `verificata`): 54D8 `iy+1d` a 00, 01, 02, 03, 05 (le
+cinque fasi); 54EA (stanza02) il ramo senza riporto (561B) e la fase 5 con bit 1
+acceso e spento; 551A (finale) riporto con 80A5, riporto con suono, 6C2C senza
+riporto nei due passaggi; 5529 (stanza02) le uscite 5573, 5549, le due attese 64
+e 32 con suono 27, i rami con maschera 20 (`iy+1a:30`) e 5567; 5584 (stanza30)
+7379 + 6BCD, i `ret c` e 55A3; 6BCD le quattro combinazioni dei bit 0-1 di C;
+6C1D (stanza07) riporto con 80A5, `ret c` con suono, `ret nc`, primo passaggio;
+56E9 (stanza01) le sette voci di 5704, il ramo (C1A4) e 57B3; 5713 e 5726 i due
+rami; 5749 `iy+12:01`, i rami con il bit 3 di (IX+1) (`ret c` e 5917 + 6EB7),
+il bit 6 acceso e il ramo 5763; 719E (stanza02) tutti i rami fino a 4938.
+Non raggiunti: `ret nc` di 7379 (5590, 5772, 720D), i rami di 5749 oltre 5763
+(cella occupata) e il `ret` di 5572 e il 5545 di 5529 (le forzature del brief
+non lo aprono: `res 1` con bit 1 acceso e riporto di 5507). Copertura gcov:
+`nemici_tipi_10_13b.c` 91,53 %; `sub_55c4` e `sub_6c1d` 100 %, `sub_719e`
+98,46 % (manca il `ret` di 7379).
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x54D8 | sub_54d8 | nemici_tipi_10_13b.c | 4 | tipo 13 di 4F1B: `rst 38` a 54DB su (IY+1D) (7 voci) | verificata | 7 | stanza02, stanza06 | stanza02 f1953; stanza06 f1953 — 5 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x54EA | sub_54ea | nemici_tipi_10_13b.c | 29 | tipo 13, fase 2: 5507 (soglia 18), senza riporto 561B; fase 5, bit 1 di (IY+1E) da (IY+1A) & 30 | verificata | 5 | stanza02, stanza06 | stanza02 f1958; stanza06 f2063 — 3 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x551A | sub_551a | nemici_tipi_10_13b.c | 15 | tipo 13, fase 1: 6C2C con A = 2, con riporto e (IX+0D) >= 18 chiude con 80A5 | verificata | 6 | finale | finale_n2 f3748; finale f2813 — 4 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x5529 | sub_5529 | nemici_tipi_10_13b.c | 91 | tipo 13, fase 5: tre chiamate a 5507, attesa 32/64, suono 27, fase 2 con bit 4 di (IX+1) | verificata | 10 | stanza02, stanza06 | stanza02 f1953; stanza06 f1953 — 8 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x5584 | sub_5584 | nemici_tipi_10_13b.c | 46 | tipo 13, fase 0: slot libero (7379) e oggetto portato con 6BCD, poi attesa 48 e fase 2 | verificata | 6 | stanza30 | stanza30_n2 f2360; stanza30 f2357 — 4 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x55C4 | sub_55c4 | nemici_tipi_10_13.c | 5 | tipo 12, fase 3 di 55B5: fase 2 | verificata | 2 | stanza07, stanza10 | stanza07 f3176; stanza10 f3491 |
+| 0x56E9 | sub_56e9 | nemici_tipi_10_13b.c | 28 | tipo 11 di 4F1B: BC = (C1A2)/(C1A4), 57AA e 57B3, `rst 38` a 5704 su (IY+1D) (7 voci) | verificata | 11 | stanza01, stanza06 | stanza01 f2002; stanza06 f2002 — 9 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x5713 | sub_5713 | nemici_tipi_10_13b.c | 10 | tipo 11, fase 6: con il bit 5 di (IY+0) spento fase 5 | verificata | 4 | stanza01, stanza06 | stanza01 f2002; stanza06 f2002 — 2 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x5726 | sub_5726 | nemici_tipi_10_13b.c | 22 | tipo 11, fase 1: azzera (IX+0B..0C) se il bit 3 di (IY+4) è spento, bit 6 di (IX+1), fase 2 | verificata | 4 | stanza01, stanza06 | stanza01 f2022; stanza06 f2095 — 2 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x573C | sub_573c | nemici_tipi_10_13b.c | 13 | tipo 11, fasi 2 e 3: (IY+12) = 5, fase 5, bit 1 di (IY+1E) | verificata | 2 | stanza01, stanza06 | stanza01 f2022; stanza06 f2096 |
+| 0x5749 | sub_5749 | nemici_tipi_10_13b.c | 97 | tipo 11, fase 5: cella davanti (5928), slot (7379), 58CF, 5917 e 6EB7 | verificata | 8 | stanza01, stanza06 | stanza01 f2023; stanza06 f2097 — 6 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x6BCD | sub_6bcd | nemici_tipi_10_13b.c | 62 | oggetto portato in 48AF spostato di 0b sull'asse scelto da C, agganciato con 4AF6 | verificata | 6 | stanza02, stanza11 | stanza02 f1987; stanza11 f2050 — 4 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x6C1D | sub_6c1d | nemici_tipi_10_13.c | 15 | tipo 12, fase 1 di 55B5: 6C2C con A = 3, con riporto e (IX+0D) >= 0d chiude con 80A5 | verificata | 6 | stanza07, stanza19 | stanza07 f3175; stanza19 f2469 — 4 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+| 0x719E | sub_719e | nemici_tipi_10_13.c | 151 | tipo 10, fase 1 di 714E: stacco e ripresa dell'oggetto portato (6EB7, 4AF6, 734D, 7379, 4938) | verificata | 10 | stanza02, stanza05 | stanza02 f2000; stanza05 f2084 — 8 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |

@@ -419,6 +419,13 @@ nessuna sessione le ha mai eseguite: le coprono le catture forzate di 4F40 e
 73A3 e gcov. Nuovo script `cattura_oggetti.sh` per lo stato «oggetti» (4F40 e
 13xx/14xx), vedi `ROUTINE.md`, sezione «Motore dei nemici (lotto N4)».
 
+**Lotto N5 fatto** (brief 31, 2026-10-29): i tipi 10-13 di 4F1B, 14 routine,
+divise fra `nemici_tipi_10_13.c` (55C4, 6C1D, 719E) e `nemici_tipi_10_13b.c`
+(le altre 11: tipo 13 con 6BCD e tipo 11), per stare sotto le 700 righe. 14 voci
+nuove nel banco. `sub_6c2c` (già verificata) ora imposta il riporto in F, che 551A
+e 6C1D leggono; le sue catture restano OK. Vedi `ROUTINE.md`, sezione «Motore dei
+nemici (lotto N5)».
+
 **Lotti N2-N12**: le routine non coperte, un lotto per modulo. Sono in
 ordine di utilità, cioè di byte eseguiti nell'unione storica delle sessioni.
 Ingressi completi in `out/censimento_nemici_lotti.txt`.
@@ -467,6 +474,7 @@ gli indici del 4F1B. L'unica ipotesi semantica è `comparsa`, per 4FC5.
 | `nemici_tipi_08_14.c` | tipi 8 (6ECA) e 14 (6CE8) di 4F1B | 33 | 1030 | 618 |
 | `nemici_tipo09.c` | tipo 9 di 4F1B (57CD) | 21 | 1100 | 660 |
 | `nemici_tipi_10_13.c` | tipi 10-13 di 4F1B (714B, 56E9, 55B2, 54D8) | 25 | 1076 | 646 |
+| `nemici_tipi_10_13b.c` | seconda parte di `nemici_tipi_10_13.c` (brief 31): tipo 13 (54D8 e le sue fasi, 6BCD) e tipo 11 (56E9 e le sue fasi) | - | - | - |
 | `nemici_tipi_15_17.c` | tipi 15-17 di 4F1B (6C0B, 6B43, 7F68) | 18 | 596 | 358 |
 
 Stub di N1: 2474 3B62 4649 46A3 4ADA 4F40 4FD4 54D8 55C4 56E9 57CD 5CFB 6B43 6C0B 6C1D 6CE8 6ECA 719E 7288 73A3 7F48 7F81 7F8A 7FA6 7FCF 801D 8042 809C

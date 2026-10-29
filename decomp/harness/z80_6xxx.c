@@ -2,6 +2,7 @@
  * Si riproducono l'effetto sulla RAM e i registri A, BC, DE, HL, IX, IY
  * all'uscita (le bandiere F no). */
 #include "routine.h"
+#include "nemici.h"
 
 /* Tabella delle attività dello scheduler (64 byte). */
 #define TABELLA_ATTIVITA 0xc000
@@ -60,6 +61,7 @@ void sub_6c2c(struct z80 *z)
         a = (uint8_t)((a >> 1) | (a << 7));    /* rrca */
         M(z->iy + 0x1e) = a;
         z->a = a;
+        NEMICI_PONI_RIPORTO(z, 0);             /* 6C3B-6C3C: and 04, rrca su zero */
         return;
     }
     /* mai eseguito nelle tracce */
@@ -70,8 +72,10 @@ void sub_6c2c(struct z80 *z)
         M(z->ix + 1) |= 0x01;
         M(z->iy + 0) |= 0x01;
         M(z->ix + 0x0d) = 0;
+        NEMICI_PONI_RIPORTO(z, 0);
         return;
     }
     z->c = 0x30;                               /* suono 30 via rst 28 */
     sub_0028(z);
+    NEMICI_PONI_RIPORTO(z, 1);                 /* rst 28 preserva AF: riporto del rrca */
 }
