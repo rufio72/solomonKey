@@ -381,3 +381,17 @@ dell'analista.
 3. Seconde catture `finale N=2 n2` e `stanza30 N=2 n2` per 551A e 5584: sì.
 4. Soglie gcov 85% (file nuovo) e 75% (le tre funzioni nel vecchio): sì.
 5. `STATO.md` e `README.md` li aggiorna la chat principale: sì.
+
+## Esito (chat principale, 2026-10-29)
+
+Terzo ciclo dello schema economico, passato al primo colpo.
+- Le 15 verifiche rieseguite dalla chat principale passano tutte; la
+  copertura (11), che lo sviluppatore aveva misurato a mano, confermata
+  col comando del brief: `4 0` (91,53% file nuovo; 98,46/100/100% le tre
+  funzioni). Banco a 626 catture (203 voci, 0 fallite), replay a fine
+  oracolo, 6C2C ancora 2/2 dopo la modifica del riporto.
+- Tutte e 14 le voci «verificata». Rami residui scoperti documentati nel
+  rapporto (5572 e 5545 di 5529 non apribili con le forzature provate).
+- **Token**: analista Sonnet ~142k, sviluppatore Sonnet ~83k (minimo
+  storico: le catture pre-misurate nel brief pagano), verifica 0.
+  Totale ~225k ≈ 0,5-0,8 $.
