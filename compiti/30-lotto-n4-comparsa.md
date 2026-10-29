@@ -400,3 +400,20 @@ dell'analista.
 4. Seconda cattura di 7412 da `finale` N=2: sì.
 5. Soglie di copertura 85% (moduli) e 75% (routine senza voce): sì.
 6. `STATO.md` e `README.md` li aggiorna la chat principale: sì.
+
+## Esito (chat principale, 2026-10-29)
+
+Secondo ciclo dello schema economico: analista Sonnet, sviluppatore Sonnet,
+verifica a script senza modello.
+
+- **Passato al primo colpo.** Le 16 verifiche rieseguite dalla chat
+  principale passano tutte, uscite identiche al rapporto dello sviluppatore.
+  Banco a 539 catture (189 voci, 0 fallite), replay a fine oracolo exit 0,
+  coperture 98,46% e 99,32%; 14FC, 4FC5 e 73C7 (senza voce) al 100%.
+- **Nessuna deviazione di sostanza**: il ramo 73E0-73EB, dato per non
+  forzabile dal brief, è stato aperto con una forzatura a scostamento
+  16 bit (`ix+fe0f:09`); `git add -f` per il dasm ignorato (come N3).
+- **Token**: analista Sonnet ~136k (con catture MAME di prova già nel
+  brief), sviluppatore Sonnet ~132k, verifica 0. Totale ~268k, nessuna
+  escalation. Da notare: lo sviluppatore è costato 132k contro i 204k di
+  N3 — le misure fatte dall'analista in anticipo si ripagano.
