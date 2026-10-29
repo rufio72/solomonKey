@@ -159,3 +159,4 @@ void banco_r_54c5(struct z80 *z) { prova_con_r(z, "0x54C5", sub_54c5); }
 void banco_r_51d7(struct z80 *z) { prova_con_r(z, "0x51D7", sub_51d7); }
 void banco_r_5995(struct z80 *z) { prova_con_r(z, "0x5995", sub_5995); }
 void banco_r_57cd(struct z80 *z) { prova_con_r(z, "0x57CD", sub_57cd); }
+void banco_r_51fa(struct z80 *z) { prova_con_r(z, "0x51FA", sub_51fa); }

@@ -2,9 +2,14 @@
  * censimento assegna al lotto N10 (tipo 06, parte A): 51D7, che sceglie a
  * caso uno dei bit accesi di una maschera, e 24DF, un piccolo calcolo su
  * nibble con una coppia di byte della tabella puntata da HL.
- * Tradotto da out/main64.dasm. */
+ * Lotto N6 (brief 32): le cinque routine del tipo 06 che il censimento
+ * assegna a N10 e che le 8 routine di nemici_tipo06b.c richiedono: 5068
+ * (coda condivisa), 51FA (smista con `rst 38` a 5207 sul bit acceso scelto
+ * da 51D7), 5224, 523C e 5254 (tre destinazioni della tabella).
+ * Tradotto da out/main64.dasm (out/nemici_n6.dasm). */
 #include "routine.h"
 #include "nemici.h"
+#include "rst38_tables.h"
 
 #define TAB_C06A 0xc06a   /* RAM: posizioni dei bit accesi della maschera */
 
@@ -56,4 +61,95 @@ void sub_51d7(struct z80 *z)
     hl = (uint16_t)(TAB_C06A + z->e);          /* 51F2-51F5 */
     SET_HL(z, hl);
     z->a = (uint8_t)(0x0d - M(hl));            /* 51F6-51F8 */
+}
+
+/* 0x5068: coda condivisa (531C, 5092, 51B5): (IY+0) con i bit 5-6 portati a
+ * 01, (IY+4) += 3, (IY+3) = 0d, (IY+1E) = 2, (IY+1A) = B, (IX+0E) = ff,
+ * bit 6 di (IY+0) acceso, bit 0 di (IX+1) spento. Esce con A = (IY+4). */
+void sub_5068(struct z80 *z)
+{
+    M(z->iy) = (uint8_t)((M(z->iy) & 0x9f) | 0x10);       /* 5068-506F */
+    z->a = (uint8_t)(0x03 + M(z->iy + 0x04));             /* 5072-5074 */
+    M(z->iy + 0x04) = z->a;                               /* 5077 */
+    M(z->iy + 0x03) = 0x0d;                               /* 507A */
+    M(z->iy + 0x1e) = 0x02;                               /* 507E */
+    M(z->iy + 0x1a) = z->b;                               /* 5082 */
+    M(z->ix + 0x0e) = 0xff;                               /* 5085 */
+    M(z->iy) |= 0x40;                                     /* 5089 */
+    M(z->ix + 0x01) &= (uint8_t)~0x01;                    /* 508D */
+}
+
+/* Parte comune di 5224, 523C e 5254: con il bit 0 di (IX+1) acceso, A = 6
+ * e C = 1 se (IX+10) > 6; altrimenti C resta com'è (in 5224 e 5254 è 0). */
+static void confronta_6(struct z80 *z)
+{
+    z->a = 0x06;
+    if (z->a < M(z->ix + 0x10))                           /* cp (ix+10); jr nc */
+        z->c++;
+}
+
+/* 0x5224: C = 0; con il bit 0 di (IX+1) acceso C = 1 se (IX+10) > 6;
+ * (IY+1E) = C; bit 0 di (IX+1) acceso. Destinazione 0 di 5207. */
+void sub_5224(struct z80 *z)
+{
+    z->c = 0x00;                                          /* 5228 */
+    if (M(z->ix + 0x01) & 0x01)                           /* 5224 */
+        confronta_6(z);                                   /* 522C-5233 */
+    M(z->iy + 0x1e) = z->c;                               /* 5234 */
+    M(z->ix + 0x01) |= 0x01;                              /* 5237 */
+}
+
+/* 0x523C: come 5224 ma senza azzerare C (con il bit spento (IY+1E) = C
+ * d'ingresso) e con il bit 0 di (IX+1) spento. Senza cattura propria. */
+static void sub_523c(struct z80 *z)
+{
+    if (M(z->ix + 0x01) & 0x01) {                         /* 523C */
+        z->c = 0x00;                                      /* 5242 */
+        confronta_6(z);                                   /* 5244-524B */
+    }
+    M(z->iy + 0x1e) = z->c;                               /* 524C */
+    M(z->ix + 0x01) &= (uint8_t)~0x01;                    /* 524F */
+}
+
+/* 0x5254: come 5224, in più (IY+1D) = 0 e bit 2 di (IX+0) spento.
+ * Senza cattura propria. */
+static void sub_5254(struct z80 *z)
+{
+    int acceso = M(z->ix + 0x01) & 0x01;                  /* 5254 */
+    z->c = 0x00;                                          /* 5258 */
+    if (acceso)
+        confronta_6(z);                                   /* 525C-5263 */
+    M(z->iy + 0x1d) = 0x00;                               /* 5264 */
+    M(z->iy + 0x1e) = z->c;                               /* 5268 */
+    M(z->ix) &= (uint8_t)~0x04;                           /* 526B */
+    M(z->ix + 0x01) |= 0x01;                              /* 526F */
+}
+
+/* 0x51FA: tipo 06 di 4F1B. 51D7 sceglie un bit acceso della maschera BC
+ * (A = E = indice); con il bit 0 di (IX+1) spento (IX+10) = A. Poi
+ * `rst 38` al sito 5207 su 14 voci (indice E = A): le destinazioni
+ * ritornano al chiamante di 51FA. Legge R tramite 51D7 e 54C5: nel banco
+ * serve banco_r_51fa. */
+void sub_51fa(struct z80 *z)
+{
+    sub_51d7(z);                                          /* 51FA */
+    if (!(M(z->ix + 0x01) & 0x01))                        /* 51FD */
+        M(z->ix + 0x10) = z->a;                           /* 5203 */
+    z->e = z->a;                                          /* 5206 */
+    uint16_t dest = nemici_rst38(z, 0x5207, rst38_5207,
+                                 sizeof rst38_5207 / sizeof rst38_5207[0]);
+    switch (dest) {                                       /* 5207 rst 38 */
+    case 0x5224: sub_5224(z); break;
+    case 0x5274: sub_5274(z); break;
+    case 0x523C: sub_523c(z); break;
+    case 0x5254: sub_5254(z); break;
+    case 0x5289: sub_5289(z); break;
+    case 0x5292: sub_5292(z); break;
+    case 0x52DB: sub_52db(z); break;
+    case 0x52AA: sub_52aa(z); break;
+    case 0x52C2: sub_52c2(z); break;
+    case 0x52EC: sub_52ec(z); break;
+    case 0:      break;                                   /* fuori tabella */
+    default:     nemici_manca(dest); break;
+    }
 }

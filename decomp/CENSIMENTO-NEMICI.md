@@ -426,6 +426,15 @@ nuove nel banco. `sub_6c2c` (già verificata) ora imposta il riporto in F, che 5
 e 6C1D leggono; le sue catture restano OK. Vedi `ROUTINE.md`, sezione «Motore dei
 nemici (lotto N5)».
 
+**Lotto N6 fatto** (brief 32, 2026-10-29): tipo 6 seconda metà, 8 routine
+(5274, 5289, 5292, 52AA, 52C2, 52DB, 52EC, 531C) in `nemici_tipo06b.c`, più
+le 5 anticipate da N10 (51FA, 5224, 523C, 5254, 5068), che N10 non deve più
+fare, in `nemici_tipo06a.c`. 6 voci nuove nel banco (51FA con il wrapper
+`banco_r_51fa`). Convenzione di 531C: riporto 1 in `z->f` = uscita anomala
+(cella piena, nell'originale `pop hl; jp 5068`), il chiamante (50BA, 50DF)
+deve ritornare subito; riporto 0 = uscita normale. Vedi `ROUTINE.md`, sezione
+«Motore dei nemici (lotto N6)».
+
 **Lotti N2-N12**: le routine non coperte, un lotto per modulo. Sono in
 ordine di utilità, cioè di byte eseguiti nell'unione storica delle sessioni.
 Ingressi completi in `out/censimento_nemici_lotti.txt`.

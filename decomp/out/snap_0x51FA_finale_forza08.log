@@ -1,0 +1,11 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+POKE 2250 C19D 00
+POKE 2250 C19E 00
+POKE 2250 C24B 32
+POKE 2250 C24C 32
+POKE 2250 C24D 32
+POSTA 2300 00 1C
+FORZA b = 01
+FORZA c = 00
+SNAP: catturata occorrenza 1 di 0x51FA [finale_forza08] al frame 3311, scartate 0
+Average speed: 1989.10% (54 seconds)

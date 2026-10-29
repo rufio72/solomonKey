@@ -6,4 +6,4 @@ POKE 2250 C24C 32
 POKE 2250 C24D 32
 POSTA 2300 00 1C
 SNAP: catturata occorrenza 1 di 0x51FA [finale] al frame 3311, scartate 0
-Average speed: 2854.73% (54 seconds)
+Average speed: 2243.33% (54 seconds)

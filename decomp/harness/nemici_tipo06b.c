@@ -2,6 +2,12 @@
  * censimento assegna al lotto N6 (tipo 06, parte B): 52FD (contatore del
  * passo con inversione della direzione), 5345 (maschere delle celle
  * attorno all'oggetto IY, per lo slot IX) e 54C5 (numero a caso).
+ * Lotto N6 (brief 32): le altre otto routine del tipo 06 (5274, 5289,
+ * 5292, 52AA, 52C2, 52DB, 52EC, destinazioni di 51FA, e 531C, che prova due
+ * celle e, se una è piena, chiude con la coda 5068). 531C: riporto 0 in
+ * z->f = uscita normale; riporto 1 = uscita anomala (nell'originale
+ * `pop hl; jp 5068` ritorna al chiamante del chiamante): il chiamante deve
+ * ritornare subito.
  * IX = slot (c2c1 + i·0x18), IY = oggetto (c4fe + i·0x30). Tradotto da
  * out/main64.dasm. */
 #include "routine.h"
@@ -170,4 +176,107 @@ void sub_5345(struct z80 *z)
         ramo_545e(z, hl);
     else
         ramo_53f5(z, (uint16_t)(hl - 1));      /* 5377-5378 */
+}
+
+/* 0x5274: (IY+1D) = (IY+1E) = 0, bit 0 di (IX+1) e bit 2 di (IX+0) spenti,
+ * bit 7 di (IX+1) acceso. Destinazioni 1, 3, 5 di 5207. */
+void sub_5274(struct z80 *z)
+{
+    IYB(0x1d) = 0x00;                          /* 5274 */
+    IYB(0x1e) = 0x00;                          /* 5278 */
+    RES(IXB(0x01), 0x01);                      /* 527C */
+    RES(IXB(0x00), 0x04);                      /* 5280 */
+    SET(IXB(0x01), 0x80);                      /* 5284 */
+}
+
+/* 0x5289: bit 1 di (IY+1E) acceso, bit 0 di (IX+1) spento. Senza cattura
+ * propria, coperta dalle forzate di 51FA. */
+void sub_5289(struct z80 *z)
+{
+    SET(IYB(0x1e), 0x02);                      /* 5289 */
+    RES(IXB(0x01), 0x01);                      /* 528D */
+}
+
+/* Parte comune di 5292 e 52AA: C = 1, con il bit 0 di (IX+1) acceso e
+ * (IX+10) <= 6 C = 0 (A = 6); (IY+1E) = C; bit 0 di (IX+1) acceso. */
+static void quota_1(struct z80 *z)
+{
+    int acceso = IXB(0x01) & 0x01;
+    z->c = 0x01;
+    if (acceso) {
+        z->a = 0x06;
+        if (z->a >= IXB(0x10))                 /* cp (ix+10); jr c */
+            z->c--;
+    }
+    IYB(0x1e) = z->c;
+    SET(IXB(0x01), 0x01);
+}
+
+/* 0x5292: vedi quota_1 (destinazione 7 di 5207). */
+void sub_5292(struct z80 *z) { quota_1(z); }
+
+/* 0x52AA: identica a 5292 (destinazione 9). Senza cattura propria. */
+void sub_52aa(struct z80 *z) { quota_1(z); }
+
+/* 0x52C2: C = 1, 0 con il bit 0 di (IX+1) acceso; (IY+1D) = 0,
+ * (IY+1E) = C; bit 0 di (IX+1) acceso, bit 2 di (IX+0) spento. Senza
+ * cattura propria. */
+void sub_52c2(struct z80 *z)
+{
+    int acceso = IXB(0x01) & 0x01;
+    z->c = acceso ? 0x00 : 0x01;               /* 52C2-52CA */
+    IYB(0x1d) = 0x00;                          /* 52CB */
+    IYB(0x1e) = z->c;                          /* 52CF */
+    SET(IXB(0x01), 0x01);                      /* 52D2 */
+    RES(IXB(0x00), 0x04);                      /* 52D6 */
+}
+
+/* 0x52DB: (IY+1D) = 0, (IY+1E) = 1, bit 0 di (IX+1) e bit 2 di (IX+0)
+ * spenti. Destinazioni 8, 10, 12; senza cattura propria. */
+void sub_52db(struct z80 *z)
+{
+    IYB(0x1d) = 0x00;                          /* 52DB */
+    IYB(0x1e) = 0x01;                          /* 52DF */
+    RES(IXB(0x01), 0x01);                      /* 52E3 */
+    RES(IXB(0x00), 0x04);                      /* 52E7 */
+}
+
+/* 0x52EC: (IY+1D) = 0, bit 1 di (IY+1E) acceso, bit 0 di (IX+1) e bit 2
+ * di (IX+0) spenti. Senza cattura propria. */
+void sub_52ec(struct z80 *z)
+{
+    IYB(0x1d) = 0x00;                          /* 52EC */
+    SET(IYB(0x1e), 0x02);                      /* 52F0 */
+    RES(IXB(0x01), 0x01);                      /* 52F4 */
+    RES(IXB(0x00), 0x04);                      /* 52F8 */
+}
+
+/* 0x531C: H = (IY+0E) + 8, L = (IY+15) + 5; due celle di c0bd (L e L + 6,
+ * per sub_36f0). Entrambe libere: riporto 0, HL e A come 36F0. Una piena:
+ * l'originale scarta l'indirizzo di ritorno e salta a 5068 con B = (IY+1A),
+ * quindi ritorna al chiamante del chiamante: qui si esegue sub_5068 e si
+ * esce con riporto 1. HL in quel caso non è riprodotto (nel gioco è
+ * l'indirizzo di ritorno scartato, 50CB o 50E2). Ramo non catturabile dal
+ * banco (snap.lua non vede il ritorno), scoperto da gcov. */
+void sub_531c(struct z80 *z)
+{
+    z->h = (uint8_t)(IYB(0x0e) + 0x08);        /* 531C-5321 */
+    z->l = (uint8_t)(IYB(0x15) + 0x05);        /* 5322-5327 */
+    uint8_t l0 = z->l;
+    sub_36f0(z);                               /* 5329 */
+    int piena = BIT7(HL(z));                   /* 532C */
+    z->h = (uint8_t)(IYB(0x0e) + 0x08);        /* 532E pop hl */
+    z->l = l0;
+    if (!piena) {
+        z->l = (uint8_t)(0x06 + z->l);         /* 5331-5334 */
+        sub_36f0(z);                           /* 5335 */
+        piena = BIT7(HL(z));                   /* 5338 */
+    }
+    if (!piena) {
+        NEMICI_PONI_RIPORTO(z, 0);             /* 533C or a */
+        return;
+    }
+    z->b = IYB(0x1a);                          /* 533F */
+    sub_5068(z);                               /* 5342 jp 5068 */
+    NEMICI_PONI_RIPORTO(z, 1);                 /* uscita anomala */
 }

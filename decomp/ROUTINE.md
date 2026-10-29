@@ -464,3 +464,43 @@ non lo aprono: `res 1` con bit 1 acceso e riporto di 5507). Copertura gcov:
 | 0x6BCD | sub_6bcd | nemici_tipi_10_13b.c | 62 | oggetto portato in 48AF spostato di 0b sull'asse scelto da C, agganciato con 4AF6 | verificata | 6 | stanza02, stanza11 | stanza02 f1987; stanza11 f2050 — 4 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
 | 0x6C1D | sub_6c1d | nemici_tipi_10_13.c | 15 | tipo 12, fase 1 di 55B5: 6C2C con A = 3, con riporto e (IX+0D) >= 0d chiude con 80A5 | verificata | 6 | stanza07, stanza19 | stanza07 f3175; stanza19 f2469 — 4 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
 | 0x719E | sub_719e | nemici_tipi_10_13.c | 151 | tipo 10, fase 1 di 714E: stacco e ripresa dell'oggetto portato (6EB7, 4AF6, 734D, 7379, 4938) | verificata | 10 | stanza02, stanza05 | stanza02 f2000; stanza05 f2084 — 8 con stato forzato (SNAP_FORZA, righe FORZA nei .log) |
+
+## Motore dei nemici (lotto N6)
+
+Tipo 6 di 4F1B, seconda metà (brief 32): `harness/nemici_tipo06b.c` (5274,
+5289, 5292, 52AA, 52C2, 52DB, 52EC, 531C, in coda alle 52FD, 5345 e 54C5 di N3)
+e `harness/nemici_tipo06a.c`, dove si sono anticipate da N10 cinque routine del
+tipo 6 che le prime richiedono: 5068 (coda condivisa), 51FA (`rst 38` a 5207 su
+14 voci), 5224, 523C e 5254. N10 le trova fatte. 51FA legge R tramite 51D7 e
+54C5: la voce del banco è il wrapper `banco_r_51fa` (`nemici_r.c`). **531C**:
+se una delle due celle è piena l'originale scarta l'indirizzo di ritorno e
+termina in 5068, tornando al chiamante del chiamante; in C `sub_531c` esegue
+`sub_5068` e ritorna con il riporto (bit 0 di `z->f`) a 1 = uscita anomala (il
+chiamante deve ritornare subito), a 0 = uscita normale; HL in quel caso non è
+riprodotto. Il ramo anomalo non è catturabile (`snap.lua` aspetta il ritorno
+all'indirizzo in cima alla pila) e resta scoperto da gcov. Copertura gcov:
+`nemici_tipo06a.c` 97,83 % di 92 (manca il ramo fuori tabella di 51FA, non
+raggiungibile con E <= 13), `nemici_tipo06b.c` 97,74 % di 177 (manca il ramo
+anomalo di 531C e il `break` di 54C5 con C = 0).
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x5068 | sub_5068 | nemici_tipo06a.c | 42 | coda condivisa: (IY+0) bit 5-6 a 01, (IY+4) += 3, (IY+3) = 0d, (IY+1E) = 2, (IY+1A) = B, bit 6 di (IY+0) | verificata | 2 | finale | finale e finale_n2 (PC=4EFB) |
+| 0x51FA | sub_51fa | nemici_tipo06a.c | 14 | 51D7, (IX+10) = A se il bit 0 di (IX+1) è spento, `rst 38` a 5207 (14 voci) | verificata | 30 | finale, stanza50 | wrapper `banco_r_51fa`; 4 non forzate (finale, finale_n2, stanza50, stanza50_n2) e 26 forzate |
+| 0x5224 | sub_5224 | nemici_tipo06a.c | 24 | C = 1 se (IX+10) > 6 con bit 0 di (IX+1) acceso; (IY+1E) = C; bit 0 acceso | verificata | 3 | finale, stanza50 | finale, finale_n2, stanza50; le forzate sono quelle di 51FA |
+| 0x523C | sub_523c | nemici_tipo06a.c | 24 | come 5224 ma bit 0 di (IX+1) spento | tradotta | - | - | senza cattura propria, coperta dalle forzate di 51FA |
+| 0x5254 | sub_5254 | nemici_tipo06a.c | 32 | come 5224 con (IY+1D) = 0 e bit 2 di (IX+0) spento | tradotta | - | - | senza cattura propria, coperta dalle forzate di 51FA |
+| 0x5274 | sub_5274 | nemici_tipo06b.c | 21 | (IY+1D) = (IY+1E) = 0, bit 7 di (IX+1) acceso | verificata | 2 | finale | finale e finale_n2 (dopo a 510D / 5114) |
+| 0x5289 | sub_5289 | nemici_tipo06b.c | 9 | bit 1 di (IY+1E) acceso, bit 0 di (IX+1) spento | tradotta | - | - | senza cattura propria, coperta dalle forzate di 51FA |
+| 0x5292 | sub_5292 | nemici_tipo06b.c | 24 | C = 1 (0 con bit 0 acceso e (IX+10) <= 6); (IY+1E) = C | tradotta | 4 | finale | una sola cattura non forzata; 3 forzate dirette (`ix+1:00`, `ix+1:01,ix+10:07`, `ix+1:01,ix+10:03`) |
+| 0x52AA | sub_52aa | nemici_tipo06b.c | 24 | identica a 5292 | tradotta | - | - | senza cattura propria, coperta dalle forzate di 51FA |
+| 0x52C2 | sub_52c2 | nemici_tipo06b.c | 25 | C = 1 (0 se bit 0 di (IX+1) acceso); (IY+1D) = 0, (IY+1E) = C | tradotta | - | - | senza cattura propria, coperta dalle forzate di 51FA |
+| 0x52DB | sub_52db | nemici_tipo06b.c | 17 | (IY+1D) = 0, (IY+1E) = 1, bit 0 di (IX+1) e bit 2 di (IX+0) spenti | tradotta | - | - | senza cattura propria, coperta dalle forzate di 51FA |
+| 0x52EC | sub_52ec | nemici_tipo06b.c | 17 | (IY+1D) = 0, bit 1 di (IY+1E) acceso, bit 0 di (IX+1) e bit 2 di (IX+0) spenti | tradotta | - | - | senza cattura propria, coperta dalle forzate di 51FA |
+| 0x531C | sub_531c | nemici_tipo06b.c | 41 | due celle di c0bd (L e L+6); entrambe libere riporto 0, una piena 5068 e riporto 1 | verificata | 4 | finale, stanza50 | finale, finale_n2, stanza50, stanza50_n2; ramo anomalo non catturabile |
+
+**Catture forzate** (`SNAP_FORZA`, suffisso `forzaNN`): 51FA (finale) `BC = 1 << j`
+per j = 0..13 (14, `forza00`-`forza13`) e, per j = 0, 2, 4, 7, 9, 11, le varianti
+`forzaJJb` (`ix+1:01,ix+10:07`, (IX+10) > 6) e `forzaJJc` (`ix+1:01,ix+10:03`)
+(12); 5292 (finale) `forza01` (`ix+1:00`), `forza02` (`ix+1:01,ix+10:07`),
+`forza03` (`ix+1:01,ix+10:03`). Tutte hanno aperto il ramo voluto.

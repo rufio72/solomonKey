@@ -214,6 +214,21 @@ void sub_6bcd(struct z80 *z);
 void sub_6c1d(struct z80 *z);
 void sub_719e(struct z80 *z);
 
+/* Lotto N6, tipo 6 seconda metà (brief 32): 5274-531C in nemici_tipo06b.c;
+ * 5068, 51FA e 5224 (anticipate da N10) in nemici_tipo06a.c. 531C lascia il
+ * riporto a 1 se la cella è piena (uscita anomala: il chiamante ritorna). */
+void sub_5068(struct z80 *z);
+void sub_51fa(struct z80 *z);
+void sub_5224(struct z80 *z);
+void sub_5274(struct z80 *z);
+void sub_5289(struct z80 *z);
+void sub_5292(struct z80 *z);
+void sub_52aa(struct z80 *z);
+void sub_52c2(struct z80 *z);
+void sub_52db(struct z80 *z);
+void sub_52ec(struct z80 *z);
+void sub_531c(struct z80 *z);
+
 /* Il registro R (nemici_r.c): somma R1 + R2 dei due `ld a,r` di 54C5 e
  * 59E5; nel banco i quattro wrapper cercano il valore di R che riproduce
  * la cattura (vedi l'intestazione di nemici_r.c). */
@@ -222,6 +237,7 @@ void banco_r_54c5(struct z80 *z);
 void banco_r_51d7(struct z80 *z);
 void banco_r_5995(struct z80 *z);
 void banco_r_57cd(struct z80 *z);
+void banco_r_51fa(struct z80 *z);
 
 /* Stub (nemici_stub.c): registrano l'ingresso con nemici_manca. */
 void sub_2474(struct z80 *z);

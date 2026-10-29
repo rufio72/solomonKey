@@ -1,0 +1,134 @@
+l5068h:
+	ld a,(iy+000h)		;5068
+	and 09fh		;506b
+	or 010h		;506d
+	ld (iy+000h),a		;506f
+	ld a,003h		;5072
+	add a,(iy+004h)		;5074
+	ld (iy+004h),a		;5077
+	ld (iy+003h),00dh		;507a
+	ld (iy+01eh),002h		;507e
+	ld (iy+01ah),b		;5082
+	ld (ix+00eh),0ffh		;5085
+	set 6,(iy+000h)		;5089
+	res 0,(ix+001h)		;508d
+	ret			;5091
+sub_51fah:
+	call sub_51d7h		;51fa
+	bit 0,(ix+001h)		;51fd
+	jr nz,l5206h		;5201
+	ld (ix+010h),a		;5203
+l5206h:
+	ld e,a			;5206
+	rst 38h			;5207
+	rlc c		;5225
+	ld b,(hl)			;5227
+	ld c,000h		;5228
+	jr z,l5234h		;522a
+	ld a,006h		;522c
+	cp (ix+010h)		;522e
+	jr nc,l5234h		;5231
+	inc c			;5233
+l5234h:
+	ld (iy+01eh),c		;5234
+	set 0,(ix+001h)		;5237
+	ret			;523b
+	bit 0,(ix+001h)		;523c
+	jr z,l524ch		;5240
+	ld c,000h		;5242
+	ld a,006h		;5244
+	cp (ix+010h)		;5246
+	jr nc,l524ch		;5249
+	inc c			;524b
+l524ch:
+	ld (iy+01eh),c		;524c
+	res 0,(ix+001h)		;524f
+	ret			;5253
+	bit 0,(ix+001h)		;5254
+	ld c,000h		;5258
+	jr z,l5264h		;525a
+	ld a,006h		;525c
+	cp (ix+010h)		;525e
+	jr nc,l5264h		;5261
+	inc c			;5263
+l5264h:
+	ld (iy+01dh),000h		;5264
+	ld (iy+01eh),c		;5268
+	res 2,(ix+000h)		;526b
+	set 0,(ix+001h)		;526f
+	ret			;5273
+	ld (iy+01dh),000h		;5274
+	ld (iy+01eh),000h		;5278
+	res 0,(ix+001h)		;527c
+	res 2,(ix+000h)		;5280
+	set 7,(ix+001h)		;5284
+	ret			;5288
+	set 1,(iy+01eh)		;5289
+	res 0,(ix+001h)		;528d
+	ret			;5291
+	bit 0,(ix+001h)		;5292
+	ld c,001h		;5296
+	jr z,l52a2h		;5298
+	ld a,006h		;529a
+	cp (ix+010h)		;529c
+	jr c,l52a2h		;529f
+	dec c			;52a1
+l52a2h:
+	ld (iy+01eh),c		;52a2
+	set 0,(ix+001h)		;52a5
+	ret			;52a9
+	bit 0,(ix+001h)		;52aa
+	ld c,001h		;52ae
+	jr z,l52bah		;52b0
+	ld a,006h		;52b2
+	cp (ix+010h)		;52b4
+	jr c,l52bah		;52b7
+	dec c			;52b9
+l52bah:
+	ld (iy+01eh),c		;52ba
+	set 0,(ix+001h)		;52bd
+	ret			;52c1
+	bit 0,(ix+001h)		;52c2
+	ld c,001h		;52c6
+	jr z,l52cbh		;52c8
+	dec c			;52ca
+l52cbh:
+	ld (iy+01dh),000h		;52cb
+	ld (iy+01eh),c		;52cf
+	set 0,(ix+001h)		;52d2
+	res 2,(ix+000h)		;52d6
+	ret			;52da
+	ld (iy+01dh),000h		;52db
+	ld (iy+01eh),001h		;52df
+	res 0,(ix+001h)		;52e3
+	res 2,(ix+000h)		;52e7
+	ret			;52eb
+	ld (iy+01dh),000h		;52ec
+	set 1,(iy+01eh)		;52f0
+	res 0,(ix+001h)		;52f4
+	res 2,(ix+000h)		;52f8
+	ret			;52fc
+sub_531ch:
+	ld a,(iy+00eh)		;531c
+	add a,008h		;531f
+	ld h,a			;5321
+	ld a,(iy+015h)		;5322
+	add a,005h		;5325
+	ld l,a			;5327
+	push hl			;5328
+	call sub_36f0h		;5329
+	bit 7,(hl)		;532c
+	pop hl			;532e
+	jr nz,l533eh		;532f
+	ld a,006h		;5331
+	add a,l			;5333
+	ld l,a			;5334
+	call sub_36f0h		;5335
+	bit 7,(hl)		;5338
+	jr nz,l533eh		;533a
+	or a			;533c
+	ret			;533d
+l533eh:
+	pop hl			;533e
+	ld b,(iy+01ah)		;533f
+	jp l5068h		;5342
