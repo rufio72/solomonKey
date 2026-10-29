@@ -11,12 +11,13 @@ ogni ciclo nei brief in `compiti/`.
 | Destinazioni statiche nel Z80 principale | 299 |
 | Coperte dalle sessioni (lotto 12 compreso) | 235 (78,6%) |
 | Routine osservate nel callgraph | ~120 |
-| Voci con stato in `decomp/ROUTINE.md` | 246 (conteggio `grep` sulla colonna stato) |
-| …di cui `verificata` (doppia cattura MAME non forzata) | 181 |
-| …di cui `tradotta` con nota (senza cattura o cattura singola) | 20 |
+| Voci con stato in `decomp/ROUTINE.md` | 278 (conteggio `grep` sulla colonna stato) |
+| …di cui `verificata` (doppia cattura MAME non forzata) | 205 |
+| …di cui `tradotta` con nota (senza cattura o cattura singola) | 28 |
 | …di cui `tradotta (replay)` | 45 |
-| Banco di prova (`harness --tutte`) | 189 voci, 539 catture, 0 fallite |
-| Catture `regs` in `decomp/out/` | 541 |
+| Banco di prova (`harness --tutte`) | 214 voci, 706 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 707 |
+| Stub residui del motore nemici | 15 |
 | Destinazioni mai osservate | 64, tutte con sito di chiamata mai eseguito (probabile dato o codice raggiungibile solo da zone mai eseguite; 37 a `8000` o sopra) |
 
 ## Fasi
@@ -80,6 +81,16 @@ ogni ciclo nei brief in `compiti/`.
    (esiste un R compatibile), niente R nelle catture — vale anche per la
    scelta (2) del brief 28. In N3 corretto un bug latente di N1 in
    `sub_4592` (secondo `rla` perso nell'uscita col riporto).
+   **Lotti N5, N6 e N7 fatti** (brief 31, 32 e 33, 2026-10-29, stesso
+   schema, tutti al primo colpo, ~0,4-0,8 $ l'uno): N5 = tipi 10-13 con
+   spezzatura in `nemici_tipi_10_13b.c` e riporto di 6C2C aggiunto in
+   `z80_6xxx.c`; N6 = tipo 06b con 5 routine di N10 anticipate (51FA,
+   5224, 523C, 5254, 5068), forzatura `BC=1<<j` su 51FA che apre tutte
+   le 14 voci della tabella 5207, wrapper `banco_r_51fa`; N7 = rami non
+   coperti del corpo 0A in coda a `nemici.c` (4767 ha un secondo
+   chiamante 37B4 non tradotto, fuori dal motore, per un lotto futuro).
+   Restano N8, N9, N10 (parziale), N11 e N12 (2 routine, da accorpare):
+   stub a 15.
 1. **Traduzione delle routine censite nel lotto 12**: 40 destinazioni in
    25 blocchi contigui in `decomp/CENSIMENTO-12.md`, due catture pilota
    già fatte (`0x3FCE porta`, `0x51FA finale`). Per i lotti futuri il

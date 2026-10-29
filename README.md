@@ -82,19 +82,28 @@ YM2149 emulator and compared against the original's — has been passed.
   and fixed a latent bug — nine collision handlers of table 08AE had been
   silently missing since batch 7 — and refined the NMI interleaving model.
   The replay is now the regression test for everything.
-- **Enemy engine — censused, translation under way.** Behind activity body
-  0A lives the per-enemy engine: **8,833 bytes and 220 routines**, mapped
-  with the real `rst 38` dispatch tables (`decomp/CENSIMENTO-NEMICI.md`)
-  and split into batches N1–N12. N1 (the 27 routines the replay exercises)
-  and N2 (enemy types 8 and 14, 33 routines + 6 shared helpers, verified
-  with targeted room/state forcing) are done; the capture harness now also
-  covers the enemy modules and stands at **321 comparisons, 147 entries,
-  0 failures**.
-- **Next up:** batches N3–N12 of the enemy engine (~160 routines, same
-  forcing-based method), then the censused bonus/ending routines, the
-  hardware layer (video, sprites, palettes, input) to make the C port
-  playable, wiring the game to the translated sound driver, and cleanup
-  with the replay as regression.
+- **Enemy engine — translation well past the halfway mark.** Behind activity
+  body 0A lives the per-enemy engine: **8,833 bytes and 220 routines**,
+  mapped with the real `rst 38` dispatch tables
+  (`decomp/CENSIMENTO-NEMICI.md`) and split into batches N1–N12.
+  **Batches N1 through N7 are done** — the replay-exercised core, enemy
+  types 0, 4–10 and 12–14, the spawn handlers (including the fairy routine
+  `4FC5`, first observed only in live play) and the uncovered branches of
+  body 0A — about **140 of the 220 routines translated**, every entry
+  backed by before/after MAME captures with targeted RAM forcing. The
+  harness stands at **706 comparisons, 214 entries, 0 failures**. Along
+  the way the bench caught and fixed a latent carry-flag bug in an
+  N1-verified routine, and grew two reusable techniques: wrappers that
+  verify routines reading the Z80 refresh register R (whose value no
+  capture can record) by searching for a consistent value, and a
+  dispatch-table forcing trick (`BC = 1<<j`) that exercises every entry
+  of a `rst 38` table from a single call site.
+- **Next up:** batches N8–N11 of the enemy engine (~70 routines, same
+  forcing-based method; N12 is two leftover routines to fold into one of
+  them), then the censused bonus/ending routines, the hardware layer
+  (video, sprites, palettes, input) to make the C port playable, wiring
+  the game to the translated sound driver, and cleanup with the replay as
+  regression.
 
 ## Repository layout
 
