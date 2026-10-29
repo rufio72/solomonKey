@@ -303,3 +303,22 @@ salvo dove è scritto `>=`.
    `stanza33` N=2 non esiste.
 5. **Accolta la proposta**: `STATO.md` e `README.md` li aggiorna la chat
    principale dopo la verifica.
+
+## Esito (chat principale, 2026-10-29)
+
+Ciclo dello schema in prova (confronto costi deciso con l'utente): analista
+Sonnet, sviluppatore Sonnet, verifica a script senza modello.
+
+- **Passato al primo colpo.** Commit `60c297d`. Le 16 verifiche rieseguite
+  dalla chat principale passano tutte; la 12 passa col comando corretto
+  (`gcov h-<file>.gcda`, il prefisso `h-` mancava nel brief): coperture
+  98,98 / 97,42 / 100 / 99,14%.
+- **Deviazioni accolte**: wrapper `nemici_r.c` per il registro R (54C5 e
+  5995 leggono `ld a,r` che le catture non registrano; il banco verifica che
+  esista un R compatibile — DA RATIFICARE con l'utente, è la questione R del
+  brief 28); bug di N1 in `sub_4592` (secondo `rla` perso nell'uscita col
+  riporto a 45DB) trovato da una forzatura e corretto; tag `stanza33_n2` per
+  non sovrascrivere le catture N=2.
+- **Token**: analista Sonnet 107k, sviluppatore Sonnet 204k, verifica 0.
+  Totale ~311k, tutto Sonnet, nessuna escalation a Opus. Banco a 412
+  catture (165 voci), replay a fine oracolo exit 0.
