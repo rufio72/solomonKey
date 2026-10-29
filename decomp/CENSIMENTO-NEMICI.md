@@ -435,6 +435,12 @@ fare, in `nemici_tipo06a.c`. 6 voci nuove nel banco (51FA con il wrapper
 deve ritornare subito; riporto 0 = uscita normale. Vedi `ROUTINE.md`, sezione
 «Motore dei nemici (lotto N6)».
 
+**Lotto N7 fatto** (brief 33, 2026-10-29): corpo 0A, 5 routine (4649, 46A3,
+470A, 4717, 4767) in coda a `nemici.c`; 3B62, la sesta, era già fatta in N1.
+Gli stub di `nemici_stub.c` scendono da 16 a 14 (tolti 4649 e 46A3). 4767 è
+condivisa con 37B4 (non tradotta, fuori dal censimento). 5 voci nuove nel
+banco, 35 catture. Vedi `ROUTINE.md`, sezione «Motore dei nemici (lotto N7)».
+
 **Lotti N2-N12**: le routine non coperte, un lotto per modulo. Sono in
 ordine di utilità, cioè di byte eseguiti nell'unione storica delle sessioni.
 Ingressi completi in `out/censimento_nemici_lotti.txt`.

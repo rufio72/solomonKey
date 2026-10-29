@@ -504,3 +504,29 @@ per j = 0..13 (14, `forza00`-`forza13`) e, per j = 0, 2, 4, 7, 9, 11, le variant
 `forzaJJb` (`ix+1:01,ix+10:07`, (IX+10) > 6) e `forzaJJc` (`ix+1:01,ix+10:03`)
 (12); 5292 (finale) `forza01` (`ix+1:00`), `forza02` (`ix+1:01,ix+10:07`),
 `forza03` (`ix+1:01,ix+10:03`). Tutte hanno aperto il ramo voluto.
+
+## Motore dei nemici (lotto N7)
+
+Corpo 0A, vie di 4632 (brief 33): `harness/nemici.c`, in coda, 4649, 46A3
+(smistate da `salta_4644` con `rst 20h`), 470A, 4717 e 4767. 3B62, la sesta
+del lotto, era già fatta in N1. **4767** è condivisa con 37B4 (chiamata a
+37D2, ritorno a 37D5), non tradotta e fuori lotto: la cattura `finale` e
+`stanza02` di 4767 vengono da lì. L'etichetta 480A cade dentro il ramo 47E5
+ed è una funzione `static` (`ramo_480a`). Il riporto in uscita di 4767 non è
+modellato (0): conta solo nel secondo giro di 4649 dopo il ramo 47B0, mai
+visto. **Non esercitabili**: i due rami di 46A3 con `sub_7379` senza slot
+libero (46AE-46B3 e 46DF-46E4), tradotti ma scoperti da gcov (6 righe).
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x4649 | sub_4649 | nemici.c | 90 | se (c2a9)&3F < 36 esce; per i bit 7 e 6 di (c459) azzera 3 byte del record 488D, inizializza l'oggetto 48AF (4AF6, 4722, 4767), bit 6 di (IX+0); (c459) = 20 | verificata | 4 | porta, stanza06, stanza07 | `porta` è l'uscita `ret c`; 3 con `SNAP_COND` (tag `_c`), non forzate |
+| 0x46A3 | sub_46a3 | nemici.c | 103 | per i bit 7 e 6 di (c459): slot libero (7379), nemico dalla lista (c2b1)/(c2b3) con 470A su FF, 472E, 4717; (c459)++ | verificata | 3 | porta, stanza06, stanza07 | `stanza07` solo il bit 6; i rami senza slot non esercitabili |
+| 0x470A | sub_470a | nemici.c | 13 | lista terminata da FF: HL = HL - (byte successivo) a 16 bit, A = (HL) | verificata | 3 | porta, stanza13, stanza14 | lista in ROM (`leggi`) |
+| 0x4717 | sub_4717 | nemici.c | 11 | 4AF6 con A=E5, E=03, BC=0 | verificata | 3 | porta, stanza06, stanza07 | |
+| 0x4767 | sub_4767 | nemici.c | 264 | A = codice, C = indice: smista per intervalli di A sulle tabelle 488D/48AF; 47B0 copia 10 byte da 47C7 con 3569 | verificata | 22 | finale, porta, stanza02, stanza07 | 4 non forzate (A = 0D, 48, 34, 4E) e 18 forzate |
+
+**Catture forzate** (`SNAP_FORZA="a:VV"`, suffisso `forzaVV`, stato `porta`) di
+4767: 10, 11, 12, 13 (47B0, record 0-3 della tabella 47C7), 16, 19 (47E5),
+1c (481D), 20, 24 (486B senza bit 3), 28, 2c (486B con bit 3), 40 (4813), 50,
+54 (481D), 68 (4832), 80 (483F), a0 (4859), a4 (4798). Tutte hanno aperto il
+ramo voluto.

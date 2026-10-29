@@ -9,8 +9,6 @@
     void sub_##x(struct z80 *z) { (void)z; nemici_manca(0x##x); }
 
 STUB_NEMICI(2474)
-STUB_NEMICI(4649)
-STUB_NEMICI(46a3)
 STUB_NEMICI(4ada)
 STUB_NEMICI(4fd4)
 STUB_NEMICI(5cfb)

@@ -1,0 +1,7 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+POKE 2250 C19D 00
+POKE 2250 C19E 00
+POSTA 2300 00 1C
+FORZA a = 10
+SNAP: catturata occorrenza 1 di 0x4767 [porta_forza10] al frame 3017, scartate 0
+Average speed: 2941.09% (49 seconds)
