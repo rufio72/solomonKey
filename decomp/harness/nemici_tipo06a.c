@@ -6,6 +6,7 @@
  * assegna a N10 e che le 8 routine di nemici_tipo06b.c richiedono: 5068
  * (coda condivisa), 51FA (smista con `rst 38` a 5207 sul bit acceso scelto
  * da 51D7), 5224, 523C e 5254 (tre destinazioni della tabella).
+ * Lotto N8 (brief 34): 4FEF, che 5CFB e 5FAC richiedono.
  * Tradotto da out/main64.dasm (out/nemici_n6.dasm). */
 #include "routine.h"
 #include "nemici.h"
@@ -152,4 +153,17 @@ void sub_51fa(struct z80 *z)
     case 0:      break;                                   /* fuori tabella */
     default:     nemici_manca(dest); break;
     }
+}
+
+/* 0x4FEF: BC = parola n. (A - 0x10) della tabella 4FF9 (anticipata da N10,
+ * richiesta da 5CFB e 5FAC). Uscita: A = A - 0x10, DE = A, HL sul secondo
+ * byte della parola, B = byte alto, C = byte basso. */
+void sub_4fef(struct z80 *z)
+{
+    z->a = (uint8_t)(z->a - 0x10);                        /* 4FEF */
+    SET_HL(z, 0x4ff9);                                    /* 4FF1 */
+    sub_0008(z);                                          /* 4FF4 */
+    z->c = leggi(HL(z));                                  /* 4FF5 */
+    SET_HL(z, (uint16_t)(HL(z) + 1));                     /* 4FF6 */
+    z->b = leggi(HL(z));                                  /* 4FF7 */
 }

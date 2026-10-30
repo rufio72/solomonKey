@@ -26,12 +26,20 @@
 static uint8_t r_valori[2];
 static unsigned r_usati;
 
+/* Come nemici_r_somma, ma scrive anche R1 (5DDF lascia C = R1). */
+uint8_t nemici_r_somma_r1(uint8_t *r1)
+{
+    uint8_t v = r_valori[r_usati < 2 ? r_usati : 1];
+    r_usati++;
+    uint8_t r2 = (uint8_t)((v & 0x80) | ((v + 3) & 0x7f));
+    *r1 = v;
+    return (uint8_t)(v + r2);
+}
+
 uint8_t nemici_r_somma(void)
 {
-    uint8_t r1 = r_valori[r_usati < 2 ? r_usati : 1];
-    r_usati++;
-    uint8_t r2 = (uint8_t)((r1 & 0x80) | ((r1 + 3) & 0x7f));
-    return (uint8_t)(r1 + r2);
+    uint8_t r1;
+    return nemici_r_somma_r1(&r1);
 }
 
 /* Stato «prima» o «dopo» di una cattura. */
@@ -160,3 +168,5 @@ void banco_r_51d7(struct z80 *z) { prova_con_r(z, "0x51D7", sub_51d7); }
 void banco_r_5995(struct z80 *z) { prova_con_r(z, "0x5995", sub_5995); }
 void banco_r_57cd(struct z80 *z) { prova_con_r(z, "0x57CD", sub_57cd); }
 void banco_r_51fa(struct z80 *z) { prova_con_r(z, "0x51FA", sub_51fa); }
+void banco_r_5ddf(struct z80 *z) { prova_con_r(z, "0x5DDF", sub_5ddf); }
+void banco_r_5e1a(struct z80 *z) { prova_con_r(z, "0x5E1A", sub_5e1a); }

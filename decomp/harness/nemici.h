@@ -237,21 +237,47 @@ void sub_470a(struct z80 *z);
 void sub_4717(struct z80 *z);
 void sub_4767(struct z80 *z);
 
-/* Il registro R (nemici_r.c): somma R1 + R2 dei due `ld a,r` di 54C5 e
- * 59E5; nel banco i quattro wrapper cercano il valore di R che riproduce
+/* Lotto N8, tipo 07 prima metà (brief 34): 5CFB-5FAC in nemici_tipo07a.c,
+ * 4FEF (anticipata da N10) in nemici_tipo06a.c. 5E09 lascia il riporto
+ * (A < 0x18) in z->f; 5E8F: A, E; 5F0C: A; 5F4B e 5F82: B, C. */
+void sub_5cfb(struct z80 *z);
+void sub_5d29(struct z80 *z);
+void sub_5d76(struct z80 *z);
+void sub_5ddf(struct z80 *z);
+void sub_5e09(struct z80 *z);
+void sub_5e1a(struct z80 *z);
+void sub_5e4d(struct z80 *z);
+void sub_5e60(struct z80 *z);
+void sub_5e8f(struct z80 *z);
+void sub_5e9d(struct z80 *z);
+void sub_5edd(struct z80 *z);
+void sub_5f0c(struct z80 *z);
+void sub_5f33(struct z80 *z);
+void sub_5f4b(struct z80 *z);
+void sub_5f82(struct z80 *z);
+void sub_5fac(struct z80 *z);
+void sub_4fef(struct z80 *z);
+
+/* Il registro R (nemici_r.c): somma R1 + R2 dei due `ld a,r` di 54C5, 59E5
+ * e 5DDF; nel banco i wrapper cercano il valore di R che riproduce
  * la cattura (vedi l'intestazione di nemici_r.c). */
 uint8_t nemici_r_somma(void);
+uint8_t nemici_r_somma_r1(uint8_t *r1);   /* somma e R1 */
 void banco_r_54c5(struct z80 *z);
 void banco_r_51d7(struct z80 *z);
 void banco_r_5995(struct z80 *z);
 void banco_r_57cd(struct z80 *z);
 void banco_r_51fa(struct z80 *z);
+void banco_r_5ddf(struct z80 *z);
+void banco_r_5e1a(struct z80 *z);
 
 /* Stub (nemici_stub.c): registrano l'ingresso con nemici_manca. */
 void sub_2474(struct z80 *z);
 void sub_4ada(struct z80 *z);
 void sub_4fd4(struct z80 *z);
-void sub_5cfb(struct z80 *z);
+void sub_5fc8(struct z80 *z);
+void sub_610c(struct z80 *z);
+void sub_627f(struct z80 *z);
 void sub_6b43(struct z80 *z);
 void sub_6c0b(struct z80 *z);
 void sub_7f48(struct z80 *z);

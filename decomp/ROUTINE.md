@@ -530,3 +530,58 @@ libero (46AE-46B3 e 46DF-46E4), tradotti ma scoperti da gcov (6 righe).
 1c (481D), 20, 24 (486B senza bit 3), 28, 2c (486B con bit 3), 40 (4813), 50,
 54 (481D), 68 (4832), 80 (483F), a0 (4859), a4 (4798). Tutte hanno aperto il
 ramo voluto.
+
+## Motore dei nemici (lotto N8)
+
+Tipo 07 di 4F0F, prima metà (brief 34): modulo nuovo `harness/nemici_tipo07a.c`
+con 5CFB-5F82 e 5FAC (anticipata da N11); 4FEF (anticipata da N10) in coda a
+`nemici_tipo06a.c`. 5DDF legge R con due `ld a,r`: nel banco la ricerca di R
+passa dai wrapper `banco_r_5ddf` e `banco_r_5e1a` (5E1A chiama 5DDF), con
+`nemici_r_somma_r1` che dà anche R1 (5DDF lascia C = R1). Restano stub
+(`nemici_stub.c`): 610C (chiamata da 5CFB), 5FC8 (destinazione 2 di 5E1A) e
+627F (coda di 5E9D). Il ramo di 5CFB 5D08-5D28 (610C, 4FEF, 5E1A) non è nel
+banco finché N11 non traduce 610C: le 4 catture di 5CFB hanno il bit 2 di
+(IX+0) acceso e percorrono 5D29. 5E60, 5F82 e 5FAC non hanno un ingresso
+catturabile da MAME: sono `tradotte`, coperte dalle forzate.
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x4FEF | sub_4fef | nemici_tipo06a.c | 10 | BC = parola n. (A-0x10) della tabella 4FF9 (anticipata da N10) | verificata | 2 | finale, stanza50 |  |
+| 0x5CFB | sub_5cfb | nemici_tipo07a.c | 46 | tipo 07 di 4F0F: bit 2 di (IX+0) acceso prosegue con 5D29; altrimenti 610C, 4FEF e, se (IX+0B/0C) >= BC, 5E1A | verificata | 4 | finale, stanza50 | 4 con `SNAP_COND` (bit 2 acceso, tag `_c`); il ramo 5D08-5D28 non è nel banco finché N11 non traduce 610C |
+| 0x5D29 | sub_5d29 | nemici_tipo07a.c | 172 | passo con (IX+0D) >= 3: tabella 84C8 a passi di 4 byte su (IY+0E/15), fine tabella (5D80) lancia con 4AF6, oppure chiude (5DC3) | verificata | 13 | finale, stanza50 | 4 non forzate e 9 forzate (`forza01-09`) |
+| 0x5D76 | sub_5d76 | nemici_tipo07a.c | 10 | A = nibble basso con segno (bit 3 esteso a F_) | verificata | 4 | finale, stanza50 |  |
+| 0x5DDF | sub_5ddf | nemici_tipo07a.c | 42 | due `ld a,r`: con i bit di D orienta (IX+5) e (IX+4) con 5E09 | verificata | 3 | finale | 2 non forzate e 1 forzata; legge R: `banco_r_5ddf` |
+| 0x5E09 | sub_5e09 | nemici_tipo07a.c | 17 | B = differenza dimezzata, A = |B'|, riporto = (A < 0x18) | verificata | 4 | finale | 3 non forzate e 1 forzata (`forza01`, `a:00,c:00`: ramo `neg`); riporto in z->f |
+| 0x5E1A | sub_5e1a | nemici_tipo07a.c | 43 | sceglie la mossa: 5DDF se bit 5 spento, azzera (IX+0B/0C/0D), `rst 38` a 5E40 su 4·((IY+1D)-0C)+(IY+1E) | verificata | 15 | finale, stanza50 | 6 non forzate e 9 forzate; legge R: `banco_r_5e1a`; la destinazione 2 (5FC8) è stub e non è esercitata |
+| 0x5E4D | sub_5e4d | nemici_tipo07a.c | 15 | (IY+1D) = B, (IY+1E) = C col bit 6 di (IY+0) spento durante la scrittura | verificata | 4 | finale, stanza50 |  |
+| 0x5E60 | sub_5e60 | nemici_tipo07a.c | 47 | bit 7 di (IX+4) spento: 5E4D con BC = 0003; acceso: 4AF6 su IY | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 5E1A (forza02, forza03) |
+| 0x5E8F | sub_5e8f | nemici_tipo07a.c | 14 | E = |2B|, A = |2C| (con segno nel bit 7) | verificata | 4 | finale, stanza50 |  |
+| 0x5E9D | sub_5e9d | nemici_tipo07a.c | 64 | mossa verso il giocatore con prova della cella (36F0); coda 627F (stub) | verificata | 3 | finale | 2 non forzate (solo le occorrenze 1 e 4 non passano da 627F) e 1 forzata |
+| 0x5EDD | sub_5edd | nemici_tipo07a.c | 47 | destinazioni 4 e 5 di 5E1A: (B, C) da 5E8F, (IY+1E) e segno | verificata | 4 | finale | 2 non forzate e 2 forzate |
+| 0x5F0C | sub_5f0c | nemici_tipo07a.c | 39 | quattro celle 2x2 della griglia: i loro bit 7 in C, A = C | verificata | 4 | finale, stanza50 |  |
+| 0x5F33 | sub_5f33 | nemici_tipo07a.c | 37 | secondo il bit 7 di (IX+5): 5F0C e 5F4B (DE = 1008) oppure 5F82 (DE = 10F8); poi 5E4D | verificata | 6 | finale, stanza50 | 4 non forzate e 2 forzate |
+| 0x5F4B | sub_5f4b | nemici_tipo07a.c | 42 | tabella 608C: (B, C) della voce, o coda 5FAC, o scelta con 5E8F | verificata | 20 | finale, stanza50 | 4 non forzate e 16 forzate (`forza00-0f`, `a:VV`) |
+| 0x5F82 | sub_5f82 | nemici_tipo07a.c | 42 | come 5F4B con la tabella 60AC | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 5F33 e 5E1A (forza05) |
+| 0x5FAC | sub_5fac | nemici_tipo07a.c | 28 | coda di 5F4B e 5F82: spegne il bit 2 di (IX+0), 4FEF, (IX+0B/0C) = FFF8, BC da (IY+1D/1E) (anticipata da N11) | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 5F4B (a = 00, 01, 04, 05) |
+
+**Catture forzate** (`SNAP_FORZA`, suffisso `forzaNN`, stato `finale`, N=1).
+5E1A: `forza01` (`iy+1d:0b`), `forza02` e `forza03` (E=0, bit 7 di (IX+4)
+spento/acceso), `forza04` (E=1, 5E9D), `forza05` e `forza06` (E=3, 5F33 verso
+5F82/5F4B), `forza07` e `forza08` (E=4, 5; 5EDD), `forza09` (`ix+00:00,iy+1d:0b`: bit 5 spento, chiama 5DDF); non E=2 (5FC8 è stub).
+5F33: `forza01` (`ix+05:00`), `forza02` (`ix+05:80`). 5D29: `forza01`
+(`ix+0d:02`), `forza02`-`03` (5DC3, bit 0 di (IY+1E) spento/acceso),
+`forza04`-`08` (5D80: `ret c`, `ret z`, 5D96 nei tre casi), `forza09`
+(percorso generale). 5F4B: `forza00`-`forza0f` (`a:00` ... `a:0f`).
+Altre forzate: 5DDF `forza01` (`iy+0e:7f,iy+15:7f`); 5E09 `forza01`
+(`a:00,c:00`); 5E9D `forza01` (`ix+04:81,ix+05:00`, B negativo: BC = 0002);
+5EDD `forza01` (`ix+04:00,ix+05:01`) e `forza02` (`ix+04:20,ix+05:00`).
+Totale lotto: 90 catture (49 non forzate e 41 forzate).
+
+**Non coperte da gcov** (`nemici_tipo07a.c`): 5D08-5D28 di 5CFB (610C stub,
+N11); la chiamata a `sub_5fc8` e i casi `0` e `default` dello `switch` di 5E1A;
+`sub_627f` e la sua uscita in 5E9D (5ED6-5EDA); in 5E9D i rami sulla cella
+davanti (5EBB-5EC6, servono celle della griglia c0bd, non forzabili con
+`ix`/`iy`); in 5F82 il ramo con bit 2 spento (coda 5FAC) e la scelta finale,
+perché 5F82 non è un ingresso catturabile e 5F0C dà l'indice in base alle
+celle; il `ret c` di 5E04 in 5DDF (dipende da R e dalle celle). Il corrispondente
+di 5F4B è invece coperto dalle forzate `forza00-0f`.

@@ -441,6 +441,14 @@ Gli stub di `nemici_stub.c` scendono da 16 a 14 (tolti 4649 e 46A3). 4767 è
 condivisa con 37B4 (non tradotta, fuori dal censimento). 5 voci nuove nel
 banco, 35 catture. Vedi `ROUTINE.md`, sezione «Motore dei nemici (lotto N7)».
 
+**Lotto N8 fatto** (brief 34, 2026-10-30): tipo 07 prima metà, 15 routine
+(5CFB, 5D29, 5D76, 5DDF, 5E09, 5E1A, 5E4D, 5E60, 5E8F, 5E9D, 5EDD, 5F0C,
+5F33, 5F4B, 5F82) in `nemici_tipo07a.c`, più due anticipate: 4FEF (da N10, in
+`nemici_tipo06a.c`) e 5FAC (da N11). Gli stub di `nemici_stub.c` salgono da
+14 a 16 (tolto 5cfb; aggiunti 610c, 5fc8 e 627f). 14 voci nuove nel banco,
+84 catture. N10 e N11 non rifanno 4FEF e 5FAC. Vedi `ROUTINE.md`, sezione
+«Motore dei nemici (lotto N8)».
+
 **Lotti N2-N12**: le routine non coperte, un lotto per modulo. Sono in
 ordine di utilità, cioè di byte eseguiti nell'unione storica delle sessioni.
 Ingressi completi in `out/censimento_nemici_lotti.txt`.
