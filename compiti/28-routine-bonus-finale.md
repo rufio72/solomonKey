@@ -301,3 +301,15 @@ OK ma non per `verificata` (servono 2 catture non forzate).
 6. **03EE catturata nella stanza 17** (dove 4ADA scrive c078 e la NMI
    successiva chiama 03EE), non in `bonus`, dove con gli ingressi «traccia»
    non compare. Proposta: accettarlo. — «preferenza»
+
+## Nota di coerenza (2026-10-30, dopo il lotto N8)
+
+Il brief non è mai stato eseguito e in parte è superato dal lotto N8
+(brief 34): 5DDF e 5E09 sono già tradotte e verificate in
+`nemici_tipo07a.c`, che esiste già (la domanda 2 è quindi superata).
+La domanda 3 (registro R nelle catture, `z->r`, `R=` in `snap.lua`) è
+superata dalla regola ratificata dall'utente: niente R nelle catture,
+le routine che leggono R si verificano coi wrapper `banco_r_*` di
+`nemici_r.c` (per 5DDF esiste `banco_r_5ddf` con `nemici_r_somma_r1`).
+Prima di eseguire il lotto, il brief va rivisto: resta aperta la sola
+domanda 1 (perimetro 28/40, scelta di progetto).

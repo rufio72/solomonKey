@@ -455,3 +455,18 @@ dove è scritto «attesa, dedotta». Abbreviazione:
    coerenza col brief 28 la annota la chat principale a fine ciclo
    (5DDF e 5E09 fatte in N8, `nemici_tipo07a.c` esiste già, niente
    `z->r` nelle catture).
+
+## Esito (2026-10-30)
+
+Ciclo passato al primo colpo, sesto con lo schema economico (analista
+Sonnet ~195k token, sviluppatore Sonnet ~100k, verifica a script senza
+modello; ~1 $). Commit dello sviluppatore `7aaa4bd`. Verifiche 1-15
+rieseguite dalla chat principale: tutte passate con le attese corrette
+per le 6 catture forzate aggiunte dallo sviluppatore (banco a 796
+catture e 228 voci, 90 file del lotto; 5DDF 3, 5E09 4, 5E1A 15, 5E9D 3,
+5EDD 4). Unica eccezione la verifica 11: 27 righe `#####` contro il
+tetto di 14, che però era «attesa, non misurata»; tutte spiegate in
+`ROUTINE.md` (rami dietro gli stub 610C/5FC8/627F e ingressi non
+catturabili), si chiudono con N11. Deviazione corretta in corso d'opera:
+prima versione di 5EDD con A sbagliato (l'originale ricarica A da
+(IY+1E) a 5EEC prima del `cp c`).
