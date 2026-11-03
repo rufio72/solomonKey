@@ -1,4 +1,4 @@
-# Giro dal boot (lotti H4a, H4b1, H4b2 e H4b3, brief 44, 45, 46 e 47)
+# Giro dal boot 0-5499 (lotti H4a, H4b1, H4b2, H4b3 e H4c, brief 44-48)
 
 Primo pezzo dell'ex «giro libero»: il C parte dal vettore 0000 e gira senza
 che l'oracolo di MAME lo guidi. Dell'oracolo restano il controllo (impronta
@@ -7,7 +7,7 @@ misurabile, alla prima attività non tradotta: in H4a `CORPO 1F (43C8)` al
 frame 602, da H4b1 `CORPO 07 (2CCD) non tradotto al frame 1188`, da H4b2
 `ROUTINE 2DCE mancante (motore dei nemici) al frame 1398`. Da H4b3 il giro
 arriva al frame 2410 senza arresti e si salda all'oracolo storico
-(`SALDATURA 2410 ... coincide`). Resta H4c (giro 0-5499).
+(`SALDATURA 2410 ... coincide`). Da H4c (brief 48) prosegue fino al 5499 (sezione in fondo).
 
 ## Uso (da `decomp/`)
 
@@ -215,3 +215,43 @@ spedidore; 9 a metà attività, tutte nel primo corpo 06 (frame 603-611).
   `nemici_tipi_10_13.c`, `attivita.c`, `z80_3xxx.c`, `z80_4xxx.c`,
   `gioco_libero.c` e `nemici.h` sono toccati solo per questo. I file
   `snap_*` delle catture sono nel commit come per 3ADF (anche i `.bin`).
+
+## H4c: giro completo 0-5499 e hash dei framebuffer (brief 48)
+
+- Oracolo esteso: `giro_boot.sh` arriva a REPLAY_FINE 5500 (13 s) e scarica i
+  dump di 700, 1000, 1300, 1600, 1900, 2100, 2400, 2410, 3000, 3500, 4000,
+  4500, 5000, 5499 (più 602). I vecchi file sono un prefisso dei nuovi; il
+  registro esteso è identico a `out/replay_disp.txt`. 5434 righe F, 106104 D.
+  L'impronta di `macchina.c` differisce da quella di `replay.c`: non si
+  concatena con `replay_oracolo.txt`.
+- `harness/giro_video.c`: a ognuno dei 13 frame campione, prima della NMI, la
+  RAM del C e il dump di MAME sono resi con `rendi_frame` e si confronta
+  l'hash FNV-1a 64 (come `vsdl_hash`) con la tabella. Righe `FRAME_VIDEO`.
+  Il 1000 vale `ecd5acf694285489` come lo stato `titolo` validato col PNG;
+  degli altri stati dell'oracolo video solo `titolo` è raggiunto dal giro.
+
+| frame | hash | frame | hash |
+|---|---|---|---|
+| 700 | ecd5acf694285489 | 3000 | a095933c7af464d4 |
+| 1000 | ecd5acf694285489 | 3500 | 151fa1f690ea7454 |
+| 1300 | 72dcb8156116ea1a | 4000 | 477dc1ae3714e5ef |
+| 1600 | 47ce347bb79ec1bb | 4500 | 57d536ce21b8e9cb |
+| 1900 | 960052b7b34b1c54 | 5000 | 8b0bb97c5ef23965 |
+| 2100 | 5f9c4bdae4b92d31 | 5499 | a239d0a940bec0b9 |
+| 2400 | 7a0831f8cdb6805d | | |
+
+- Regressione: `sh giro_completo.sh` (`REGEN=1` rigenera l'oracolo, `RIGHE=1`
+  stampa i frame `MEZZA`). Riga finale: `GIRO COMPLETO 0-5499: saldatura 0
+  byte, spedidore 0 divergenze, 30 a metà attività (attese), 13 frame resi con
+  hash coincidenti`; altrimenti `FALLITO (motivo)` e uscita 1.
+- Divergenze a metà attività: 33 prima di H4c, 3 oltre il 2410 (frame 4029 e
+  4508 con ritorno 4632, 5459 con ritorno 4635: NMI prima della fase 4632 del
+  corpo 0A). Sanate con `PUNTO_GIRO(0x4632, 0x4635)` in `sub_4632`
+  (`nemici.c`): restano 30. Sono i frame 604-611, 1188 e 1190-1195, 1532-1541 e
+  1565-1569 (ritorni 32xx/33xx, 7F03-7F28, 75B1-75E0, 23F4), già noti da
+  H4b3. Il replay storico non cambia (885 a metà attività, ha gli
+  stessi ritorni senza i ganci del giro).
+- Regione 6253-673F: nel giro 0-5499 non si esegue oltre 63A4-63C2 (corpo 0E,
+  già tradotto) e 673F (banco): 15 indirizzi in `replay_gioco_eseguiti.txt`.
+  Resta fuori dall'harness; da affrontare solo se un giro più lungo (H5, partita
+  libera) la raggiunge.

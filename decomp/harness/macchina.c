@@ -28,6 +28,7 @@
 #include "sched.h"
 #include "nemici.h"
 #include "rst20_tables.h"
+#include "giro_video.h"
 
 attivita_fn corpo_attivita[SCHED_CODICI];
 extern attivita_fn corpo_attivita_replay[SCHED_CODICI];
@@ -143,6 +144,7 @@ static long nmi_totali, nmi_divergenti;
 static long spedizioni;                /* corpi eseguiti dopo il boot */
 static long dopo_pulite, dopo_meta;    /* NMI dopo il boot per tipo */
 static long div_pulite, div_meta;      /* e divergenti per tipo */
+static long saldatura_byte = -1;       /* byte diversi alla saldatura */
 static long punti;                     /* chiamate di punto dall'ultima NMI */
 static int in_nmi;
 static uint8_t maschera_nmi;           /* e600 in scrittura, bit 0 */
@@ -226,6 +228,7 @@ static void saldatura(void)
         return;
     printf("SALDATURA %d: byte diversi in c000-e5ff (escluse c040-c043, cf00-cfff): "
            "%d, %s\n", FRAME_SALDATURA, tot, tot ? "DIVERSO" : "coincide");
+    saldatura_byte = tot;
     if (tot) {
         nmi_divergenti++;
         ferma(1);
@@ -244,6 +247,7 @@ static void esegui_nmi(const struct riga_f *r)
         sanita();
     if (r->frame == FRAME_SALDATURA)
         saldatura();
+    giro_video_campione(r->frame, ram, prefisso);
     if (r->frame >= 0 && r->frame < MAX_FRAME) {   /* porte vive del frame */
         ram[0xe600 - 0xc000] = ingressi[r->frame][0];
         ram[0xe601 - 0xc000] = ingressi[r->frame][1];
@@ -422,6 +426,7 @@ static void esegui_nmi_ev(const struct evento *n)
         }
         div_meta++;
         nmi_divergenti++;
+        printf("MEZZA frame %ld ritorno %04X\n", r->frame, r->ritorno);
     }
     esegui_nmi(r);
 }
@@ -610,5 +615,21 @@ int macchina_esegui(const char *oracolo, const char *disp, const char *ingr, lon
     nemici_r_gancio = r_letto;
     for (int i = 0; i < SCHED_CODICI; i++)
         corpo_attivita[i] = involucro;
-    return giro_spedidore();
+    int rc = giro_spedidore();
+    if (fine < 0 && n_ff > 0) {
+        long campioni, coinc, ultimo = ff[n_ff - 1].frame;
+        const char *motivo = NULL;
+        if (rc) motivo = "giro fermato";
+        else if (saldatura_byte != 0) motivo = "saldatura non coincide";
+        else if (div_pulite) motivo = "divergenze nello spedidore";
+        else if (giro_video_riepilogo(&campioni, &coinc)) motivo = "hash dei framebuffer";
+        if (motivo) {
+            printf("GIRO COMPLETO 0-%ld: FALLITO (%s)\n", ultimo, motivo);
+            return 1;
+        }
+        printf("GIRO COMPLETO 0-%ld: saldatura %ld byte, spedidore %ld divergenze, "
+               "%ld a metà attività (attese), %ld frame resi con hash coincidenti\n",
+               ultimo, saldatura_byte, div_pulite, div_meta, coinc);
+    }
+    return rc;
 }

@@ -179,6 +179,7 @@ static void salta_4644(struct z80 *z, uint16_t dest)
 
 static void sub_4632(struct z80 *z)
 {
+    PUNTO_GIRO(0x4632, 0x4635);                /* NMI prima di 4632 e di 4635 (H4c) */
     SET_HL(z, FASE_C2B8);                      /* 4632 */
     M(FASE_C2B8)++;                            /* 4635; 4636 pop hl */
     z->a = M(0xc459);                          /* 4637 */

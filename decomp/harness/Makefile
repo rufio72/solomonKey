@@ -35,9 +35,10 @@ replay: $(SORGENTI_REPLAY) ram.h routine.h sched.h nemici.h e603.h rst20_tables.
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_REPLAY)
 
 # giro dal boot (lotto H4a): macchina, NMI una per frame, ingressi registrati
-SORGENTI_LIBERO = $(filter-out harness.c,$(SORGENTI)) sched.c macchina.c gioco_libero.c
+# (H4c: con il modulo video per gli hash dei framebuffer)
+SORGENTI_LIBERO = $(filter-out harness.c,$(SORGENTI)) sched.c macchina.c gioco_libero.c giro_video.c video_rendi.c $(SORGENTI_GRAFICA)
 
-gioco_libero: $(SORGENTI_LIBERO) ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h
+gioco_libero: $(SORGENTI_LIBERO) ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h giro_video.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_LIBERO)
 
 audio_banco: $(SORGENTI_AUDIO) audio.h $(INTESTAZIONI_DATI)

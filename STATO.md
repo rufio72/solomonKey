@@ -183,7 +183,11 @@ ogni ciclo nei brief in `compiti/`.
    spedizioni, 2345 NMI (30 divergenti a metà attività, 0 nello spedidore).
    Per la saldatura sono serviti ganci `PUNTO_GIRO` (attivi solo nel giro) in
    routine del motore dei nemici già verificate; il replay storico non cambia.
-   Resta H4c (giro 0-5499). Vedi `decomp/GIRO.md`.
+   H4c (brief 48): il giro arriva al frame 5499 senza arresti, con oracolo
+   esteso, hash di 13 framebuffer resi dalla RAM del C (tutti coincidenti con
+   MAME) e una riga di regressione (`sh giro_completo.sh`): `GIRO COMPLETO
+   0-5499: saldatura 0 byte, spedidore 0 divergenze, 30 a metà attività
+   (attese), 13 frame resi con hash coincidenti`. H4 chiuso. Vedi `decomp/GIRO.md`.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

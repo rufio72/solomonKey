@@ -44,9 +44,9 @@ Materiale già pronto:
   script del framebuffer (SDL non cambia i pixel) + sanità manuale.
   *Analista Sonnet.*
 
-- [ ] **H4 — Giro libero.** *H4a fatto (brief 44), H4b1 fatto (brief 45,
+- [x] **H4 — Giro libero.** *H4c fatto (brief 48, 2026-11-03): H4 chiuso, restano H5 e oltre. H4a fatto (brief 44), H4b1 fatto (brief 45,
   2026-11-03), H4b2 fatto (brief 46, 2026-11-03), H4b3 fatto (brief 47,
-  2026-11-03), resta H4c.* Spezzato in tre dal brief 44 (Fable,
+  2026-11-03).* Spezzato in tre dal brief 44 (Fable,
   2026-11-03): **H4a** macchina+boot+ingressi registrati con arresto
   atteso al corpo 1F; **H4b** traduzione dei corpi attract/titolo
   (~930 istruzioni), spezzato dal brief 45 in **H4b1** (fatto: NMI complete,
