@@ -45,7 +45,7 @@ of every PSG register change, captured for each of the 65 sound/music command
 codes. Its end-to-end test — WAV files rendered from the C driver through a
 YM2149 emulator and compared against the original's — has been passed.
 
-## Status (October 2026)
+## Status (November 2026)
 
 - **Feasibility survey** (`decomp/RAPPORTO.md`): clean code, no self-modifying
   tricks on the main CPU, ~250-300 routines estimated.
@@ -56,11 +56,16 @@ YM2149 emulator and compared against the original's — has been passed.
   before/after MAME captures, harness at **112 comparisons, 0 failures**.
   This includes the NMI, the activity scheduler, Dana's state machine, the
   per-object engine and the hardware ports as platform functions.
-- **Bonus rooms & ending coverage, done:** guided sessions with targeted RAM
-  forcing pushed coverage to **235 of 299 static call destinations (78.6%)**;
-  the 64 never-executed remainder all have call sites that never run
-  (data misread as code, or code reachable only from dead zones) and are
-  censused in `decomp/CENSIMENTO-12.md`.
+- **Bonus rooms & ending — done, translated:** guided sessions with targeted
+  RAM forcing censused the region, and every reachable routine is now
+  translated and in the harness, including the key-pickup dispatcher and
+  its 16 handlers (table `0D18`). The never-executed remainder — 59
+  destinations — has a written verdict per entry in
+  `decomp/ZONE-MAI-ESEGUITE.md`: 53 are data misread as code, none are
+  dead code, 6 are reachable under special conditions (5 with a proven
+  wake-up recipe, two of them needing specific DIP-switch settings).
+  **With this, the main Z80's reachable code is fully translated:**
+  the harness stands at **1,270 comparisons, 304 entries, 0 failures**.
 - **Audio Z80 — done: fully decompiled and verified end to end.** The whole
   sound driver is now C (`decomp/harness/audio_*.c`): command dispatch, the
   sequence interpreter (9 voices × 2 layers, glissando, envelopes) and the
@@ -99,10 +104,19 @@ YM2149 emulator and compared against the original's — has been passed.
   capture can record) by searching for a consistent value, and a
   dispatch-table forcing trick (`BC = 1<<j`) that exercises every entry
   of a `rst 38` table from a single call site.
-- **Next up:** the censused bonus/ending routines, the hardware layer
-  (video, sprites, palettes, input) to make the C port playable, wiring
-  the game to the translated sound driver, and cleanup with the replay as
-  regression.
+- **Hardware layer — underway (SDL2).** The plan lives in
+  `compiti/PIANO-HARDWARE.md` (batches H1-H7). Done so far:
+  **H1, the video oracle** — per-frame dumps of both tilemaps, sprite RAM
+  and palette RAM taken in the same frame as a MAME screenshot, for six
+  sample states (`decomp/out/video/`, format in `decomp/VIDEO.md`); and
+  **H2, the pure software renderer** — `rendi_frame` turns the video RAM
+  into an RGB framebuffer that is **pixel-for-pixel identical to MAME on
+  all seven sample states**, with the graphics ROMs' pixel data shipped
+  as generated C source (round-trip verified, see `NOTICE.md`).
+- **Next up:** H3-H7 of the hardware plan — the SDL2 window, the
+  free-running game loop, input, wiring the translated sound driver to
+  SDL audio, and packaging — then classifying the replay's mid-activity
+  NMI divergences, with the replay as the regression test throughout.
 
 ## Repository layout
 
