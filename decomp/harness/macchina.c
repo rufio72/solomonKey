@@ -29,8 +29,11 @@
 #include "nemici.h"
 #include "rst20_tables.h"
 #include "giro_video.h"
+#include "macchina.h"
 
 attivita_fn corpo_attivita[SCHED_CODICI];
+uint8_t macchina_dsw1 = 0x02, macchina_dsw2 = 0x00;
+void (*macchina_prima_nmi)(long frame) = NULL;
 extern attivita_fn corpo_attivita_replay[SCHED_CODICI];
 
 #define FRAME_DUMP   602       /* frame del dump completo (giro_boot.sh) */
@@ -147,8 +150,8 @@ static long div_pulite, div_meta;      /* e divergenti per tipo */
 static long saldatura_byte = -1;       /* byte diversi alla saldatura */
 static long punti;                     /* chiamate di punto dall'ultima NMI */
 static int in_nmi;
-static uint8_t maschera_nmi;           /* e600 in scrittura, bit 0 */
-static uint8_t ribalta;                /* e604 in scrittura */
+uint8_t maschera_nmi;                 /* e600 in scrittura, bit 0 */
+uint8_t ribalta;                      /* e604 in scrittura */
 
 static void riepilogo(void)
 {
@@ -164,7 +167,7 @@ static void ferma(int codice)
     exit(codice);
 }
 
-static void gancio_porta(uint16_t a, uint8_t v)
+void gancio_porta(uint16_t a, uint8_t v)
 {
     if (a == 0xe600)
         maschera_nmi = v & 1;
@@ -253,6 +256,8 @@ static void esegui_nmi(const struct riga_f *r)
         ram[0xe601 - 0xc000] = ingressi[r->frame][1];
         ram[0xe602 - 0xc000] = ingressi[r->frame][2];
     }
+    if (macchina_prima_nmi)            /* H5: resa del frame, RAM prima della NMI */
+        macchina_prima_nmi(r->frame);
     struct z80 z = {0};
     in_nmi = 1;
     sub_0066(&z);
@@ -322,12 +327,12 @@ static void test_rami(struct z80 *z, void (*fn)(struct z80 *), uint16_t hl, uint
 /* SP e registro I non si modellano: la pila (cf00-cfff dal frame 68, dbxx
  * prima) è fuori dall'impronta. IX è una variabile locale. In C i test RAM
  * passano sempre (IX = 0), quindi niente nuovo tentativo a 28D9. */
-static void boot_2833(void)
+void boot_2833(void)
 {
     struct z80 z = {0};
     uint16_t ix = 0;
-    ram[0xe604 - 0xc000] = 0x02;       /* DSW1 e DSW2 della registrazione */
-    ram[0xe605 - 0xc000] = 0x00;
+    ram[0xe604 - 0xc000] = macchina_dsw1;   /* DSW (predefiniti: quelli della registrazione) */
+    ram[0xe605 - 0xc000] = macchina_dsw2;
     scrivi_porta(0xe600, 0);           /* 0000: NMI spenta */
     test_rami(&z, sub_2bf3, 0xc000, 0x0800, &ix);
     test_rami(&z, sub_2bf3, 0xc800, 0x0800, &ix);

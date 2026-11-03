@@ -18,7 +18,7 @@ SORGENTI_AUDIO = audio_banco.c $(SORGENTI_DRIVER)
 SDL2_CONFIG ?= sdl2-config
 HA_SDL := $(shell $(SDL2_CONFIG) --version 2>/dev/null)
 ifneq ($(HA_SDL),)
-BERSAGLI_SDL = mostra_oracolo mostra_replay
+BERSAGLI_SDL = mostra_oracolo mostra_replay gioca
 SDL_CFLAGS := $(shell $(SDL2_CONFIG) --cflags)
 SDL_LIBS := $(shell $(SDL2_CONFIG) --libs)
 endif
@@ -76,7 +76,13 @@ replay_lib.o: replay.c ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rs
 mostra_replay: mostra_replay.c video_sdl.c video_sdl.h video_rendi.c $(SORGENTI_GRAFICA) replay_lib.o $(filter-out replay.c,$(SORGENTI_REPLAY)) video.h ram.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ mostra_replay.c video_sdl.c video_rendi.c $(SORGENTI_GRAFICA) replay_lib.o $(filter-out replay.c,$(SORGENTI_REPLAY)) $(SDL_LIBS)
 
+# il gioco si gioca (lotto H5): macchina libera o con oracolo, tastiera, DSW
+SORGENTI_GIOCA = $(filter-out gioco_libero.c,$(SORGENTI_LIBERO)) gioca.c gioca_tasti.c gioca_dsw.c macchina_libera.c video_sdl.c
+
+gioca: $(SORGENTI_GIOCA) macchina.h ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h video_sdl.h giro_video.h
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ $(SORGENTI_GIOCA) $(SDL_LIBS)
+
 clean:
-	rm -f harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine mostra_oracolo mostra_replay replay_lib.o
+	rm -f harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine mostra_oracolo mostra_replay gioca replay_lib.o
 
 .PHONY: all clean

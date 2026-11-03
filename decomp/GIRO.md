@@ -255,3 +255,53 @@ spedidore; 9 a metà attività, tutte nel primo corpo 06 (frame 603-611).
   già tradotto) e 673F (banco): 15 indirizzi in `replay_gioco_eseguiti.txt`.
   Resta fuori dall'harness; da affrontare solo se un giro più lungo (H5, partita
   libera) la raggiunge.
+
+## H5: gioca (brief 49)
+
+`harness/gioca` (da `decomp/`; `make gioca`, richiede SDL2) unisce la macchina
+del giro dal boot alla finestra SDL2 di H3. Sorgenti: `gioca.c` (opzioni,
+registrazione, resa), `gioca_tasti.c` (tastiera/joystick), `gioca_dsw.c` (DSW),
+`macchina_libera.c` (macchina senza oracolo), `macchina.h`.
+
+- Uso: `harness/gioca [-s N] [-n N | -m N] [--registra F] [--riproduci F]
+  [--hash-frame F,F] [DSW] [--stampa-dsw] [--mappa]`. `-n N` senza finestra (N
+  frame resi), `-m N` con finestra, poi esce. Riepilogo su stdout: `FRAME rese`,
+  `HASH ultimo` (e `FRAME ultimo` con `--oracolo`). `--hash-frame` stampa
+  `HASH <frame> <hex16>` (FNV-1a del frame reso con la RAM prima della NMI).
+- Registra/riproduci: stesso formato di `out/ingressi_replay.txt`
+  (`<frame> <e600> <e601> <e602>`, hex maiuscolo a due cifre); il primo frame
+  è il 66. Frame mancante = `00 00 00`. Con `--riproduci` il reset F2 è disattivato.
+- Tasti (`gioca --mappa`; porte attive alte, bit da solomon.cpp): frecce/WASD
+  direzioni (e600 01/02/04/08), X e Alt sx = BUTTON2 (10), Z, Ctrl sx e Spazio =
+  BUTTON1 (20), 1 e Invio = START1 (e602 01), 2 = START2, 5 e C = COIN1 (04), 6 =
+  COIN2; giocatore 2 (e601): L J I K direzioni, M BUTTON2, N BUTTON1. Direzioni
+  opposte insieme si annullano. Joystick 0: assi oltre ±8000 e cappello,
+  pulsanti 0 = BUTTON1, 1 = BUTTON2, 6 = COIN1, 7 = START1. P = pausa, F2 =
+  reset (`execv` con gli stessi argomenti), ESC esce. Quale pulsante sia il
+  salto e quale la magia: non risulta dal sorgente MAME, da annotare dopo la
+  prova manuale con la finestra (non eseguita in questo lotto).
+- DSW: `--vite 2|3|4|5`, `--cabinet upright|cocktail`, `--demo on|off`, `--bonus
+  30k-200k-500k|100k-300k-800k|30k-200k|100k-300k|30k|100k|200k|nessuno`,
+  `--difficolta facile|normale|dura|difficile`, `--timer lento|normale|veloce|
+  velocissimo`, `--extra normale|difficile`, `--dsw1 HEX`, `--dsw2 HEX` (grezzi,
+  vincono). Predefiniti 02/00. Arrivano alla macchina solo con la scrittura del
+  boot (`macchina_dsw1/2`). Il codice tradotto legge pochi bit dei DSW: valori
+  diversi dai predefiniti possono portare a codice non tradotto.
+- Modo `--oracolo ORACOLO DISP --riproduci F`: la macchina di H4 (istante delle
+  NMI dall'oracolo), ripresa in finestra. Riproduce esattamente la partita: hash
+  del frame 5499 `a239d0a940bec0b9`, `FRAME rese 5434`.
+- Modo libero (senza oracolo): il boot usa `MACCHINA_PUNTO` come orologio, una
+  NMI ogni `PUNTI_PER_NMI_BOOT` = 1150 punti (misurato: 1000 -> boot finito al
+  frame 615, 1100 -> 605, 1200 -> 598; il boot totale fa circa 660000 punti; con
+  32 non finiva). Dopo il boot la NMI entra ai confini: ogni `CORPI_PER_FRAME` = 22
+  corpi (media misurata sul registro di MAME 21,67) o `LETTURE_PER_FRAME` = 2000
+  letture a vuoto della scansione. Non c'è modello dei cicli del Z80: in MAME
+  2928 delle 4800 NMI dopo il frame 700 cadono a metà corpo, quindi la partita
+  è plausibile ma non identica a MAME (l'hash del frame 5499 libero è
+  `0150736758a51e3b`, diverso da `a239...`). Con gli ingressi registrati il modo
+  libero arriva a 5434 frame senza fermarsi; i frame 700 e 1000 (titolo) danno
+  `ecd5acf694285489`, come MAME.
+- Limite di copertura: i corpi tradotti sono quelli della partita registrata. Una
+  partita diversa (altre stanze, registro R, DSW diversi) può raggiungere codice
+  non tradotto: il modo libero stampa `FERMO <motivo> al frame <f>`, chiude la
+  registrazione e la finestra, riepiloga ed esce con codice 3.

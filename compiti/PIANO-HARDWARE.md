@@ -64,7 +64,7 @@ Materiale già pronto:
   È il secondo lotto delicato (confini tra harness e gioco vero).
   *Analista Opus.*
 
-- [ ] **H5 — Input SDL.** Tastiera (e joystick se c'è) → porte di
+- [x] **H5 — Input SDL.** *Fatto (brief 49, 2026-11-03): `decomp/harness/gioca`, modo libero (NMI ai confini dello spedidore, 5434 frame senza FERMO) e `--oracolo` (hash 5499 a239d0a940bec0b9 esatto); vedi GIRO.md.* Tastiera (e joystick se c'è) → porte di
   ingresso già modellate in `porte.c`/`e603.h`, più i dip switch come
   opzioni da riga di comando (Bonus Life compreso, vedi brief 40).
   Da qui il gioco si gioca. Verifica: sequenza di input registrata che
