@@ -280,3 +280,18 @@ punti-gancio inseriti e le deviazioni.
 4. Sì (preferenza): formato ingressi `<frame> <e600> <e601> <e602>`.
 5. Sì (preferenza): nomi come proposti.
 6. Sì (preferenza): DSW fissi 02/00; le opzioni arrivano con H5.
+
+## Esito (sviluppatore, 2026-11-03)
+
+Tutte le 12 verifiche passate al primo giro. Uscite: (1) `0`; (2) `5434` e
+`43934a8e...b437f`; (3) `REPLAY giroboot: 544 righe F, 2 spedizioni`, diff vuoto;
+(4) `SANITA 602: ... 0, coincide`, `CORPO 1F (43C8) non tradotto al frame 602`,
+`NMI confrontate: 537, divergenti: 0`, `exit 1`; (5) `0`; (6) `exit 0`, `0`, `304`,
+`1270`; (7) `exit 0` e le 4 righe note; (8) `106124, differenze: 0; ... 131/131`;
+(9) `RENDI 7/7 identici`, `exit 0`; (10) vuoto; (11) vuoto; (12) solo i file del
+brief più `.gitignore`, `0` binari.
+Punti inseriti: 29 nelle routine verificate, 47 nel codice nuovo, 2 per byte nei
+cicli di azzeramento del boot. Deviazioni: il gancio `punto` rieseguibile
+(più NMI nello stesso tratto a RAM costante); `porte_gancio_scrittura` consuma
+la scrittura (non deposita in ram[]); il brief diceva «azzera d000-d007» ma
+2922 azzera d000-d7ff (BC=0008); la mappa dei fatti sul boot non cambia.
