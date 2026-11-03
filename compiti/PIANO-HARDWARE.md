@@ -18,7 +18,7 @@ Materiale già pronto:
 
 ## Lotti, in ordine
 
-- [ ] **H1 — Oracolo video.** Script Lua/sh che da MAME estrae, per 4-6
+- [x] **H1 — Oracolo video.** FATTO (brief 41, 2026-11-03, ~0,3 $). Script Lua/sh che da MAME estrae, per 4-6
   stati campione (titolo, stanza 1, una stanza avanzata, bonus, finale):
   dump di videoram, colorram, spriteram e palette RAM, più lo screenshot
   PNG dello stesso frame. Definire il formato dei file e dove vivono
