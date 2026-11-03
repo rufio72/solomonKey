@@ -11,13 +11,13 @@ ogni ciclo nei brief in `compiti/`.
 | Destinazioni statiche nel Z80 principale | 299 |
 | Coperte dalle sessioni (lotto 12 compreso) | 235 (78,6%) |
 | Routine osservate nel callgraph | ~120 |
-| Voci con stato in `decomp/ROUTINE.md` | 329 (conteggio sulla colonna stato) |
-| …di cui `verificata` (doppia cattura MAME non forzata) | 237 |
-| …di cui `tradotta` con nota (senza cattura o cattura singola) | 49 |
+| Voci con stato in `decomp/ROUTINE.md` | 350 (conteggio sulla colonna stato) |
+| …di cui `verificata` (doppia cattura MAME non forzata) | 250 |
+| …di cui `tradotta` con nota (senza cattura o cattura singola) | 57 |
 | …di cui `tradotta (replay)` | 43 |
-| Banco di prova (`harness --tutte`) | 250 voci, 977 catture, 0 fallite |
-| Catture `regs` in `decomp/out/` | 978 |
-| Stub residui del motore nemici | 5 |
+| Banco di prova (`harness --tutte`) | 264 voci, 1110 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 1111 |
+| Stub residui del motore nemici | 0 (motore completo, `nemici_stub.c` tolto) |
 | Destinazioni mai osservate | 64, tutte con sito di chiamata mai eseguito (probabile dato o codice raggiungibile solo da zone mai eseguite; 37 a `8000` o sopra) |
 
 ## Fasi
@@ -103,9 +103,15 @@ ogni ciclo nei brief in `compiti/`.
    forzate in più per coprire la tabella 7F39; N10 = tipo 06 prima metà
    (19 routine, 4FD4 e 5005-51D7) in `nemici_tipo06a.c`, wrapper
    `banco_r_4fd4` e `banco_r_50df` nuovi, 8 routine N10 erano già
-   anticipate in N3/N6/N8. Restano N11 (5FC8, 610C, 627F: completa il
-   ramo 5D08-5D28 di 5CFB) e N12 (2474, 4ADA, da accorpare): stub a 5,
-   ~193/220 routine del motore tradotte.
+   anticipate in N3/N6/N8. **Lotti N11 e N12 fatti insieme** (brief 37,
+   2026-11-03, stesso schema, al primo colpo, ~1 $): tipo 07 seconda
+   metà (18 routine) in `nemici_tipo07b.c`, 2474 e 4ADA in
+   `nemici_comuni.c`, 49AE nel banco (17 catture, unico modo di
+   esercitare 4ADA), wrapper `banco_r_5cfb`, convenzione del riporto per
+   l'uscita anomala di 627F (come 531C), bug di lettura ROM in 2474
+   corretto (`M()`→`leggi()` sulla tabella 9495). `nemici_stub.c` tolto:
+   **IL MOTORE DEI NEMICI È COMPLETO**, 220/220 routine, gcov scoperto
+   solo sui casi fuori tabella non forzabili.
 1. **Traduzione delle routine censite nel lotto 12**: 40 destinazioni in
    25 blocchi contigui in `decomp/CENSIMENTO-12.md`, due catture pilota
    già fatte (`0x3FCE porta`, `0x51FA finale`). Per i lotti futuri il
