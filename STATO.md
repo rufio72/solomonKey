@@ -18,7 +18,7 @@ ogni ciclo nei brief in `compiti/`.
 | Banco di prova (`harness --tutte`) | 304 voci, 1270 catture, 0 fallite |
 | Catture `regs` in `decomp/out/` | 1270 |
 | Stub residui del motore nemici | 0 (motore completo, `nemici_stub.c` tolto) |
-| Destinazioni mai osservate | 64, tutte con sito di chiamata mai eseguito (probabile dato o codice raggiungibile solo da zone mai eseguite; 37 a `8000` o sopra) |
+| Destinazioni mai osservate | 59 documentate in `decomp/ZONE-MAI-ESEGUITE.md`: 53 `DATO`, 0 `MORTO`, 6 `RAGGIUNGIBILE` (5 con ricetta di sveglia provata); le altre 5 delle 64 originali sono ormai tradotte |
 
 ## Fasi
 
@@ -128,10 +128,19 @@ ogni ciclo nei brief in `compiti/`.
    rami (gcov pulito salvo 5 righe di sola etichetta), la scrittura in
    ROM di 0D38 (`ld (0),a`) non tradotta per decisione; corretti i due
    errori del censimento (11A5 cade in 1172, non in 113C).
-2. **Altre zone mai eseguite**: restano 64 destinazioni, tutte con sito
-   di chiamata mai eseguito (tabella SI/NO in coda al censimento);
-   forzature mirate di RAM, una parte sarà codice morto da documentare e
-   basta. Attenzione: `att_27` è artificiale (esecuzione in RAM).
+2. **Altre zone mai eseguite: DOCUMENTATE** (brief 40, 2026-11-03,
+   dodicesimo ciclo economico al primo colpo, ~0,7 $, solo analisi,
+   nessun codice toccato): delle 64 originali, 5 sono ormai tradotte
+   (4FC5, 5F82, 6046, 6FC3, 6FDF) e le 59 restanti hanno verdetto in
+   `decomp/ZONE-MAI-ESEGUITE.md`: 53 `DATO` (siti in zona dati o byte
+   di tabella letti come call, compresa la famiglia AEE2-AFF0), 0
+   `MORTO`, 6 `RAGGIUNGIBILE` — 5 esercitate con ricetta provata
+   (2533, 6379, 4364, e 7E03/7E14 che richiedono i dip switch Bonus
+   Life via `solomon.cfg`), 1 non svegliata (560A, serve un nemico di
+   tipo 12 con via libera). Scoperta collaterale: la tabella `rst 20h`
+   a 646B ha 10 parole vere contro le 3 di `rst20_tables.h` (non
+   corretto, tutte già eseguite). Attenzione: `att_27` è artificiale
+   (esecuzione in RAM).
    **Novità 2026-10-27**: una partita dal vivo sorvegliata con punti di
    interruzione (`decomp/copertura_viva.lua`, MAME con finestra) ha
    svegliato `4FC5` — 6 esecuzioni, sito `4F8F` eseguito 1 volta, quindi
