@@ -2,7 +2,7 @@
  * 0A e i corpi 01 (48D1) e 10 (457B). Temi: coordinate di cella e di
  * schermo (2482, 248D, 24BE, 4C11), presa di un blocco della griglia c0bd
  * da parte di un oggetto (4592, 4938, 49AE), contatto fra due oggetti
- * (4B20). Ingressi: 2482, 248D, 24BE, 4592, 4938, 49AE, 4B20, 4C11.
+ * (4B20). Ingressi: 2474, 2482, 248D, 24BE, 4592, 4938, 49AE, 4ADA, 4B20, 4C11.
  *
  * Tradotto da out/main64.dasm. La tabella ROM 9495 ha 8 byte per tipo di
  * oggetto (+0 altezza, +1 e +2 scostamenti in X, +3 larghezza: nomi
@@ -431,4 +431,37 @@ void sub_49ae(struct z80 *z)
     z->ix = ix0;                               /* 4A0B pop ix */
     posa_49ae(z, M(POSA_C08A), 0x00, 0xe5);    /* 4A0D-4A17 */
     z->a = 0x02;                               /* 4A1A */
+}
+
+/* 0x2474: D = ~A + 5; E = (HL) + (HL+1); A = D - E con riporto D < E in
+ * z->f (letto da 4B20). Lascia HL + 1. */
+void sub_2474(struct z80 *z)
+{
+    z->d = (uint8_t)(~z->a + 5);                           /* 2474-247A */
+    z->a = leggi(HL(z));                                   /* 247B (ROM) */
+    SET_HL(z, (uint16_t)(HL(z) + 1));                      /* 247C */
+    z->e = (uint8_t)(z->a + leggi(HL(z)));                 /* 247D-247E */
+    z->a = z->d;                                           /* 247F */
+    NEMICI_PONI_RIPORTO(z, z->d < z->e);                   /* 2480 sub e */
+    z->a = (uint8_t)(z->d - z->e);
+}
+
+/* 0x4ADA: (c0bd+E) = A; sub_2457 e sub_3a2e sul valore (A = C); poi
+ * (c07b..c078) = E, D, C, B con DE salvato attorno a 3A2E. */
+void sub_4ada(struct z80 *z)
+{
+    z->d = 0x00;                                           /* 4ADA */
+    SET_HL(z, (uint16_t)(GRIGLIA_C0BD + DE(z)));           /* 4ADC-4ADF */
+    M(HL(z)) = z->a;                                       /* 4AE0 */
+    z->c = z->a;                                           /* 4AE1 */
+    sub_2457(z);                                           /* 4AE2 */
+    uint16_t de = DE(z);                                   /* 4AE5 push de */
+    z->a = z->c;                                           /* 4AE6 */
+    sub_3a2e(z);                                           /* 4AE7 */
+    SET_DE(z, de);                                         /* 4AEA pop de */
+    M(0xc07b) = z->e;                                      /* 4AEB-4AEE */
+    M(0xc07a) = z->d;                                      /* 4AEF-4AF0 */
+    M(0xc079) = z->c;                                      /* 4AF1-4AF2 */
+    M(0xc078) = z->b;                                      /* 4AF3-4AF4 */
+    SET_HL(z, 0xc078);
 }

@@ -1,0 +1,18 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+POKE 2250 C19D 00
+POKE 2250 C19E 00
+POKE 2250 C24B 32
+POKE 2250 C24C 32
+POKE 2250 C24D 32
+POSTA 2300 00 1C
+FORZA ix+00 (C411) = 20
+FORZA ix+08 (C419) = 00
+FORZA ix+09 (C41A) = FF
+FORZA ix+0A (C41B) = FF
+FORZA ix+0E (C41F) = FF
+FORZA iy+1A (C7B8) = 0D
+FORZA iy+1D (C7BB) = 0C
+FORZA ix+0B (C41C) = FF
+FORZA ix+0C (C41D) = FF
+SNAP: catturata occorrenza 1 di 0x5CFB [finale_forza06] al frame 2818, scartate 0
+Average speed: 1720.93% (46 seconds)

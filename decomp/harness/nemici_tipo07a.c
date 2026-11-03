@@ -4,7 +4,7 @@
  * 5E1A (smista con `rst 38` a 5E40 sullo stato (IY+1D/1E)), 5E4D, 5E60,
  * 5E8F, 5E9D, 5EDD, 5F0C, 5F33, 5F4B, 5F82; 5FAC è anticipata da N11.
  * 4FEF (anticipata da N10) sta in nemici_tipo06a.c.
- * 610C, 5FC8 e 627F restano stub (nemici_stub.c).
+ * 610C, 5FC8 e 627F sono in nemici_tipo07b.c (lotto N11).
  * 5DDF legge il registro R (due `ld a,r`): nel banco serve banco_r_5ddf
  * (e banco_r_5e1a per chi arriva da 5E1A).
  * IX = slot (c2c1 + i·0x18), IY = oggetto (c4fe + i·0x30). Tradotto da
@@ -29,6 +29,8 @@ void sub_5cfb(struct z80 *z)
     }
     IYB(0x00) &= ~0x10;                                   /* 5D08 */
     sub_610c(z);                                          /* 5D0C */
+    if (NEMICI_RIPORTO_ACCESO(z))                         /* uscita anomala di 627F: */
+        return;                                           /* 5CFB termina (HL = 5D0F) */
     z->a = IYB(0x04);                                     /* 5D0F */
     IYB(0x1b) = z->a;                                     /* 5D12 */
     sub_4fef(z);                                          /* 5D15 */

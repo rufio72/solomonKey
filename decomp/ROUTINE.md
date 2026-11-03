@@ -547,12 +547,12 @@ catturabile da MAME: sono `tradotte`, coperte dalle forzate.
 | ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
 |---|---|---|---:|---|---|---|---|---|
 | 0x4FEF | sub_4fef | nemici_tipo06a.c | 10 | BC = parola n. (A-0x10) della tabella 4FF9 (anticipata da N10) | verificata | 2 | finale, stanza50 |  |
-| 0x5CFB | sub_5cfb | nemici_tipo07a.c | 46 | tipo 07 di 4F0F: bit 2 di (IX+0) acceso prosegue con 5D29; altrimenti 610C, 4FEF e, se (IX+0B/0C) >= BC, 5E1A | verificata | 4 | finale, stanza50 | 4 con `SNAP_COND` (bit 2 acceso, tag `_c`); il ramo 5D08-5D28 non è nel banco finché N11 non traduce 610C |
+| 0x5CFB | sub_5cfb | nemici_tipo07a.c | 46 | tipo 07 di 4F0F: bit 2 di (IX+0) acceso prosegue con 5D29; altrimenti 610C, 4FEF e, se (IX+0B/0C) >= BC, 5E1A | verificata | 19 | finale, stanza50 | 4 `_c` con bit 2 acceso; 15 nuove con il bit 2 spento: il ramo 5D08-5D28 è nel banco (wrapper `banco_r_5cfb`) |
 | 0x5D29 | sub_5d29 | nemici_tipo07a.c | 172 | passo con (IX+0D) >= 3: tabella 84C8 a passi di 4 byte su (IY+0E/15), fine tabella (5D80) lancia con 4AF6, oppure chiude (5DC3) | verificata | 13 | finale, stanza50 | 4 non forzate e 9 forzate (`forza01-09`) |
 | 0x5D76 | sub_5d76 | nemici_tipo07a.c | 10 | A = nibble basso con segno (bit 3 esteso a F_) | verificata | 4 | finale, stanza50 |  |
 | 0x5DDF | sub_5ddf | nemici_tipo07a.c | 42 | due `ld a,r`: con i bit di D orienta (IX+5) e (IX+4) con 5E09 | verificata | 3 | finale | 2 non forzate e 1 forzata; legge R: `banco_r_5ddf` |
 | 0x5E09 | sub_5e09 | nemici_tipo07a.c | 17 | B = differenza dimezzata, A = |B'|, riporto = (A < 0x18) | verificata | 4 | finale | 3 non forzate e 1 forzata (`forza01`, `a:00,c:00`: ramo `neg`); riporto in z->f |
-| 0x5E1A | sub_5e1a | nemici_tipo07a.c | 43 | sceglie la mossa: 5DDF se bit 5 spento, azzera (IX+0B/0C/0D), `rst 38` a 5E40 su 4·((IY+1D)-0C)+(IY+1E) | verificata | 15 | finale, stanza50 | 6 non forzate e 9 forzate; legge R: `banco_r_5e1a`; la destinazione 2 (5FC8) è stub e non è esercitata |
+| 0x5E1A | sub_5e1a | nemici_tipo07a.c | 43 | sceglie la mossa: 5DDF se bit 5 spento, azzera (IX+0B/0C/0D), `rst 38` a 5E40 su 4·((IY+1D)-0C)+(IY+1E) | verificata | 16 | finale, stanza50 | 6 non forzate e 10 forzate; legge R: `banco_r_5e1a`; la destinazione 2 (5FC8) è esercitata da `forza10` |
 | 0x5E4D | sub_5e4d | nemici_tipo07a.c | 15 | (IY+1D) = B, (IY+1E) = C col bit 6 di (IY+0) spento durante la scrittura | verificata | 4 | finale, stanza50 |  |
 | 0x5E60 | sub_5e60 | nemici_tipo07a.c | 47 | bit 7 di (IX+4) spento: 5E4D con BC = 0003; acceso: 4AF6 su IY | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 5E1A (forza02, forza03) |
 | 0x5E8F | sub_5e8f | nemici_tipo07a.c | 14 | E = |2B|, A = |2C| (con segno nel bit 7) | verificata | 4 | finale, stanza50 |  |
@@ -577,14 +577,12 @@ Altre forzate: 5DDF `forza01` (`iy+0e:7f,iy+15:7f`); 5E09 `forza01`
 5EDD `forza01` (`ix+04:00,ix+05:01`) e `forza02` (`ix+04:20,ix+05:00`).
 Totale lotto: 90 catture (49 non forzate e 41 forzate).
 
-**Non coperte da gcov** (`nemici_tipo07a.c`): 5D08-5D28 di 5CFB (610C stub,
-N11); la chiamata a `sub_5fc8` e i casi `0` e `default` dello `switch` di 5E1A;
-`sub_627f` e la sua uscita in 5E9D (5ED6-5EDA); in 5E9D i rami sulla cella
-davanti (5EBB-5EC6, servono celle della griglia c0bd, non forzabili con
-`ix`/`iy`); in 5F82 il ramo con bit 2 spento (coda 5FAC) e la scelta finale,
-perché 5F82 non è un ingresso catturabile e 5F0C dà l'indice in base alle
-celle; il `ret c` di 5E04 in 5DDF (dipende da R e dalle celle). Il corrispondente
-di 5F4B è invece coperto dalle forzate `forza00-0f`.
+**Non coperte da gcov** (`nemici_tipo07a.c`): i casi `0` e `default` dello
+`switch` di 5E1A; in 5E9D i rami sulla cella davanti (5EBB-5EC6, servono celle
+della griglia c0bd, non forzabili con `ix`/`iy`); in 5F82 il ramo con bit 2
+spento (coda 5FAC) e la scelta finale; il `ret c` di 5E04 in 5DDF (dipende da
+R e dalle celle). 5D08-5D28 di 5CFB, 5FC8 e 627F sono ora coperte: vedi la
+sezione «Motore dei nemici (lotti N11 e N12)».
 
 ## Motore dei nemici (lotto N9)
 
@@ -674,3 +672,55 @@ C vengono da 5345 e non sono forzabili da fuori); in 50DF il ritorno
 anticipato sul riporto di 531C (cella piena: uscita anomala non catturabile,
 vale anche per 50BA, dove la chiamata è in coda e il ramo non ha righe
 proprie).
+
+## Motore dei nemici (lotti N11 e N12)
+
+Ultimo lotto (brief 37): tipo 07 seconda metà in `harness/nemici_tipo07b.c`
+(5FC8-6270 e 627F) e le comuni 2474 e 4ADA in `nemici_comuni.c`.
+`nemici_stub.c` è tolto: il motore è completo (restano `nemici_manca` e
+`nemici_fuori_tabella` in `nemici.c` per i `default:` degli `switch`). Già
+fatte e non rifatte: 5FAC (N8) e 5E4D. 49AE entra nel banco per coprire 4ADA.
+Uscita anomala di 627F: `pop hl; ret` scarta l'indirizzo di ritorno; in C
+`sub_610c` lascia il riporto acceso solo in quel caso e `sub_5cfb` smette di
+proseguire (come 531C in 50BA e 50DF); HL = 5D0F (da 610C) o 5D28 (da 5E9D).
+6248 e 2474 lasciano il riporto in z->f. Wrapper `banco_r_5cfb` per R (via
+5DDF). 6151, 6183, 618B, 6261, 6270, 627F e 4ADA non hanno ingresso
+catturabile: coperte dalle forzate dei genitori.
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x2474 | sub_2474 | nemici_comuni.c | 14 | D = ~A+5, E = (HL)+(HL+1), A = D-E; riporto D < E in z->f | verificata | 4 | finale, stanza50 | 4 non forzate; letta da 4B20 (ROM 9495 con `leggi`) |
+| 0x49AE | sub_49ae | nemici_comuni.c | - | posa l'oggetto sulla cella; A in 5-7 e 8-0F chiamano 4ADA (entra nel banco per coprirla) | verificata | 17 | finale, stanza50, gioco, tardo, porta, bonus | 6 non forzate e 11 forzate (`forza01-11`, `a:05-0f`) |
+| 0x4ADA | sub_4ada | nemici_comuni.c | 28 | (c0bd+E) = A, 2457, 3A2E, (c07b..c078) = E, D, C, B | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 49AE |
+| 0x5FC8 | sub_5fc8 | nemici_tipo07b.c | 40 | destinazione 2 di 5E1A: 5F0C con DE = 0800 o 1800, 6046 / 5FDC, 5E4D | verificata | 5 | finale | 2 non forzate e 3 forzate |
+| 0x5FDC | sub_5fdc | nemici_tipo07b.c | 86 | `rst 8` su 60CC; ret z, coda 5FAC o movimento con 5E8F; BC 0602 / 0600 / 0601 | verificata | 14 | finale | 2 non forzate e 12 forzate |
+| 0x6046 | sub_6046 | nemici_tipo07b.c | 70 | come 5FDC con 60EC; BC 0702 / 0700 / 0701 | verificata | 13 | finale | 2 non forzate e 11 forzate |
+| 0x610C | sub_610c | nemici_tipo07b.c | 37 | sceglie lo stato da (IY+1A), (IX+0E) = A, `rst 38` a 6130 su 16 voci | verificata | 26 | finale, stanza50 | 4 non forzate e 22 forzate; riporto acceso = uscita anomala di 627F |
+| 0x6151 | sub_6151 | nemici_tipo07b.c | 10 | 6252, (IY+0E) = nibble alto + 0A, BC = 0C00 | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 610C (e 61B1) |
+| 0x6165 | sub_6165 | nemici_tipo07b.c | 10 | come 6151 con +06 e BC = 0C01 | verificata | 5 | finale, stanza50 | 3 non forzate e 2 forzate |
+| 0x6179 | sub_6179 | nemici_tipo07b.c | 10 | 6248: riporto a 6196, altrimenti A = 2 e 618B | verificata | 4 | finale | 2 non forzate e 2 forzate |
+| 0x6183 | sub_6183 | nemici_tipo07b.c | 8 | come 6179 con A = 3 | tradotta | 0 | - | nessun ingresso catturabile; coperta da 610C forza20 |
+| 0x618B | sub_618b | nemici_tipo07b.c | 11 | C = A, B = 3, 5E4D, (IX+0E) = FF | tradotta | 0 | - | ingresso interno; coperta da 6179 |
+| 0x6196 | sub_6196 | nemici_tipo07b.c | 27 | arrotonda (IY+0E) e (IY+15); BC = 0C02 | verificata | 3 | finale | 2 non forzate e 1 forzata |
+| 0x61B1 | sub_61b1 | nemici_tipo07b.c | 73 | rrca in E; tre rami su (IY+0E), (IY+15); BC = 0C03 nel ramo lungo | verificata | 10 | finale, stanza50 | 4 non forzate e 6 forzate |
+| 0x61FA | sub_61fa | nemici_tipo07b.c | 39 | (IY+15) a multiplo di 8 + 1, BC = 0D00 | verificata | 4 | finale | 2 non forzate e 2 forzate |
+| 0x6221 | sub_6221 | nemici_tipo07b.c | 39 | come 61FA con -1 e BC = 0D01 | tradotta | 3 | finale | 1 non forzata e 2 forzate |
+| 0x6248 | sub_6248 | nemici_tipo07b.c | 10 | A = ((IY+0E)+2)&0F; riporto A < 4 | verificata | 4 | finale | 2 non forzate e 2 forzate; riporto in z->f |
+| 0x6252 | sub_6252 | nemici_tipo07b.c | 15 | (IY+15) arrotondato a multiplo di 16 | verificata | 5 | finale, stanza50 | 3 non forzate e 2 forzate |
+| 0x6261 | sub_6261 | nemici_tipo07b.c | 15 | ((IY+0E)-6)&0F < 7: 61FA, altrimenti 61B1 | tradotta | 0 | - | nessun ingresso catturabile; coperta da 610C forza21 |
+| 0x6270 | sub_6270 | nemici_tipo07b.c | 15 | come 6261 con 6221 | tradotta | 0 | - | nessun ingresso catturabile; coperta da 610C forza22 |
+| 0x627F | sub_627f | nemici_tipo07b.c | 55 | crea l'oggetto con 4AF6; `pop hl; ret` scarta il ritorno | tradotta | 0 | - | uscita anomala: provata solo da 5CFB (forza01-02, 10-11) |
+
+**Catture forzate** (`SNAP_FORZA`, `forzaNN`, stato `finale`, N=1). 5E1A
+`forza10` (5FC8); 5FC8 `forza01-03`; 5FDC `forza01-12`; 6046 `forza01-11`;
+610C `forza01-15` (una per destinazione), `forza16-19` (ret z, ret nz, nibble
+0F, filtro non soddisfatto), `forza20-22` (aggiunte per 6183, 6261, 6270);
+6165, 61FA, 6221, 6252 `forza01-02`; 6179, 6248 `forza01-02`; 6196 `forza01`;
+61B1 `forza01-06`; 5CFB `forza01-11` (610C indice 0 e 627F, 5E1A, 5E9D);
+49AE `forza01-11`. Totale lotto: 133 catture (43 non forzate e 90 forzate);
+banco a 1110 catture e 264 voci.
+
+**Non coperte da gcov**: `nemici_tipo07b.c`, i casi `0` e `default` dello
+`switch` di 610C (il nibble è sempre < 16). `sub_2474` e `sub_4ada` sono
+coperte per intero. In `nemici_comuni.c` restano scoperte le parti di 49AE e
+4B20 che non esercitano le catture (non compito di questo lotto).

@@ -462,6 +462,15 @@ catture. Vedi `ROUTINE.md`, sezione «Motore dei nemici (lotto N9)».
 catture. Con N10 il tipo 6 è completo. Vedi `ROUTINE.md`, sezione «Motore
 dei nemici (lotto N10)».
 
+**Lotto N11 e N12 fatti** (brief 37, 2026-11-03): tipo 07 seconda metà e
+due routine comuni, 20 routine: 5FC8, 5FDC, 6046, 610C, 6151, 6165, 6179,
+6183, 618B, 6196, 61B1, 61FA, 6221, 6248, 6252, 6261, 6270, 627F in
+`nemici_tipo07b.c` e 2474, 4ADA in `nemici_comuni.c`. Gli stub di
+`nemici_stub.c` scendono da 5 a 0 (file tolto). 14 voci nuove nel banco
+(compresa 49AE, che esercita 4ADA); 5CFB (19) e 5E1A (16) crescono. 133
+catture nuove. Con N11 e N12 il motore dei nemici è completo. Vedi
+`ROUTINE.md`, sezione «Motore dei nemici (lotti N11 e N12)».
+
 **Lotti N2-N12**: le routine non coperte, un lotto per modulo. Sono in
 ordine di utilità, cioè di byte eseguiti nell'unione storica delle sessioni.
 Ingressi completi in `out/censimento_nemici_lotti.txt`.
@@ -513,4 +522,4 @@ gli indici del 4F1B. L'unica ipotesi semantica è `comparsa`, per 4FC5.
 | `nemici_tipi_10_13b.c` | seconda parte di `nemici_tipi_10_13.c` (brief 31): tipo 13 (54D8 e le sue fasi, 6BCD) e tipo 11 (56E9 e le sue fasi) | - | - | - |
 | `nemici_tipi_15_17.c` | tipi 15-17 di 4F1B (6C0B, 6B43, 7F68) | 18 | 596 | 358 |
 
-Stub di N1: 2474 3B62 4649 46A3 4ADA 4F40 4FD4 54D8 55C4 56E9 57CD 5CFB 6B43 6C0B 6C1D 6CE8 6ECA 719E 7288 73A3 7F48 7F81 7F8A 7FA6 7FCF 801D 8042 809C
+Stub di N1 (tutti tradotti): 2474 3B62 4649 46A3 4ADA 4F40 4FD4 54D8 55C4 56E9 57CD 5CFB 6B43 6C0B 6C1D 6CE8 6ECA 719E 7288 73A3 7F48 7F81 7F8A 7FA6 7FCF 801D 8042 809C

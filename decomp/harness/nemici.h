@@ -1,6 +1,6 @@
 /* Motore dei nemici (corpo dell'attività 0A e routine collegate), lotti
- * N1-N12 di CENSIMENTO-NEMICI.md. Prototipi delle routine tradotte, degli
- * stub (nemici_stub.c) e meccanismo che ferma il replay quando il C
+ * N1-N12 di CENSIMENTO-NEMICI.md (motore completo). Prototipi delle routine
+ * tradotte e meccanismo che ferma il replay quando il C
  * raggiunge una routine non ancora tradotta o un indice fuori tabella.
  *
  * Convenzioni come in routine.h: `void sub_xxxx(struct z80 *z)`, i
@@ -299,6 +299,30 @@ void sub_51b1(struct z80 *z);
 void sub_51b5(struct z80 *z);
 void sub_51d3(struct z80 *z);
 
+/* Lotto N11 (brief 37, nemici_tipo07b.c) e N12 (nemici_comuni.c). 6248 lascia
+ * il riporto (A < 4); sub_610c lo lascia acceso solo con l'uscita anomala di
+ * 627F (HL = 5D0F e 5CFB non prosegue); 2474 lascia il riporto D < E. */
+void sub_2474(struct z80 *z);
+void sub_4ada(struct z80 *z);
+void sub_5fc8(struct z80 *z);
+void sub_5fdc(struct z80 *z);
+void sub_6046(struct z80 *z);
+void sub_610c(struct z80 *z);
+void sub_6151(struct z80 *z);
+void sub_6165(struct z80 *z);
+void sub_6179(struct z80 *z);
+void sub_6183(struct z80 *z);
+void sub_618b(struct z80 *z);
+void sub_6196(struct z80 *z);
+void sub_61b1(struct z80 *z);
+void sub_61fa(struct z80 *z);
+void sub_6221(struct z80 *z);
+void sub_6248(struct z80 *z);
+void sub_6252(struct z80 *z);
+void sub_6261(struct z80 *z);
+void sub_6270(struct z80 *z);
+void sub_627f(struct z80 *z);
+
 /* Il registro R (nemici_r.c): somma R1 + R2 dei due `ld a,r` di 54C5, 59E5
  * e 5DDF; nel banco i wrapper cercano il valore di R che riproduce
  * la cattura (vedi l'intestazione di nemici_r.c). */
@@ -313,12 +337,6 @@ void banco_r_5ddf(struct z80 *z);
 void banco_r_5e1a(struct z80 *z);
 void banco_r_4fd4(struct z80 *z);
 void banco_r_50df(struct z80 *z);
-
-/* Stub (nemici_stub.c): registrano l'ingresso con nemici_manca. */
-void sub_2474(struct z80 *z);
-void sub_4ada(struct z80 *z);
-void sub_5fc8(struct z80 *z);
-void sub_610c(struct z80 *z);
-void sub_627f(struct z80 *z);
+void banco_r_5cfb(struct z80 *z);
 
 #endif
