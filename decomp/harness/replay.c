@@ -191,6 +191,10 @@ static void stampa_diff(long frame)
  * pulito. */
 static int prima_del_corpo;
 
+/* Gancio opzionale (lotto H3): chiamato a fine NMI, con la RAM del frame
+ * completa. NULL nel replay normale: nessun effetto sull'uscita. */
+void (*replay_dopo_nmi)(long frame) = NULL;
+
 /* Confronto d'impronta e NMI del prossimo frame dell'oracolo. */
 static void esegui_nmi(const struct evento *n)
 {
@@ -238,6 +242,7 @@ static void esegui_nmi(const struct evento *n)
     M(0xe602) = r->p[2];
     struct z80 z = {0};
     sub_0066(&z);
+    if (replay_dopo_nmi) replay_dopo_nmi(r->frame);
 }
 
 /* NMI entrata a metà di un corpo (riga N subito dopo la D, 0 letture,

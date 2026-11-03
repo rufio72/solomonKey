@@ -14,7 +14,16 @@ INTESTAZIONI_DATI = $(wildcard audio_dati*.h)
 SORGENTI_DRIVER = audio_piattaforma.c audio_ossatura.c audio_registri.c audio_interprete.c $(SORGENTI_DATI)
 SORGENTI_AUDIO = audio_banco.c $(SORGENTI_DRIVER)
 
-all: harness sched_proto replay audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine
+# strato video SDL2 (lotto H3): i bersagli SDL esistono solo se sdl2-config risponde
+SDL2_CONFIG ?= sdl2-config
+HA_SDL := $(shell $(SDL2_CONFIG) --version 2>/dev/null)
+ifneq ($(HA_SDL),)
+BERSAGLI_SDL = mostra_oracolo mostra_replay
+SDL_CFLAGS := $(shell $(SDL2_CONFIG) --cflags)
+SDL_LIBS := $(shell $(SDL2_CONFIG) --libs)
+endif
+
+all: harness sched_proto replay audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine $(BERSAGLI_SDL)
 
 harness: $(SORGENTI) ram.h routine.h e603.h rst20_tables.h nemici.h rst38_tables.h sched.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI)
@@ -50,7 +59,17 @@ rendi_oracolo: rendi_oracolo.c video_rendi.c $(SORGENTI_GRAFICA) video.h
 video_immagine: video_immagine.c $(SORGENTI_GRAFICA) video.h
 	$(CC) $(CFLAGS) -o $@ video_immagine.c $(SORGENTI_GRAFICA)
 
+# finestra SDL2 (lotto H3): stato dell'oracolo e giro replay
+mostra_oracolo: mostra_oracolo.c video_sdl.c video_sdl.h video_rendi.c $(SORGENTI_GRAFICA) video.h
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ mostra_oracolo.c video_sdl.c video_rendi.c $(SORGENTI_GRAFICA) $(SDL_LIBS)
+
+replay_lib.o: replay.c ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h
+	$(CC) $(CFLAGS) -Dmain=replay_main -c -o $@ replay.c
+
+mostra_replay: mostra_replay.c video_sdl.c video_sdl.h video_rendi.c $(SORGENTI_GRAFICA) replay_lib.o $(filter-out replay.c,$(SORGENTI_REPLAY)) video.h ram.h
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ mostra_replay.c video_sdl.c video_rendi.c $(SORGENTI_GRAFICA) replay_lib.o $(filter-out replay.c,$(SORGENTI_REPLAY)) $(SDL_LIBS)
+
 clean:
-	rm -f harness sched_proto replay audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine
+	rm -f harness sched_proto replay audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine mostra_oracolo mostra_replay replay_lib.o
 
 .PHONY: all clean

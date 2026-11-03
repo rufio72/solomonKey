@@ -75,5 +75,8 @@ decomp/harness/audio_wav
 decomp/harness/audio_suona
 decomp/harness/rendi_oracolo
 decomp/harness/video_immagine
+decomp/harness/mostra_oracolo
+decomp/harness/mostra_replay
+decomp/harness/replay_lib.o
 # la licenza di emu2149 deve restare accanto ai sorgenti (regola LICENSE sopra)
 !decomp/harness/emu2149/LICENSE

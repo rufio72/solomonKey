@@ -37,7 +37,7 @@ Materiale già pronto:
   formato hardware degli sprite da ricavare. *Analista Opus; spezzare in
   H2a fondale + palette e H2b sprite se supera le soglie.*
 
-- [ ] **H3 — Finestra SDL.** Modulo `video_sdl.c`: finestra, texture
+- [x] **H3 — Finestra SDL.** Modulo `video_sdl.c`: finestra, texture
   streaming del framebuffer di H2, 60 Hz con vsync, scala intera. Primo
   risultato visibile: un visualizzatore che mostra gli stati campione e,
   come dimostrazione, i frame del giro replay. Verifica: confronto a

@@ -69,3 +69,29 @@ generato da `estrai_grafica.py` (`harness/video_dati_*.c`).
   RAM; da aggiungere come parametro in H4/H5 se serve). Nessun dump di
   `c000-ffff`.
 - `png_ppm.py` converte il PNG in PPM; `rendi_oracolo` confronta in C.
+
+## Finestra SDL (H3)
+
+Modulo `harness/video_sdl.c`: finestra SDL2, texture streaming RGB24 256x224,
+scala intera 1-8 (predefinita 3), pixel netti (nessuna interpolazione). Il
+framebuffer di `rendi_frame` non viene alterato. Il vsync del renderer
+accelerato è usato se c'è; con il renderer software (anche il driver
+`SDL_VIDEODRIVER=dummy`, che dichiara il vsync ma non attende) vale il ripiego:
+attesa fino a 1/60 s dal present precedente, la scadenza avanza di 1/60 s.
+`vsdl_hash` è FNV-1a 64 bit sui 172032 byte RGB.
+
+- `mostra_oracolo [-s N] [-n N | -m N] [-d cartella] <stato>`: rende uno stato
+  di `out/video/` e lo ripresenta a 60 Hz (ESC chiude). `-n N` senza SDL,
+  `-m N` con finestra e limite di frame.
+- `mostra_replay [-s N] [-n N | -m N] [-o cartella]`: il giro replay 2410-5499;
+  il gancio `replay_dopo_nmi` (in `replay.c`, NULL nel replay normale) rende la
+  RAM video `ram[]` a fine di ogni NMI, dopo `sub_0066` (che pubblica palette e
+  sprite nella video RAM). 3090 frame, uno per NMI. `replay.c` è compilato anche
+  come `replay_lib.o` con `-Dmain=replay_main`.
+- Uscita (stdout): `HASH primo`, `HASH ultimo`, (replay: `NMI primo f ultimo f`),
+  `FRAME rese N`.
+
+Limite noto: le 1604 NMI «a metà attività» (885 con impronta diversa da MAME)
+possono mostrare la RAM del C in uno stato appena diverso da quello di MAME;
+non è un difetto del renderizzatore. Il confronto frame per frame con MAME non
+è in questo lotto (H4).
