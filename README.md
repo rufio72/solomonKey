@@ -82,7 +82,7 @@ YM2149 emulator and compared against the original's — has been passed.
   and fixed a latent bug — nine collision handlers of table 08AE had been
   silently missing since batch 7 — and refined the NMI interleaving model.
   The replay is now the regression test for everything.
-- **Enemy engine — translation well past the halfway mark.** Behind activity
+- **Enemy engine — fully translated.** Behind activity
   body 0A lives the per-enemy engine: **8,833 bytes and 220 routines**,
   mapped with the real `rst 38` dispatch tables
   (`decomp/CENSIMENTO-NEMICI.md`) and split into batches N1–N12.
