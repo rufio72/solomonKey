@@ -25,7 +25,10 @@ Materiale già pronto:
   (`decomp/out/video/`). Nessun codice C. Verifica: i dump si rigenerano
   identici. *Analista Sonnet.*
 
-- [ ] **H2 — Renderizzatore software puro (senza SDL).** Funzione C
+- [x] **H2 — Renderizzatore software puro (senza SDL).** FATTO (brief 42,
+  2026-11-03, ~0,4 $; 7/7 stati identici pixel per pixel; i byte delle ROM
+  grafiche sono C generato nel repo, quindi in H7 non si caricano da
+  `roms/`). Funzione C
   `rendi_frame(ram) → framebuffer RGB` che riproduce il video del gioco:
   fondale (tilemap), sprite con priorità e trasparenze, palette. Tabelle
   grafiche dalle ROM come sorgente C generato (stile `estrai_dati.py`
