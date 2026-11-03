@@ -53,4 +53,21 @@ uint8_t leggi_e603(uint16_t pc);
 uint8_t leggi_porta(uint16_t a);           /* e600-e606: ram[a - 0xc000] */
 void scrivi_porta(uint16_t a, uint8_t v);  /* scrive ram[a - 0xc000] */
 
+/* Gancio sulle scritture di porta (lotto H4a, porte.c): NULL = nessun
+ * effetto. Se impostato, scrivi_porta lo chiama e non deposita nulla in
+ * ram[]: la macchina del giro dal boot lo usa per tenere fuori da ram[] la
+ * maschera NMI (e600) e il ribaltamento schermo (e604), che in ram[] sono
+ * gli ingressi P1 e la DSW1 vive. */
+extern void (*porte_gancio_scrittura)(uint16_t a, uint8_t v);
+
+/* Punti di sincronia per la NMI del giro dal boot (lotto H4a, stile
+ * NEMICI_PUNTO): le routine del percorso di avvio chiamano
+ * MACCHINA_PUNTO(da, a) dove l'originale, interrotto con un ritorno fra
+ * `da` e `a` (indirizzi Z80), avrebbe la stessa RAM. macchina.c ci aggancia
+ * macchina_punto per iniettare la NMI; altrove è NULL e non cambia nulla
+ * (definito in comune.c). */
+extern void (*macchina_punto)(uint16_t da, uint16_t a);
+#define MACCHINA_PUNTO(da, a) \
+    do { if (macchina_punto) macchina_punto((da), (a)); } while (0)
+
 #endif

@@ -44,7 +44,13 @@ Materiale già pronto:
   script del framebuffer (SDL non cambia i pixel) + sanità manuale.
   *Analista Sonnet.*
 
-- [ ] **H4 — Giro libero.** Staccare il gioco dall'oracolo: ciclo
+- [ ] **H4 — Giro libero.** *H4a fatto (brief 44, 2026-11-03), restano
+  H4b/H4c.* Spezzato in tre dal brief 44 (Fable,
+  2026-11-03): **H4a** macchina+boot+ingressi registrati con arresto
+  atteso al corpo 1F; **H4b** traduzione dei corpi attract/titolo
+  (~950 istruzioni: 1F, 06, 07, 08+0C, 0B, regione 6253-673F) più
+  l'oracolo del registro R; **H4c** giro completo 0-5499 contro
+  `replay_2410.bin` e l'oracolo storico. Staccare il gioco dall'oracolo: ciclo
   principale vero (NMI a 60 Hz, scheduler, RAM inizializzata come al
   boot), il gioco gira da solo senza replay, prima headless. Verifica:
   N frame di giro libero con input nulli coincidono con MAME avviato

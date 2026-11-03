@@ -7,6 +7,9 @@
 uint8_t ram[0x4000];
 uint8_t rom[0x10000];
 
+/* Punti di sincronia per la NMI del giro dal boot (ram.h); NULL = spento. */
+void (*macchina_punto)(uint16_t da, uint16_t a) = NULL;
+
 /* Carica main64.bin (ROM a indirizzi reali) da out/ o ../out/. */
 void carica_rom(void)
 {

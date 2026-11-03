@@ -1,6 +1,8 @@
 /* Routine del Z80 principale fra 0x2000 e 0x2fff, tradotte in C leggibile.
  * Si riproducono l'effetto sulla RAM e i registri A, BC, DE, HL, IX, IY
  * all'uscita (le bandiere F no). */
+#include <stdio.h>
+#include <stdlib.h>
 #include "routine.h"
 
 /* 0x237E: aggiorna un piccolo record a HL.
@@ -144,6 +146,9 @@ void sub_2457(struct z80 *z)
 void sub_2b08(struct z80 *z)
 {
     uint8_t b = z->b, c = z->c;
+    MACCHINA_PUNTO(0x2b08, 0x2b19);    /* nessuna scrittura fino al primo carattere */
+    MACCHINA_PUNTO(0x0008, 0x0014);    /* helper rst 08/10, senza scritture */
+    MACCHINA_PUNTO(0x0018, 0x001a);
     if (!(b & 0x80)) {
         z->a = b;
         SET_HL(z, TAB_DEST_2B29);
@@ -157,11 +162,14 @@ void sub_2b08(struct z80 *z)
     sub_0010(z);               /* rst 10: DE = inizio della stringa */
     uint16_t src = DE(z);
     for (;;) {
+        MACCHINA_PUNTO(0x2b1a, 0x2b1e);
         uint8_t ch = leggi(src);
         if (ch == 0xff)
             break;
         M(dest) = ch;
+        MACCHINA_PUNTO(0x2b1f, 0x2b21);
         M(dest & ~0x0400) = 0x40;
+        MACCHINA_PUNTO(0x2b23, 0x2b27);
         dest = (uint16_t)((dest | 0x0400) + 1);
         src++;
     }
@@ -181,7 +189,9 @@ void sub_2af5(struct z80 *z)
 {
     uint8_t cy = (uint8_t)(z->f & 1);
     z->b = 0x80;
+    MACCHINA_PUNTO(0x2af5, 0x2af5);
     do {
+        MACCHINA_PUNTO(0x2af7, 0x2afe);
         uint8_t bit = (uint8_t)(z->a & 1);     /* rra */
         z->a = (uint8_t)((cy << 7) | (z->a >> 1));
         cy = bit;
@@ -190,8 +200,10 @@ void sub_2af5(struct z80 *z)
         z->c = (uint8_t)(cy ? 0x0c : 0x0d);
         sub_2b08(z);
         z->a = a_sal;                          /* pop af */
+        MACCHINA_PUNTO(0x2b01, 0x2b05);
         z->b = (uint8_t)(b_sal + 1);           /* inc b */
     } while (!(z->b & 0x08));                  /* bit 3,b */
+    MACCHINA_PUNTO(0x2b07, 0x2b07);
 }
 
 /* 0x2FF3: differenze di coordinate in passi di griglia.
@@ -291,16 +303,19 @@ void sub_2980(struct z80 *z)
  * Uscita: registri della seconda sub_2af5. */
 void sub_2ae2(struct z80 *z)
 {
+    MACCHINA_PUNTO(0x2ae2, 0x2ae8);
     uint8_t dsw1 = leggi_porta(0xe604);        /* DSW1 */
     z->a = dsw1;
     SET_HL(z, 0xd765);
     sub_2af5(z);
+    MACCHINA_PUNTO(0x2aeb, 0x2af1);
     /* il riporto lasciato da sub_2af5 (ultimo bit estratto = bit 7 di
      * DSW1) entra nella rotazione della seconda chiamata */
     z->f = (uint8_t)((z->f & ~1) | (dsw1 >> 7));
     z->a = leggi_porta(0xe605);                /* DSW2 */
     SET_HL(z, 0xd785);
     sub_2af5(z);
+    MACCHINA_PUNTO(0x2af4, 0x2af4);
 }
 
 /* 0x2BC3 (attract, 29EB/2AAD; coda esclusiva 2353-2367): lettura degli
@@ -309,6 +324,8 @@ void sub_2ae2(struct z80 *z)
  * Uscita: C = (P1 | P2) & 0x3f, HL = e602. */
 void sub_2bc3(struct z80 *z)
 {
+    MACCHINA_PUNTO(0x2bc3, 0x2bc6);            /* solo letture: RAM costante */
+    MACCHINA_PUNTO(0x2353, 0x2367);
     uint8_t c = (uint8_t)((leggi_porta(0xe600) |   /* P1 */
                            leggi_porta(0xe601)) &  /* P2 */
                           0x3f);
@@ -326,7 +343,9 @@ void sub_2c1a(struct z80 *z)
     uint16_t hl = HL(z), bc = BC(z);
     uint8_t d = z->d;
     do {
+        MACCHINA_PUNTO(0x2c1a, 0x2c1a);
         M(hl) = d;
+        MACCHINA_PUNTO(0x2c1b, 0x2c26);
         d = (uint8_t)((d << 1) | (d >> 7));    /* rlc d */
         hl++;
         bc--;
@@ -350,10 +369,12 @@ void sub_2bc9(struct z80 *z)
     uint16_t hl0 = HL(z), bc0 = BC(z);
     uint8_t e = 1, d;
     for (;;) {
+        MACCHINA_PUNTO(0x2bc9, 0x2bce);
         z->d = e;
         sub_2c1a(z);                           /* riempie col pattern */
         SET_HL(z, hl0);                        /* pop hl / pop bc */
         SET_BC(z, bc0);
+        MACCHINA_PUNTO(0x2bd1, 0x2bf2);        /* rilettura: RAM costante */
         d = e;
         uint16_t hl = hl0, bc = bc0;
         for (;;) {
@@ -400,10 +421,12 @@ void sub_2bf3(struct z80 *z)
     uint16_t hl0 = HL(z), bc0 = BC(z);
     uint8_t e = 1, d;
     for (;;) {
+        MACCHINA_PUNTO(0x2bf3, 0x2bf8);
         z->d = e;
         sub_2c1a(z);
         SET_HL(z, hl0);
         SET_BC(z, bc0);
+        MACCHINA_PUNTO(0x2bfb, 0x2c15);        /* rilettura: RAM costante */
         d = e;
         uint16_t hl = hl0, bc = bc0;
         for (;;) {
@@ -564,4 +587,210 @@ void sub_250e(struct z80 *z)
     SET_DE(z, hl0 + 1);                        /* 251B ex de,hl */
     SET_HL(z, (uint16_t)somma);
     z->f = (uint8_t)((z->f & ~1) | (somma > 0xffff));
+}
+
+/* 0x29CF (avvio, 28FD; lotto H4a): griglia di 14×16 riquadri 2×2 (tile
+ * 0x35, attributo 0xcc) dalla cella (riga 2, colonna 0) a passo 2, poi
+ * c467 = 0 e attesa che la NMI lo porti a 0xE0 (224 frame). Un tasto
+ * premuto (sub_2bc3 ≠ 0) fa aspettare il rilascio e poi un nuovo tasto.
+ * Non catturabile dal banco (centinaia di frame): la verifica è il giro
+ * dal boot (GIRO.md). I MACCHINA_PUNTO sono i punti in cui la NMI può
+ * entrare con la stessa RAM; la lettura di c467 e il confronto (29F0/29F3)
+ * sono separati come nell'originale: una NMI entrata fra i due non cambia
+ * il valore già in A. Uscita: come l'originale non importa ai chiamanti. */
+void sub_29cf(struct z80 *z)
+{
+    uint8_t h = 0x0e, d = 0x02;
+    do {                                       /* 29D3 */
+        uint8_t l = 0x10, e = 0x00;
+        do {                                   /* 29D7 */
+            MACCHINA_PUNTO(0x29d3, 0x29da);
+            SET_BC(z, 0xcc35);
+            z->d = d; z->e = e; z->h = h; z->l = l;
+            sub_3a54(z);
+            MACCHINA_PUNTO(0x29dd, 0x29e0);
+            e = (uint8_t)(e + 2);
+            l--;
+        } while (l != 0);
+        MACCHINA_PUNTO(0x29e2, 0x29e5);
+        d = (uint8_t)(d + 2);
+        h--;
+    } while (h != 0);
+    MACCHINA_PUNTO(0x29e7, 0x29e8);
+    M(0xc467) = 0;
+    for (;;) {                                 /* 29EB: attesa di 224 NMI */
+        MACCHINA_PUNTO(0x29eb, 0x29eb);
+        sub_2bc3(z);
+        if (z->a != 0) {                       /* 29F8: tasto premuto */
+            do {
+                MACCHINA_PUNTO(0x29f8, 0x29fb);
+                sub_2bc3(z);
+            } while (z->a != 0);
+            do {                               /* 29FD: attesa di un tasto */
+                MACCHINA_PUNTO(0x29fd, 0x2a00);
+                sub_2bc3(z);
+            } while (z->a == 0);
+            return;
+        }
+        MACCHINA_PUNTO(0x29ee, 0x29f0);
+        uint8_t a = M(0xc467);
+        MACCHINA_PUNTO(0x29f3, 0x29f5);
+        if (a >= 0xe0) {
+            MACCHINA_PUNTO(0x29f7, 0x29f7);
+            return;
+        }
+    }
+}
+
+/* Rotazione a destra circolare di un byte (rrc): il riporto è il bit 0. */
+static uint8_t rrc8(uint8_t v) { return (uint8_t)((v >> 1) | (v << 7)); }
+
+/* 0x2A03 (avvio, 28F7; lotto H4a): schermata dell'esito del test RAM. Tre
+ * righe di titolo e sette di elenco via sub_2b08 (con l'ultima cifra
+ * sovrascritta), poi i sedici bit di IX (z->ix: un bit per riga, testo 2 se
+ * 0, 3 se 1) e altre otto righe, riempimenti d5a2/d5c2/d746 col piano
+ * degli attributi (bit 2 di H spento) e infine l'attesa di 224 NMI con le
+ * DSW ridisegnate (sub_2ae2). Con IX & 7F ≠ 0 l'originale entra nel ramo di
+ * guasto 2AC8 (attesa infinita): nel C i test passano sempre, quindi il
+ * ramo non è tradotto e si esce con un avviso. Non catturabile dal banco:
+ * la verifica è il giro dal boot (GIRO.md). */
+void sub_2a03(struct z80 *z)
+{
+    uint16_t ix = z->ix;
+    uint8_t b = 0, c = 0, a;
+    uint16_t hl;
+    do {                                       /* 2A06 */
+        MACCHINA_PUNTO(0x2a03, 0x2a06);
+        z->b = b; z->c = c;
+        sub_2b08(z);
+        a = (uint8_t)(b + 0x31);
+        MACCHINA_PUNTO(0x2a09, 0x2a0d);
+        M(HL(z) - 1) = a;                      /* dec hl; ld (hl),a */
+        b++;
+        MACCHINA_PUNTO(0x2a0e, 0x2a11);
+    } while (a != 0x33);
+    c++;
+    do {                                       /* 2A14 */
+        MACCHINA_PUNTO(0x2a13, 0x2a14);
+        z->b = b; z->c = c;
+        sub_2b08(z);
+        a = (uint8_t)(b + 0x2e);
+        MACCHINA_PUNTO(0x2a17, 0x2a1b);
+        M(HL(z) - 1) = a;
+        b++;
+        MACCHINA_PUNTO(0x2a1c, 0x2a1f);
+    } while (a != 0x37);
+    uint8_t lo = (uint8_t)ix, hi = (uint8_t)(ix >> 8);   /* push ix */
+    do {                                       /* 2A23: byte basso di IX */
+        MACCHINA_PUNTO(0x2a21, 0x2a2c);
+        uint8_t cy = (uint8_t)(lo & 1);
+        lo = rrc8(lo);
+        z->b = b; z->c = (uint8_t)(cy ? 3 : 2);
+        sub_2b08(z);
+        b++;
+        MACCHINA_PUNTO(0x2a2f, 0x2a33);
+    } while (b != 0x11);
+    do {                                       /* 2A35: byte alto di IX */
+        MACCHINA_PUNTO(0x2a35, 0x2a3e);
+        uint8_t cy = (uint8_t)(hi & 1);
+        hi = rrc8(hi);
+        z->b = b; z->c = (uint8_t)(cy ? 3 : 2);
+        sub_2b08(z);
+        b++;
+        MACCHINA_PUNTO(0x2a41, 0x2a45);
+    } while (b != 0x14);
+    c = 4;
+    do {                                       /* 2A49 */
+        MACCHINA_PUNTO(0x2a47, 0x2a49);
+        z->b = b; z->c = c;
+        sub_2b08(z);
+        b++; c++;
+        MACCHINA_PUNTO(0x2a4c, 0x2a51);
+    } while (c != 0x0c);
+    MACCHINA_PUNTO(0x2a53, 0x2a59);
+    hl = 0xd5a2;
+    c = 0xe2;
+    do {                                       /* 2A59 */
+        MACCHINA_PUNTO(0x2a59, 0x2a59);
+        M(hl) = c;
+        hl &= (uint16_t)~0x0400;               /* res 2,h */
+        MACCHINA_PUNTO(0x2a5a, 0x2a5c);
+        M(hl) = 0x40;
+        hl |= 0x0400;                          /* set 2,h */
+        MACCHINA_PUNTO(0x2a5e, 0x2a62);
+        hl++; c++;
+    } while (c != 0);
+    MACCHINA_PUNTO(0x2a64, 0x2a67);
+    hl = 0xd5c2;
+    b = 8; c = 0;
+    do {                                       /* 2A6A */
+        MACCHINA_PUNTO(0x2a6a, 0x2a70);
+        c = rrc8(c);
+        a = 2;
+        do {                                   /* 2A6E */
+            MACCHINA_PUNTO(0x2a6e, 0x2a70);
+            uint8_t scritto = (uint8_t)(a >> 1);   /* or a; rra */
+            M(hl) = scritto;
+            MACCHINA_PUNTO(0x2a71, 0x2a79);
+            hl &= (uint16_t)~0x0400;
+            M(hl) = (uint8_t)(c << 4);         /* c·16 nel piano attributi */
+            hl |= 0x0400;
+            MACCHINA_PUNTO(0x2a7a, 0x2a82);
+            hl++;                              /* rla rifà A: era a prima di rra */
+            a++;
+        } while (a != 0x20);
+        c = (uint8_t)((c << 1) | (c >> 7));    /* rlc c */
+        hl = (uint16_t)(hl + 2);
+        c++;
+        MACCHINA_PUNTO(0x2a84, 0x2a89);
+        b--;
+    } while (b != 0);
+    MACCHINA_PUNTO(0x2a8b, 0x2a91);
+    hl = 0xd746;
+    b = 8; c = 0x31;
+    do {                                       /* 2A91 */
+        MACCHINA_PUNTO(0x2a91, 0x2a91);
+        M(hl) = c;
+        hl &= (uint16_t)~0x0400;
+        MACCHINA_PUNTO(0x2a92, 0x2a94);
+        M(hl) = 0x40;
+        hl |= 0x0400;
+        MACCHINA_PUNTO(0x2a96, 0x2a9c);
+        c++;
+        hl = (uint16_t)(hl + 3);
+        b--;
+    } while (b != 0);
+    MACCHINA_PUNTO(0x2a9e, 0x2aa7);
+    if ((ix & 0x7f) != 0) {                    /* 2AC8: guasto RAM, mai nel C */
+        fprintf(stderr, "sub_2a03: IX = %04X, ramo di guasto 2AC8 non tradotto\n", ix);
+        exit(2);
+    }
+    M(0xc467) = 0;
+    for (;;) {                                 /* 2AAA: attesa di 224 NMI */
+        MACCHINA_PUNTO(0x2aaa, 0x2aaa);
+        sub_2ae2(z);
+        MACCHINA_PUNTO(0x2aad, 0x2aad);
+        sub_2bc3(z);
+        if (z->a != 0) {                       /* 2ABA: tasto premuto */
+            for (;;) {
+                do {
+                    MACCHINA_PUNTO(0x2aba, 0x2abd);
+                    sub_2bc3(z);
+                } while (z->a != 0);
+                MACCHINA_PUNTO(0x2abf, 0x2abf);
+                sub_2ae2(z);
+                MACCHINA_PUNTO(0x2ac2, 0x2ac2);
+                sub_2bc3(z);
+                if (z->a != 0)
+                    return;
+            }
+        }
+        MACCHINA_PUNTO(0x2ab0, 0x2ab2);
+        a = M(0xc467);
+        MACCHINA_PUNTO(0x2ab5, 0x2ab7);
+        if (a >= 0xe0) {
+            MACCHINA_PUNTO(0x2ab9, 0x2ab9);
+            return;
+        }
+    }
 }

@@ -32,7 +32,13 @@ uint8_t leggi_porta(uint16_t a)
  * e803): si deposita in ram[] come già fa sub_33ba con e802. La zona
  * e600-ffff è fuori confronto (il banco confronta c000-e5ff), quindi la
  * scrittura è visibile al debug e innocua per l'oracolo. */
+void (*porte_gancio_scrittura)(uint16_t a, uint8_t v) = NULL;
+
 void scrivi_porta(uint16_t a, uint8_t v)
 {
+    if (porte_gancio_scrittura) {      /* giro dal boot: la scrittura è sua */
+        porte_gancio_scrittura(a, v);
+        return;
+    }
     ram[a - 0xc000] = v;
 }

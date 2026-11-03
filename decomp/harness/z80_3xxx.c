@@ -538,12 +538,25 @@ void sub_3a54(struct z80 *z)
     uint16_t hl0 = HL(z), de0 = DE(z);
     sub_2418(z);                    /* HL = 32·D + E, D = 0 */
     uint16_t tile = (uint16_t)(HL(z) + PIANO_TILE_D400);
+    /* punti di sincronia per la NMI (giro dal boot): uno fra ogni scrittura */
+    MACCHINA_PUNTO(0x3a54, 0x3a5d);
     M(tile) = z->b;
+    MACCHINA_PUNTO(0x3a5e, 0x3a60);
     M(tile + 1) = (uint8_t)(z->b + 1);
+    MACCHINA_PUNTO(0x3a61, 0x3a66);
     M(tile + 0x20) = (uint8_t)(z->b + 2);
+    MACCHINA_PUNTO(0x3a67, 0x3a69);
     M(tile + 0x21) = (uint8_t)(z->b + 3);
     uint16_t attr = (uint16_t)(tile - 0x400);
-    M(attr) = M(attr + 1) = M(attr + 0x20) = M(attr + 0x21) = z->c;
+    MACCHINA_PUNTO(0x3a6a, 0x3a6e);
+    M(attr) = z->c;
+    MACCHINA_PUNTO(0x3a6f, 0x3a70);
+    M(attr + 1) = z->c;
+    MACCHINA_PUNTO(0x3a71, 0x3a75);
+    M(attr + 0x20) = z->c;
+    MACCHINA_PUNTO(0x3a76, 0x3a77);
+    M(attr + 0x21) = z->c;
+    MACCHINA_PUNTO(0x3a78, 0x3a7c);
     z->b = (uint8_t)(z->b + 3);
     z->a = (uint8_t)(z->a - 3);
     SET_DE(z, de0);

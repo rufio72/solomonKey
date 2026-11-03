@@ -23,7 +23,7 @@ SDL_CFLAGS := $(shell $(SDL2_CONFIG) --cflags)
 SDL_LIBS := $(shell $(SDL2_CONFIG) --libs)
 endif
 
-all: harness sched_proto replay audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine $(BERSAGLI_SDL)
+all: harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine $(BERSAGLI_SDL)
 
 harness: $(SORGENTI) ram.h routine.h e603.h rst20_tables.h nemici.h rst38_tables.h sched.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI)
@@ -33,6 +33,12 @@ sched_proto: $(SORGENTI_SCHED) sched.h ram.h
 
 replay: $(SORGENTI_REPLAY) ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_REPLAY)
+
+# giro dal boot (lotto H4a): macchina, NMI una per frame, ingressi registrati
+SORGENTI_LIBERO = $(filter-out harness.c,$(SORGENTI)) sched.c macchina.c gioco_libero.c
+
+gioco_libero: $(SORGENTI_LIBERO) ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h
+	$(CC) $(CFLAGS) -o $@ $(SORGENTI_LIBERO)
 
 audio_banco: $(SORGENTI_AUDIO) audio.h $(INTESTAZIONI_DATI)
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_AUDIO)
@@ -70,6 +76,6 @@ mostra_replay: mostra_replay.c video_sdl.c video_sdl.h video_rendi.c $(SORGENTI_
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ mostra_replay.c video_sdl.c video_rendi.c $(SORGENTI_GRAFICA) replay_lib.o $(filter-out replay.c,$(SORGENTI_REPLAY)) $(SDL_LIBS)
 
 clean:
-	rm -f harness sched_proto replay audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine mostra_oracolo mostra_replay replay_lib.o
+	rm -f harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine mostra_oracolo mostra_replay replay_lib.o
 
 .PHONY: all clean

@@ -162,6 +162,12 @@ ogni ciclo nei brief in `compiti/`.
    (`harness/video_rendi.c`), 7 stati su 7 identici (`sh rendi_video.sh`).
    Lotto H3 (brief 43) chiuso: finestra SDL2 (`video_sdl.c`), programmi
    `mostra_oracolo` e `mostra_replay` (3090 frame resi, gancio `replay_dopo_nmi`).
+   Lotto H4a (brief 44) chiuso: `harness/gioco_libero` fa girare il C dal
+   vettore 0000 (boot 2833-2959, `sub_29cf`/`sub_2a03` tradotte), NMI una
+   per frame con gli ingressi registrati; 537 NMI (frame 66-602)
+   coincidono con MAME e il dump 602 coincide byte per byte; si ferma al
+   corpo 1F (43C8). Restano H4b (corpi attract/titolo ~950 istruzioni,
+   oracolo del registro R) e H4c (giro 0-5499). Vedi `decomp/GIRO.md`.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

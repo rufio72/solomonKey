@@ -115,6 +115,8 @@ void sub_0043(struct z80 *z);
 void sub_234a(struct z80 *z);
 void sub_2980(struct z80 *z);
 void sub_2ae2(struct z80 *z);
+void sub_29cf(struct z80 *z);   /* avvio: griglia e attesa (lotto H4a) */
+void sub_2a03(struct z80 *z);   /* avvio: schermata esito test RAM (lotto H4a) */
 void sub_2bc3(struct z80 *z);
 void sub_2bc9(struct z80 *z);
 void sub_2bf3(struct z80 *z);
