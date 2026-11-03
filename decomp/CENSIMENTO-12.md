@@ -76,76 +76,78 @@ fine spetta ai lotti di traduzione.
   dalle altre sessioni (condizione della risoluzione 2 del brief).
 
 
-## Destinazioni ancora scoperte (64)
+## Destinazioni ancora scoperte (59 + 5 tradotte)
+
+Lotto 40: delle 64 destinazioni mai osservate nelle sessioni, 5 sono nel frattempo tradotte (4FC5, 5F82, 6046, 6FC3, 6FDF) e per le altre 59 c'è un verdetto (53 `DATO`, 0 `MORTO`, 6 `RAGGIUNGIBILE`) con motivo e ricette in `ZONE-MAI-ESEGUITE.md`.
 
 `sito_eseguito` da `copertura_call.py --classifica`: NO = il sito della prima call statica non è mai stato eseguito, quindi probabile dato disassemblato come codice o codice raggiungibile solo da zone a loro volta mai eseguite; SI = sito eseguito ma con la call mai presa (ramo condizionale).
 
-| destinazione | prima call statica | sito_eseguito |
-|---|---|---|
-| 0071 | 85EA | NO |
-| 029D | 969E | NO |
-| 09A2 | 9DBF | NO |
-| 1020 | A308 | NO |
-| 1604 | A387 | NO |
-| 17A4 | 9CAE | NO |
-| 2114 | 1330 | NO |
-| 2533 | 6879 | NO |
-| 2FC3 | 93D3 | NO |
-| 3254 | 8FD3 | NO |
-| 3504 | A1CD | NO |
-| 4364 | 64A8 | NO |
-| 4A05 | 80BB | NO |
-| 4FC5 | 4F8F | NO |
-| 540A | A09C | NO |
-| 5564 | 647C | NO |
-| 5604 | A38E | NO |
-| 560A | A053 | NO |
-| 570A | A056 | NO |
-| 5F82 | 5F7B | NO |
-| 6046 | 603F | NO |
-| 6379 | 6310 | NO |
-| 68B0 | AD10 | NO |
-| 6FC3 | 6FAA | NO |
-| 6FDF | 6F9C | NO |
-| 7E03 | 7DA0 | NO |
-| 7E14 | 7DC6 | NO |
-| 8010 | A289 | NO |
-| 801E | A271 | NO |
-| 8514 | 1D25 | NO |
-| 856C | 1EA1 | NO |
-| 8719 | 1EDF | NO |
-| 9111 | 1C0B | NO |
-| 9557 | 57DC | NO |
-| 982C | 3B1F | NO |
-| A001 | 8590 | NO |
-| A804 | A21A | NO |
-| A904 | A217 | NO |
-| AB04 | A23B | NO |
-| AB14 | 4FAD | NO |
-| AEE2 | A88E | NO |
-| AEF6 | A8A6 | NO |
-| AF00 | A8A9 | NO |
-| AF0A | A8DC | NO |
-| AF14 | A8B2 | NO |
-| AF1E | A8CA | NO |
-| AF28 | A8CD | NO |
-| AF32 | A8C4 | NO |
-| AF3C | A8BE | NO |
-| AF46 | A8C1 | NO |
-| AF50 | A972 | NO |
-| AF5A | A975 | NO |
-| AF64 | A978 | NO |
-| AF6E | A97B | NO |
-| AFA0 | AA1A | NO |
-| AFAA | AA1D | NO |
-| AFB4 | AA20 | NO |
-| AFBE | AA32 | NO |
-| AFC8 | AA35 | NO |
-| AFD2 | AA38 | NO |
-| AFDC | AA62 | NO |
-| AFE6 | AA71 | NO |
-| AFF0 | AA80 | NO |
-| BE2B | 2D83 | NO |
+| destinazione | prima call statica | sito_eseguito | verdetto | note |
+|---|---|---|---|---|
+| 0071 | 85EA | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 029D | 969E | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 09A2 | 9DBF | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 1020 | A308 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 1604 | A387 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 17A4 | 9CAE | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 2114 | 1330 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 2533 | 6879 | NO | RAGGIUNGIBILE | codice vero con ingresso condizionato, vedi ZONE-MAI-ESEGUITE.md |
+| 2FC3 | 93D3 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 3254 | 8FD3 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 3504 | A1CD | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 4364 | 64A8 | NO | RAGGIUNGIBILE | codice vero con ingresso condizionato, vedi ZONE-MAI-ESEGUITE.md |
+| 4A05 | 80BB | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 4FC5 | 4F8F | NO | tradotta | vedi «Già tradotte» in ZONE-MAI-ESEGUITE.md |
+| 540A | A09C | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 5564 | 647C | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 5604 | A38E | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 560A | A053 | NO | RAGGIUNGIBILE | codice vero con ingresso condizionato, vedi ZONE-MAI-ESEGUITE.md |
+| 570A | A056 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 5F82 | 5F7B | NO | tradotta | vedi «Già tradotte» in ZONE-MAI-ESEGUITE.md |
+| 6046 | 603F | NO | tradotta | vedi «Già tradotte» in ZONE-MAI-ESEGUITE.md |
+| 6379 | 6310 | NO | RAGGIUNGIBILE | codice vero con ingresso condizionato, vedi ZONE-MAI-ESEGUITE.md |
+| 68B0 | AD10 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 6FC3 | 6FAA | NO | tradotta | vedi «Già tradotte» in ZONE-MAI-ESEGUITE.md |
+| 6FDF | 6F9C | NO | tradotta | vedi «Già tradotte» in ZONE-MAI-ESEGUITE.md |
+| 7E03 | 7DA0 | NO | RAGGIUNGIBILE | codice vero con ingresso condizionato, vedi ZONE-MAI-ESEGUITE.md |
+| 7E14 | 7DC6 | NO | RAGGIUNGIBILE | codice vero con ingresso condizionato, vedi ZONE-MAI-ESEGUITE.md |
+| 8010 | A289 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 801E | A271 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 8514 | 1D25 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 856C | 1EA1 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 8719 | 1EDF | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 9111 | 1C0B | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 9557 | 57DC | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| 982C | 3B1F | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| A001 | 8590 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| A804 | A21A | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| A904 | A217 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AB04 | A23B | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AB14 | 4FAD | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AEE2 | A88E | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AEF6 | A8A6 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF00 | A8A9 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF0A | A8DC | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF14 | A8B2 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF1E | A8CA | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF28 | A8CD | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF32 | A8C4 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF3C | A8BE | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF46 | A8C1 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF50 | A972 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF5A | A975 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF64 | A978 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AF6E | A97B | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AFA0 | AA1A | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AFAA | AA1D | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AFB4 | AA20 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AFBE | AA32 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AFC8 | AA35 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AFD2 | AA38 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AFDC | AA62 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AFE6 | AA71 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| AFF0 | AA80 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
+| BE2B | 2D83 | NO | DATO | dato o byte a metà di istruzione, vedi ZONE-MAI-ESEGUITE.md |
 
 ## Destino delle 40 destinazioni (brief 38)
 
