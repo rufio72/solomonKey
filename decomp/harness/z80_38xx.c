@@ -3,6 +3,7 @@
  * che avevano). Si riproducono l'effetto sulla RAM e i registri A, BC,
  * DE, HL, IX, IY all'uscita (le bandiere F no). */
 #include "routine.h"
+#include "nemici.h"          /* sub_4767 */
 
 /* 0x3A1C: due cifre ASCII di A (0..99 atteso).
  * Uscita: D = '0' + A/10, E = '0' + A%10, A = D. */
@@ -300,4 +301,34 @@ void sub_3adf(struct z80 *z)
     z->b = 0;
     z->c = c;
     SET_HL(z, hl);
+}
+
+/* 0x37B4 (374B, 379F: fase 18 del corpo 07 dell'avvio): crea un oggetto del
+ * quadro dal record (A = cella, B = indice da 4722 e 4767, C = numero del
+ * record da 472E) alla posizione di slot HL. Scrive D0 in (HL), le
+ * coordinate della cella (4B0E) e i campi del record con 472E, lo stato A0
+ * con E = B e BC = 0500 (4AF6), (IX+03) = C da 4722 su B, poi 4767 su B
+ * con C = numero del record. DE conservato.
+ * Uscita: come le routine chiamate (IX = oggetto, HL = coordinate). */
+void sub_37b4(struct z80 *z)
+{
+    uint16_t de_in = DE(z);                    /* 37B4 push de */
+    M(HL(z)) = 0xd0;                           /* 37B5 */
+    sub_4b0e(z);                               /* 37B7 */
+    uint8_t b = z->b, c = z->c;                /* 37BA push bc */
+    sub_472e(z);                               /* 37BB */
+    z->b = b;                                  /* 37BE pop bc */
+    z->c = c;
+    z->d = z->c;                               /* 37BF */
+    z->e = z->b;                               /* 37C0 */
+    SET_BC(z, 0x0500);                         /* 37C1 */
+    z->a = 0xa0;                               /* 37C4 */
+    sub_4af6(z);                               /* 37C6 */
+    z->a = z->e;                               /* 37C9 */
+    sub_4722(z);                               /* 37CA */
+    M(z->ix + 0x03) = z->a;                    /* 37CD */
+    z->a = z->e;                               /* 37D0 */
+    z->c = z->d;                               /* 37D1 */
+    sub_4767(z);                               /* 37D2 */
+    SET_DE(z, de_in);                          /* 37D5 pop de */
 }

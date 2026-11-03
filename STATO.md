@@ -15,8 +15,8 @@ ogni ciclo nei brief in `compiti/`.
 | …di cui `verificata` (doppia cattura MAME non forzata) | 286 |
 | …di cui `tradotta` con nota (senza cattura o cattura singola) | 61 |
 | …di cui `tradotta (replay)` | 43 |
-| Banco di prova (`harness --tutte`) | 305 voci, 1272 catture, 0 fallite |
-| Catture `regs` in `decomp/out/` | 1272 |
+| Banco di prova (`harness --tutte`) | 307 voci, 1278 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 1278 |
 | Stub residui del motore nemici | 0 (motore completo, `nemici_stub.c` tolto) |
 | Destinazioni mai osservate | 59 documentate in `decomp/ZONE-MAI-ESEGUITE.md`: 53 `DATO`, 0 `MORTO`, 6 `RAGGIUNGIBILE` (5 con ricetta di sveglia provata); le altre 5 delle 64 originali sono ormai tradotte |
 
@@ -175,8 +175,15 @@ ogni ciclo nei brief in `compiti/`.
    Lotto H4b2 (brief 46) chiuso: corpo 07 (2CCD) tradotto fino alla fase 12
    (`attivita_attract07*.c`) e routine 3ADF nel banco (305 voci, 1272
    catture); il giro arriva al frame 1398 (`ROUTINE 2DCE mancante`), 1333 NMI
-   confrontate, 0 divergenze nello spedidore. Restano H4b3 (fasi 13-25 di 07,
-   08, 0C, 0B e confronto al 2410) e H4c (giro 0-5499). Vedi `decomp/GIRO.md`.
+   confrontate, 0 divergenze nello spedidore.
+   Lotto H4b3 (brief 47) chiuso: fasi 13-25 del corpo 07 (`attivita_attract07c.c`,
+   `07d.c`), corpi 08, 0C e 0B (`attivita_attract08.c`), routine 37B4 e 2D8A nel
+   banco (307 voci, 1278 catture); il giro dal boot arriva al frame 2410 e
+   si salda all'oracolo storico: `SALDATURA 2410 ... 0, coincide`, 41396
+   spedizioni, 2345 NMI (30 divergenti a metà attività, 0 nello spedidore).
+   Per la saldatura sono serviti ganci `PUNTO_GIRO` (attivi solo nel giro) in
+   routine del motore dei nemici già verificate; il replay storico non cambia.
+   Resta H4c (giro 0-5499). Vedi `decomp/GIRO.md`.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

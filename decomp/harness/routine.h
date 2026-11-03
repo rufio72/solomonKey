@@ -207,4 +207,8 @@ void sub_113c(struct z80 *z);
 void sub_1172(struct z80 *z);
 void sub_11d8(struct z80 *z);
 
+/* Lotto H4b3 (brief 47). */
+void sub_2d8a(struct z80 *z);
+void sub_37b4(struct z80 *z);
+
 #endif

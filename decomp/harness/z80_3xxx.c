@@ -2,6 +2,7 @@
  * Si riproducono l'effetto sulla RAM e i registri A, BC, DE, HL, IX, IY
  * all'uscita (le bandiere F no). */
 #include "routine.h"
+#include "nemici.h"            /* NEMICI_PUNTO (gancio NULL fuori dal giro) */
 
 /* Tabella in ROM di 33 valori (indici 0..0x20), letta a specchio. */
 #define TABELLA_3111 0x3111
@@ -223,6 +224,16 @@ void sub_3097(struct z80 *z)
     uint8_t c = M(CERCHIO_RAGGIO);
     z->c = c;
     for (int b = 0x10; b > 0; b--) {
+        /* punti di sincronia per la NMI del giro dal boot (NULL altrove): la
+         * routine dura più di un frame; sub_30ef e sub_3101 (30EF-3110) non
+         * scrivono, i loro ritorni appartengono al punto che segue */
+        if (b == 0x10) {
+            PUNTO_GIRO(0x3097, 0x30be);
+        } else {
+            PUNTO_GIRO(0x30e3, 0x30ec);
+            PUNTO_GIRO(0x30aa, 0x30be);
+        }
+        PUNTO_GIRO(0x30ef, 0x3110);
         z->b = (uint8_t)b;
         z->a = e;
         sub_30ef(z);
@@ -232,7 +243,7 @@ void sub_3097(struct z80 *z)
         uint8_t a = z->h;
         if (e & 0x40)
             a = (uint8_t)(-a);
-        M(ix + 0x0e) = (uint8_t)(a + (centro >> 8));
+        M(ix + 0x0e) = (uint8_t)(a + (centro >> 8));    /* 30BE */
         z->a = (uint8_t)(0x20 - (e & 0x3f));
         sub_30ef(z);
         z->l = z->a;
@@ -241,11 +252,15 @@ void sub_3097(struct z80 *z)
         a = z->h;
         if ((uint8_t)(e + 0x20) & 0x40)
             a = (uint8_t)(-a);
-        M(ix + 0x15) = (uint8_t)(a + (centro & 0xff));
-        M(ix) = 0xc5;
+        PUNTO_GIRO(0x30c1, 0x30dc);
+        PUNTO_GIRO(0x30ef, 0x3110);
+        M(ix + 0x15) = (uint8_t)(a + (centro & 0xff));  /* 30DC */
+        PUNTO_GIRO(0x30dd, 0x30df);
+        M(ix) = 0xc5;                          /* 30DF */
         e = (uint8_t)(e + 8);
         ix = (uint16_t)(ix + 0x30);
     }
+    PUNTO_GIRO(0x30e3, 0x30ee);
     z->a = e;
     z->b = 0;
     z->d = 0;

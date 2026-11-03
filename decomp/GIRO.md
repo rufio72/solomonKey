@@ -1,12 +1,13 @@
-# Giro dal boot (lotti H4a, H4b1 e H4b2, brief 44, 45 e 46)
+# Giro dal boot (lotti H4a, H4b1, H4b2 e H4b3, brief 44, 45, 46 e 47)
 
 Primo pezzo dell'ex «giro libero»: il C parte dal vettore 0000 e gira senza
 che l'oracolo di MAME lo guidi. Dell'oracolo restano il controllo (impronta
 della RAM a ogni NMI) e gli ingressi registrati. Il giro si ferma, atteso e
 misurabile, alla prima attività non tradotta: in H4a `CORPO 1F (43C8)` al
 frame 602, da H4b1 `CORPO 07 (2CCD) non tradotto al frame 1188`, da H4b2
-`ROUTINE 2DCE mancante (motore dei nemici) al frame 1398`. Restano H4b3
-(fasi 13-25 del corpo 07, 08, 0C, 0B e confronto al 2410) e H4c (giro 0-5499).
+`ROUTINE 2DCE mancante (motore dei nemici) al frame 1398`. Da H4b3 il giro
+arriva al frame 2410 senza arresti e si salda all'oracolo storico
+(`SALDATURA 2410 ... coincide`). Resta H4c (giro 0-5499).
 
 ## Uso (da `decomp/`)
 
@@ -19,8 +20,9 @@ harness/gioco_libero out/giroboot_oracolo.txt out/giroboot_disp.txt \
     out/ingressi_replay.txt [frame_fine]
 ```
 
-Uscita attesa: `SANITA 602: ... coincide`, `CORPO 1F (43C8) non tradotto al
-frame 602`, `NMI confrontate: 537, divergenti: 0`, codice 1.
+Uscita attesa (H4b3): `SANITA 602: ... coincide`, `SALDATURA 2410: ... 0,
+coincide`, `spedizioni eseguite: 41396`, `NMI confrontate: 2345`, codice 0.
+(All'epoca di H4a: `CORPO 1F (43C8) non tradotto al frame 602`, codice 1.)
 
 ## Come funziona
 
@@ -155,3 +157,61 @@ spedidore; 9 a metà attività, tutte nel primo corpo 06 (frame 603-611).
 - Restano a H4b3: fasi 13-25 (gestori 2DCE, 31C5, 2E0A, 2E9C, 3709, 3829, 321E,
   2EF5, 2E6D, 2F1A, 2E1E; la voce 16, 2D9D, non è mai eseguita), 37B4, i corpi 08,
   0C e 0B e il confronto al frame 2410.
+
+## H4b3: corpo 07 (fasi 13-25), corpi 08, 0C, 0B e saldatura al 2410 (brief 47)
+
+- Moduli: `attivita_attract07c.c` (fase 13 con la tabella `rst 20` 2DDA di sette
+  voci: 3009, 305F, 3131, attesa 2E65, 3161, attesa 2E81, 31B7; fasi 14, 15,
+  17 e 21), `attivita_attract07d.c` (fasi 18, 19, 20, 22, 24, 25; la 23 è
+  l'attesa 2E6D nel `switch`), `attivita_attract08.c` (corpi 08, 0C, 0B). La
+  fase 16 (2D9D) non è mai eseguita nei frame 0-2410 e resta
+  `nemici_manca(0x2d9d)`. `attesa()` di 07.c è ora `attesa_07()` (esportata) e
+  `fondale_322a()` serve anche al corpo 08. `[0x08]`, `[0x0b]`, `[0x0c]` in
+  `corpo_attivita_replay[]`.
+- Routine nuove nel banco: `sub_37b4` (`z80_38xx.c`, 4 catture) e `sub_2d8a`
+  (`z80_2dxx.c`, 2 catture, `att0B` banale: i due blocchi coincidono; la
+  cattura `gioco 2 n2` non esiste, MAME non arriva alla seconda
+  occorrenza). Banco: 307 voci, 1278 catture, 0 fallite.
+- Saldatura (`macchina.c`): `diff_dump(frame, pila)`; con `pila = 1` il
+  confronto include dbc0-dbff e salta solo c040-c043 e cf00-cfff. `saldatura()`
+  gira prima della NMI del frame 2410 (`FRAME_SALDATURA`). Esito:
+  `SALDATURA 2410: byte diversi in c000-e5ff (escluse c040-c043, cf00-cfff):
+  0, coincide`, 41396 spedizioni, 2345 NMI confrontate (30 divergenti, tutte a
+  metà attività: le 15 di H4b1/H4b2 più 1532-1541 nel corpo 08 e 1565-1569
+  nella fase 6 della seconda corsa, ritorni dentro 75AA, 322A, 33BA, 7ECA e
+  nel decodificatore 23xx, senza punti interni: `PUNTO_LARGO`), nello
+  spedidore 1132 con 0 divergenti, a metà attività 676.
+- Seconda corsa del corpo 07: il corpo 0B (frame 1562) azzera c19d e rimette 07
+  in coda; le fasi si ripassano dal frame 1562 al 1884 alternate al corpo 14
+  (una spedizione per ciascuno a ogni giro), come mostra il registro.
+- Sequenza reale dei fermi (le fasi 13-25 e i tre corpi sono stati tradotti in
+  un colpo solo, quindi non si è visto nessun `ROUTINE mancante` intermedio):
+  1414 (NMI pulita, ritorni dentro 3097), 1544 (c29a: la NMI 1533 va dopo
+  75AA), 1814 (NMI nel corpo 14 senza punti), 1838 (ritorni 0010 dentro 452B),
+  2012 (NMI 2010 dentro 5693 dopo 7379), poi il giro arriva in fondo.
+- Punti `NEMICI_PUNTO`/`PUNTO_GIRO` aggiunti: i nuovi moduli ne hanno uno
+  per scrittura o chiamata come da regola di `nemici.h`; per i ritorni delle
+  NMI dentro routine già verificate sono stati aggiunti ganci a puntatore
+  NULL con la nuova macro `PUNTO_GIRO` (nemici.h), attiva solo se
+  `gioco_libero.c` accende `giro_dal_boot`: il replay storico non ne risente
+  (885 divergenze a metà attività, prima al frame 2415, come prima). Dove:
+  `sub_3097` (z80_3xxx.c, 16 oggetti: i ritorni 30AA-310F sono la maggioranza
+  delle NMI della fase 13), `sub_452b` e `sub_4dee`, `sub_4e31`, `sub_4e87`
+  (z80_4xxx.c), il corpo 14 (`attivita.c`: letture di c09b e c464, che la NMI
+  incrementa, e le chiamate a 452B), `sub_4dad` e l'ingresso 4DA2 di
+  `nemici.c` (`sposta_249e()` rifà sub_249e, e sub_4e31 rifà sub_24b1 in
+  linea, perché z80_2xxx.c non si tocca), `sub_5693` (nemici_tipi_10_13.c).
+  Le letture di variabili che la NMI incrementa (c2b7 a 4DB0/4DB1, c2a9 a
+  4E8A, c464 a 44B9) hanno il punto prima della lettura, non solo prima della
+  scrittura: senza, una NMI con ritorno fra lettura e scrittura cambia il
+  valore letto.
+- `PUNTO_LARGO` aggiunti: 3045 (fase 13), 37B4 (fase 18), 3A54 (fase 19), 33BA
+  prima della chiamata (fasi 20 e corpo 08: la routine accende il bit 6 di
+  c044 alla fine), 75AA spezzato (75AA-75BC prima, 75BD-75E6 dopo: la routine
+  azzera c299-c2a8 a 75C3), 6771 (6771-6784), 7ECA (7ECA-7F40), 2D8A,
+  23BB-23FF e 3225-33E9 (322A e figlie).
+- Deviazioni dal brief: i ganci `PUNTO_GIRO` in routine e corpi del motore
+  dei nemici (sopra) non erano previsti ma servono alla saldatura; `nemici.c`,
+  `nemici_tipi_10_13.c`, `attivita.c`, `z80_3xxx.c`, `z80_4xxx.c`,
+  `gioco_libero.c` e `nemici.h` sono toccati solo per questo. I file
+  `snap_*` delle catture sono nel commit come per 3ADF (anche i `.bin`).

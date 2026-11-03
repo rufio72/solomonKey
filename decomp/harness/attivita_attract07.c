@@ -2,8 +2,9 @@
  * c19d, lotto H4b2 (brief 46). Qui l'ingresso, le fasi brevi (2, 5, 6, 8,
  * 9, 10, 11) e la fase 12 con la sua seconda tabella `rst 20` (2DB8) sul
  * sotto-contatore c19e; le fasi 0, 1, 3 stanno in attivita_attract07a.c, la
- * 4 e la 7 in attivita_attract07b.c. Le fasi 13-25 sono del lotto H4b3:
- * nemici_manca ferma il giro sul loro gestore.
+ * 4 e la 7 in attivita_attract07b.c. Le fasi 13-25 sono del lotto H4b3
+ * (attivita_attract07c.c e 07d.c); la 16 (2D9D) non è mai eseguita nei
+ * frame 0-2410 e resta nemici_manca.
  *
  * Regole come attivita_01_10.c: ogni fase inizia con `pop hl` (puntatore
  * allo slot) e termina con `ret`, quindi il `pop hl; ret` diventa `return`;
@@ -25,7 +26,7 @@
  * ha raggiunto C ritorna, altrimenti azzera c467 e rincrementa (HL)) ma con
  * i punti di sincronia fra una scrittura e l'altra. `sito` è l'ingresso
  * della voce (2E89, 2E5D, 2E79, 2E71, 2E7D) che carica C. */
-static void attesa(uint16_t hl, uint8_t c, uint16_t sito)
+void attesa_07(uint16_t hl, uint8_t c, uint16_t sito)
 {
     NEMICI_PUNTO(sito, 0x2e90);
     M(hl)--;                                   /* 2E90 */
@@ -71,7 +72,7 @@ static void fase_2d07(void)
  * frame) eseguiti prima di sub_33ba, che accende il bit 6 di c044 (consegna
  * della palette): chiamando sub_322a intera le NMI correrebbero a flag già
  * acceso e lo consumerebbero sei frame prima di MAME. */
-static void fondale_322a(struct z80 *z)
+void fondale_322a(struct z80 *z)
 {
     sub_33aa(z);
     scrivi_porta(0xe802, 0);
@@ -96,7 +97,8 @@ static void fondale_322a(struct z80 *z)
     z->a = z->l;
     if (z->a != 0)
         sub_325e(z);
-    PUNTO_LARGO(0x3225, 0x33b9);               /* ritorni in 322A e figlie (32xx-33xx) */
+    PUNTO_LARGO(0x23bb, 0x2400);               /* ritorni nel decodificatore (fondale.c: 23BB-23FF) */
+    PUNTO_LARGO(0x3225, 0x33e9);               /* ritorni in 322A e figlie (32xx-33xx, 33BA) */
     z->c = 1;
     sub_33ba(z);
 }
@@ -255,19 +257,19 @@ static void fase_2dad(void)
     NEMICI_PUNTO(0x0008, 0x0026);              /* gestore del rst 20h */
     switch (sotto) {                           /* 2DB8 rst 20h */
     case 0: t2_2fc1(); break;
-    case 1: attesa(0xc19e, 0x42, 0x2e79); break;
+    case 1: attesa_07(0xc19e, 0x42, 0x2e79); break;
     case 2: t2_2fa9(); break;
-    case 3: attesa(0xc19e, 0x10, 0x2e71); break;
+    case 3: attesa_07(0xc19e, 0x10, 0x2e71); break;
     case 4: t2_2f8f(); break;
-    case 5: attesa(0xc19e, 0x0c, 0x2e7d); break;
+    case 5: attesa_07(0xc19e, 0x0c, 0x2e7d); break;
     }
 }
 
 /* 07, ingresso 2CCD: HL = c19d, A = fase, c19d avanza di uno, salto con
- * `rst 20h` alla tabella 2CD2 (26 voci). Fasi 13-25: H4b3. */
+ * `rst 20h` alla tabella 2CD2 (26 voci). Le fasi 13-25 sono del lotto H4b3
+ * (07c e 07d, la 16 non è mai eseguita). */
 void attivita_07_2ccd(uint8_t slot)
 {
-    (void)slot;
     NEMICI_PUNTO(0x2ccd, 0x2cd1);
     uint8_t fase = M(0xc19d);                  /* 2CCD-2CD0 */
     M(0xc19d) = (uint8_t)(fase + 1);           /* 2CD1 */
@@ -282,24 +284,24 @@ void attivita_07_2ccd(uint8_t slot)
     case 5:  fase_2d07(); break;
     case 6:  fase_3225(); break;
     case 7:  fase_07_3a7d(); break;
-    case 8:  attesa(0xc19d, 0x60, 0x2e89); break;
+    case 8:  attesa_07(0xc19d, 0x60, 0x2e89); break;
     case 9:  fase_2f2d(); break;
-    case 10: attesa(0xc19d, 0x0d, 0x2e5d); break;
+    case 10: attesa_07(0xc19d, 0x0d, 0x2e5d); break;
     case 11: fase_2dfa(); break;
     case 12: fase_2dad(); break;
-    case 13: nemici_manca(0x2dce); break;
-    case 14: nemici_manca(0x31c5); break;
-    case 15: nemici_manca(0x2e0a); break;
+    case 13: fase_07_2dce(); break;
+    case 14: fase_07_31c5(); break;
+    case 15: fase_07_2e0a(); break;
     case 16: nemici_manca(0x2d9d); break;
-    case 17: nemici_manca(0x2e9c); break;
-    case 18: nemici_manca(0x3709); break;
-    case 19: nemici_manca(0x3829); break;
-    case 20: nemici_manca(0x321e); break;
-    case 21: nemici_manca(0x2e9c); break;
-    case 22: nemici_manca(0x2ef5); break;
-    case 23: nemici_manca(0x2e6d); break;
-    case 24: nemici_manca(0x2f1a); break;
-    case 25: nemici_manca(0x2e1e); break;
+    case 17: fase_07_2e9c(); break;
+    case 18: fase_07_3709(); break;
+    case 19: fase_07_3829(); break;
+    case 20: fase_07_321e(); break;
+    case 21: fase_07_2e9c(); break;
+    case 22: fase_07_2ef5(); break;
+    case 23: attesa_07(0xc19d, 0x1e, 0x2e6d); break;
+    case 24: fase_07_2f1a(); break;
+    case 25: fase_07_2e1e(slot); break;
     default: nemici_fuori_tabella(0x2cd2, fase); break;
     }
 }

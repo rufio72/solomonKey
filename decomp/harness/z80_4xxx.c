@@ -70,14 +70,17 @@ void sub_4722(struct z80 *z)
  * IX = c2c1 + 17·0x18. */
 void sub_4dee(struct z80 *z)
 {
+    /* punti di sincronia per la NMI del giro dal boot (NEMICI_PUNTO, NULL
+     * altrove): uno prima di ogni scrittura in RAM */
     uint16_t hl = HL(z) + 1;
     uint8_t a = z->a - 1;
+    PUNTO_GIRO(0x4de0, 0x4df2);
     if (a == M(hl)) {
         z->a = a;
         SET_HL(z, hl);
         return;
     }
-    M(hl) = a;
+    M(hl) = a;                                 /* 4DF2 */
     z->a = a;
     SET_HL(z, SEQUENZE_83FA);
     sub_0008(z);
@@ -96,7 +99,11 @@ void sub_4dee(struct z80 *z)
                 hl = de;
                 v = leggi(hl);
             }
-            M(ix + 7) = v;
+            PUNTO_GIRO(0x4df3, 0x4e16);
+            PUNTO_GIRO(0x0008, 0x0014);
+            PUNTO_GIRO(0x4e02, 0x4e16);
+            M(ix + 7) = v;                     /* 4E16 */
+            PUNTO_GIRO(0x4e17, 0x4e30);
             hl++;
         }
         z->ix = ix;
@@ -132,16 +139,30 @@ void sub_4dee(struct z80 *z)
  * IX = c4fe + 17·0x30. */
 void sub_4e31(struct z80 *z)
 {
+    /* punti di sincronia per la NMI del giro dal boot (NEMICI_PUNTO, NULL
+     * altrove): uno prima di ogni scrittura e delle letture dei campi
+     * x e y dell'oggetto, che il motore degli oggetti della NMI può cambiare;
+     * sub_24b1 (z80_2xxx.c, non modificabile) è rifatta qui in linea */
+    PUNTO_GIRO(0x4ddd, 0x4e3a);
     uint8_t rif_x = M(RIF_X), rif_y = M(RIF_Y);
-    M(DIREZIONI) = 0;
+    M(DIREZIONI) = 0;                          /* 4E3A */
     uint16_t hl = SLOT_INIZIO, ix = OGGETTI;
+    int primo = 1;
     for (int i = NUM_SLOT; i > 0; i--, hl += SLOT_PASSO, ix += OGGETTO_PASSO) {
-        if (M(hl) < 0xc0)
+        PUNTO_GIRO(primo ? 0x4e3b : 0x4e46, 0x4e55);
+        primo = 0;
+        if (M(hl) < 0xc0) {
+            PUNTO_GIRO(0x4e7d, 0x4e86);
             continue;
+        }
         uint8_t c = 0;
-        uint8_t x = M(ix + 0x0e), y = M(ix + 0x15);
-        M(hl + 2) = x;
-        M(hl + 3) = y;
+        uint8_t x = M(ix + 0x0e);              /* 4E55 */
+        PUNTO_GIRO(0x4e56, 0x4e58);
+        M(hl + 2) = x;                         /* 4E58 */
+        PUNTO_GIRO(0x4e59, 0x4e61);
+        uint8_t y = M(ix + 0x15);              /* 4E61 */
+        PUNTO_GIRO(0x4e62, 0x4e64);
+        M(hl + 3) = y;                         /* 4E64 */
         int prestito_x = x < rif_x, prestito_y = y < rif_y;
         if (prestito_x) c |= 1;
         if (prestito_y) c |= 2;
@@ -150,12 +171,27 @@ void sub_4e31(struct z80 *z)
         z->a = (uint8_t)(y - rif_y);
         z->b = (uint8_t)i;
         z->c = c;
-        SET_HL(z, hl + 3);
-        z->f = (uint8_t)((z->f & ~1) | prestito_y);   /* riporto di sub d */
-        sub_24b1(z);
+        /* sub_24b1: rra col riporto di sub d, tre scritture */
+        uint8_t a24 = (uint8_t)((z->a >> 1) | (prestito_y << 7));
+        PUNTO_GIRO(0x4e65, 0x4e6a);
+        PUNTO_GIRO(0x24b1, 0x24b3);
+        M(hl + 4) = z->e;                      /* 24B3 */
+        PUNTO_GIRO(0x24b4, 0x24b5);
+        M(hl + 5) = a24;                       /* 24B5 */
+        PUNTO_GIRO(0x24b6, 0x24b7);
+        M(hl + 6) = z->c;                      /* 24B7 */
+        SET_HL(z, hl + 6);
+        z->e = z->b;
+        z->c++;
+        z->b = z->c;
+        z->a = 0;
+        PUNTO_GIRO(0x24b8, 0x24bd);
+        PUNTO_GIRO(0x4e6d, 0x4e75);
         /* dopo sub_24b1 (scf) i rla danno 1 << C d'ingresso */
-        M(DIREZIONI) |= (uint8_t)(1 << c);
+        M(DIREZIONI) |= (uint8_t)(1 << c);     /* 4E75 */
+        PUNTO_GIRO(0x4e76, 0x4e86);
     }
+    PUNTO_GIRO(0x4e86, 0x4e86);
     z->a = 1;
     SET_BC(z, OGGETTO_PASSO);
     z->d = rif_y;
@@ -179,19 +215,32 @@ void sub_4e31(struct z80 *z)
  * punto di uscita, come nel codice. */
 void sub_4e87(struct z80 *z)
 {
+    /* punti di sincronia per la NMI del giro dal boot (NEMICI_PUNTO, NULL
+     * altrove): c2a9 è incrementata dalla NMI, il punto sta prima della
+     * lettura; poi uno prima di ogni scrittura */
+    PUNTO_GIRO(0x4e87, 0x4e8a);
+    PUNTO_GIRO(0x0010, 0x0014);
     SET_HL(z, TABELLA_PTR);
     sub_0010(z);                        /* DE = parola, HL = c2ab */
     SET_DE(z, DE(z) * 4);
     z->a = z->d;
-    if (z->a == M(PASSO_ATTUALE))
+    if (z->a == M(PASSO_ATTUALE)) {
+        PUNTO_GIRO(0x4e8b, 0x4e91);
         return;
+    }
     if (z->a == 0x20) {
+        PUNTO_GIRO(0x4e92, 0x4e9c);
         uint16_t p = (uint16_t)(M(PTR_RIGHE) | (M(PTR_RIGHE + 1) << 8)) + 2;
         M(PTR_RIGHE) = p & 0xff;
         M(PTR_RIGHE + 1) = p >> 8;
         SET_DE(z, p);
+        PUNTO_GIRO(0x4e9d, 0x4ea0);
+    } else {
+        PUNTO_GIRO(0x4e92, 0x4ea0);
     }
-    M(PASSO_ATTUALE) = z->a;
+    M(PASSO_ATTUALE) = z->a;                   /* 4EA0 */
+    PUNTO_GIRO(0x4ea1, 0x4ee4);
+    PUNTO_GIRO(0x0010, 0x0014);
     uint8_t v = z->a - 1;
     z->c = (v & 0x18) >> 3;
     uint8_t passi = (v & 7) + 1;
@@ -223,8 +272,9 @@ void sub_4e87(struct z80 *z)
     z->a = (uint8_t)(limite - z->c);
     if (limite >= z->c)
         return;
-    z->a = M(STATO_GIOCO) |= z->e;
+    z->a = M(STATO_GIOCO) |= z->e;             /* 4EE4 */
     SET_HL(z, STATO_GIOCO);
+    PUNTO_GIRO(0x4ee5, 0x4ee5);
 }
 
 /* 0x452B: programma un canale di coppie (registro, valore).
@@ -237,17 +287,26 @@ void sub_4e87(struct z80 *z)
  * dell'incremento, HL dopo l'ultima coppia letta; BC e DE invariati. */
 void sub_452b(struct z80 *z)
 {
+    /* punti di sincronia per la NMI del giro dal boot (NEMICI_PUNTO, NULL
+     * altrove): uno prima di ogni scrittura in RAM; rst 08 e rst 10 di
+     * 4531 e 4535 cadono fra la prima e la seconda scrittura */
     uint16_t ix = z->ix;
-    M(ix + 0) = z->d;
+    PUNTO_GIRO(0x452b, 0x452b);
+    M(ix + 0) = z->d;                          /* 452B */
     uint16_t rec = (uint16_t)(HL(z) + 3 * z->b);   /* rst 08 + add hl,de */
     uint8_t coppie = leggi(rec);
     uint16_t dest = (uint16_t)(leggi(rec + 1) | (leggi(rec + 2) << 8));
     uint8_t contatore = M(ix + 2);
-    M(ix + 2) = (uint8_t)(contatore + 1);
-    if (contatore == M(ix + 3))
-        M(ix + 2) = 0;
+    PUNTO_GIRO(0x452e, 0x4539);
+    PUNTO_GIRO(0x0008, 0x0014);
+    M(ix + 2) = (uint8_t)(contatore + 1);      /* 4539 */
+    if (contatore == M(ix + 3)) {
+        PUNTO_GIRO(0x453c, 0x4541);
+        M(ix + 2) = 0;                         /* 4541 */
+    }
     uint16_t lista = (uint16_t)(M(ix + 4) | (M(ix + 5) << 8));
     uint16_t p = (uint16_t)(lista + 2 * contatore);
+    int primo = 1;
     for (unsigned resto = coppie ? coppie : 256; resto > 0; ) {
         uint8_t reg = leggi(p);
         uint8_t val = leggi(p + 1);
@@ -256,11 +315,20 @@ void sub_452b(struct z80 *z)
             p = lista;
             continue;
         }
-        M(dest) = reg;
-        M(dest + 1) = val;
+        if (primo) {
+            PUNTO_GIRO(0x4545, 0x4563);
+            primo = 0;
+        } else {
+            PUNTO_GIRO(0x4566, 0x4568);
+            PUNTO_GIRO(0x4552, 0x4563);
+        }
+        M(dest) = reg;                         /* 4563 */
+        PUNTO_GIRO(0x4564, 0x4565);
+        M(dest + 1) = val;                     /* 4565 */
         dest += 2;
         resto--;
     }
+    PUNTO_GIRO(0x4566, 0x456d);
     z->a = contatore;
     SET_HL(z, p);
 }

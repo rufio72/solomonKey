@@ -152,42 +152,62 @@ static void scrivi_ram(uint16_t a, uint8_t v)
  * bit 5 di (IY+0), fase 2 e azzera il byte puntato dalla tabella 488D. */
 void sub_5693(struct z80 *z)
 {
+    /* punti di sincronia per la NMI del giro dal boot (NEMICI_PUNTO, NULL
+     * altrove): uno prima di ogni scrittura in RAM */
     if (!(M(z->ix + 0x01) & 0x08)) {           /* 5693-5697 */
         z->a = M(z->ix + 0x0d);                /* 5699 */
         if (z->a < 0x20)                       /* 569C-569E */
             return;
+        PUNTO_GIRO(0x5693, 0x569f);
         sub_5928(z);                           /* 569F */
         if (!(M(HL(z)) & 0x80)) {              /* 56A2-56A4 */
+            PUNTO_GIRO(0x56a2, 0x56a6);
             M(z->iy + 0x1d) = 0x02;            /* 56A6 */
             return;
         }
+        PUNTO_GIRO(0x56a2, 0x56ab);
         sub_7379(z);                           /* 56AB */
         if (!NEMICI_RIPORTO_ACCESO(z))         /* 56AE ret nc */
             return;
+        PUNTO_GIRO(0x56ae, 0x56af);
         M(HL(z)) = 0x80;                       /* 56AF */
+        PUNTO_GIRO(0x56b0, 0x56b1);
         M(z->ix + 0x0e) = z->a;                /* 56B1 */
+        PUNTO_GIRO(0x56b2, 0x56b4);
         sub_58cf(z);                           /* 56B4 */
+        PUNTO_GIRO(0x56b7, 0x56b7);
         M(z->ix + 0x0d) = 0x00;                /* 56B7 */
+        PUNTO_GIRO(0x56bb, 0x56bd);
         if (!NEMICI_RIPORTO_ACCESO(z))         /* 56BB jr c,56c7 */
             return;
     } else {
         z->a = M(z->ix + 0x0d);                /* 56BE */
         if (z->a < 0x20)                       /* 56C1-56C3 */
             return;
+        PUNTO_GIRO(0x5693, 0x56c4);
         sub_5917(z);                           /* 56C4 */
     }
+    PUNTO_GIRO(0x56c7, 0x56c7);
     sub_5928(z);                               /* 56C7 */
-    if (M(HL(z)) & 0x80)                       /* 56CA-56CC */
+    if (M(HL(z)) & 0x80) {                     /* 56CA-56CC */
+        PUNTO_GIRO(0x56ca, 0x56ce);
         M(z->ix + 0x01) |= 0x10;               /* 56CE */
+    }
+    PUNTO_GIRO(0x56ca, 0x56d2);
     M(z->ix + 0x01) &= ~0x08;                  /* 56D2 */
+    PUNTO_GIRO(0x56d3, 0x56d6);
     M(z->iy) |= 0x20;                          /* 56D6 */
+    PUNTO_GIRO(0x56d7, 0x56da);
     M(z->iy + 0x1d) = 0x02;                    /* 56DA */
     z->a = M(z->ix + 0x0e);                    /* 56DE */
     SET_HL(z, OGGETTI_488D);                   /* 56E1 */
+    PUNTO_GIRO(0x56de, 0x56e7);
+    PUNTO_GIRO(0x0008, 0x0014);
     sub_0008(z);                               /* 56E4 rst 8 */
     sub_0010(z);                               /* 56E5 rst 10 */
     z->a = 0;                                  /* 56E6 */
     scrivi_ram(DE(z), z->a);                   /* 56E7 */
+    PUNTO_GIRO(0x56e8, 0x56e8);
 }
 
 /* ------------------------------------------------------------------ */

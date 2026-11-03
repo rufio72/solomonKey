@@ -6,11 +6,13 @@
  *     (giro_boot.sh); accanto serve il dump out/giroboot_602.bin
  *   ingressi.txt: out/ingressi_replay.txt (estrai_ingressi.sh)
  * Si ferma, con codice 1, alla prima attività il cui corpo non è tradotto
- * (oggi: CORPO 07 al frame 1188, brief 45); vedi GIRO.md. */
+ * (oggi nessuna fino al frame 2410: saldatura all'oracolo storico, brief 47);
+ * vedi GIRO.md. */
 #include <stdio.h>
 #include <stdlib.h>
 
 int macchina_esegui(const char *oracolo, const char *disp, const char *ingr, long fine);
+extern int giro_dal_boot;        /* nemici.c: accende i punti PUNTO_GIRO */
 
 int main(int argc, char **argv)
 {
@@ -20,5 +22,6 @@ int main(int argc, char **argv)
         return 2;
     }
     long fine = argc > 4 ? atol(argv[4]) : -1;
+    giro_dal_boot = 1;
     return macchina_esegui(argv[1], argv[2], argv[3], fine);
 }

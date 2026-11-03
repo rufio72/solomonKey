@@ -213,18 +213,24 @@ static void attivita_11_456e(uint8_t slot)
 static void attivita_14_44b5(uint8_t slot)
 {
     (void)slot;
+    /* punti di sincronia (giro dal boot, NULL altrove): una NMI prima delle
+     * letture di c09b e c464 le cambia; poi uno per ogni chiamata di 452B */
+    PUNTO_GIRO(0x44b5, 0x44b8);
     uint8_t c = M(0xc09b);                     /* 44B5-44B8 */
+    PUNTO_GIRO(0x44b9, 0x44bc);
     uint8_t d = M(0xc464);                     /* 44B9-44BC */
     uint16_t ix = 0xc09d;                      /* 44BD */
     struct z80 z = {0};
     for (uint8_t b = 0; b != 4; b++) {         /* 44C1, 44DD-44E1 */
         int acceso = c & 0x01;                 /* 44C3 rrc c */
         c = (uint8_t)((c >> 1) | (c << 7));
+        PUNTO_GIRO(0x44bd, 0x44d3);
         if (acceso && (uint8_t)(d - M(ix)) >= M(ix + 1)) {    /* 44C7-44CE */
             z.ix = ix; z.b = b; z.d = d;
             SET_HL(&z, 0x451c);                /* 44D0 */
             sub_452b(&z);                      /* 44D3 */
         }
+        PUNTO_GIRO(0x44d6, 0x44e1);
         ix = (uint16_t)(ix + 6);               /* 44D6-44DA */
     }
     ix = 0xc0b7;                               /* 44E3 */
@@ -233,6 +239,7 @@ static void attivita_14_44b5(uint8_t slot)
         uint8_t b = 0;                         /* un solo canale (44E7, 450C) */
         int acceso = c & 0x01;                 /* 44ED rrc c */
         c = (uint8_t)((c >> 1) | (c << 7));
+        PUNTO_GIRO(0x44e3, 0x44fd);
         if (acceso && (uint8_t)(d - M(ix)) >= M(ix + 1)) {    /* 44F1-44F8 */
             /* il flag Z all'uscita di 452B è quello del `cp (ix+3)` a 453C
              * (push af / pop af): contatore prima dell'incremento == limite */
@@ -245,7 +252,9 @@ static void attivita_14_44b5(uint8_t slot)
         }
     }
     /* 4511-4515: sette rrca = una rotazione a sinistra */
+    PUNTO_GIRO(0x4500, 0x4517);
     M(0xc0b5) = (uint8_t)((c << 1) | (c >> 7));    /* 4517 */
+    PUNTO_GIRO(0x4518, 0x451b);
 }
 
 /* ------------------------------------------------------------------ */
@@ -345,7 +354,10 @@ attivita_fn corpo_attivita_replay[SCHED_CODICI] = {
     [0x03] = attivita_03_4bc6,
     [0x06] = attivita_06_75e7,
     [0x07] = attivita_07_2ccd,
+    [0x08] = attivita_08_7c98,
     [0x0a] = attivita_0a_4da2,
+    [0x0b] = attivita_0b_2c27,
+    [0x0c] = attivita_0c_7bf6,
     [0x0d] = attivita_0d_5c8e,
     [0x0e] = attivita_0e_63a4,
     [0x10] = attivita_10_457b,

@@ -96,18 +96,51 @@ void sub_4f0f(struct z80 *z)
 }
 
 /* ------------------------------------------------------------------ */
+/* 249E come sub_249e (z80_2xxx.c, non modificabile) ma con i punti di
+ * sincronia del giro dal boot fra le quattro scritture: (HL), (HL+3),
+ * (HL+4), (HL+5). `primo` = prima delle 17 chiamate di 4DBC. */
+static void sposta_249e(struct z80 *z, int primo)
+{
+    if (primo) {
+        PUNTO_GIRO(0x4db3, 0x4dbc);
+    } else {
+        PUNTO_GIRO(0x24af, 0x24b0);
+        PUNTO_GIRO(0x4dbc, 0x4dbf);
+    }
+    PUNTO_GIRO(0x249e, 0x24a0);
+    uint16_t hl = HL(z);
+    M(hl) = (uint8_t)(M(hl) + z->c);           /* 24A0 */
+    uint16_t parola = (uint16_t)((M(hl + 3) | (M(hl + 4) << 8)) + ((z->d << 8) | z->c));
+    PUNTO_GIRO(0x24a1, 0x24a6);
+    M(hl + 3) = parola & 0xff;                 /* 24A6 */
+    PUNTO_GIRO(0x24a7, 0x24aa);
+    M(hl + 4) = parola >> 8;                   /* 24AA */
+    PUNTO_GIRO(0x24ab, 0x24ae);
+    z->a = M(hl + 5) = (uint8_t)(M(hl + 5) + z->c);   /* 24AE */
+    SET_HL(z, hl + 5 + DE(z));
+}
+
 /* 0x4DAD, fase 0: sposta i 17 slot di c2b7 (sub_249e da c2c9, passo 0x18),
  * conta in c2af gli slot con i bit 7 e 4 accesi (23 slot da c2c1), poi
- * sub_4e87, sub_4e31 e, se c2b5 non è nullo, sub_4dee. Fase successiva. */
+ * sub_4e87, sub_4e31 e, se c2b5 non è nullo, sub_4dee. Fase successiva.
+ * Punti di sincronia (lotto H4b3): c2b7 è incrementato dalla NMI, quindi
+ * il punto 4DB1 sta fra la lettura e l'azzeramento. */
 static void sub_4dad(struct z80 *z)
 {
+    PUNTO_GIRO(0x4dad, 0x4db0);
     z->a = M(0xc2b7);                          /* 4DAD-4DB0 */
+    PUNTO_GIRO(0x4db1, 0x4db1);
     M(0xc2b7) = 0x00;                          /* 4DB1 */
     z->c = z->a;                               /* 4DB3 */
     SET_HL(z, 0xc2c9);                         /* 4DB6 */
     SET_DE(z, 0x0013);                         /* 4DB9 */
-    for (z->b = NUM_SLOT; z->b; z->b--)
-        sub_249e(z);                           /* 4DBC-4DBF djnz */
+    int primo = 1;
+    for (z->b = NUM_SLOT; z->b; z->b--) {
+        sposta_249e(z, primo);                 /* 4DBC-4DBF djnz */
+        primo = 0;
+    }
+    PUNTO_GIRO(0x24af, 0x24b0);
+    PUNTO_GIRO(0x4dbf, 0x4dd7);
     uint16_t hl = SLOT_C2C1;                   /* 4DC1 */
     z->c = 0x00;                               /* 4DC4 ld bc,1700 */
     for (z->b = 0x17; z->b; z->b--) {
@@ -119,13 +152,18 @@ static void sub_4dad(struct z80 *z)
     SET_DE(z, SLOT_PASSO);
     z->a = z->c;                               /* 4DD6 */
     M(0xc2af) = z->a;                          /* 4DD7 */
+    PUNTO_GIRO(0x4dd8, 0x4dda);
     sub_4e87(z);                               /* 4DDA */
+    PUNTO_GIRO(0x4ddd, 0x4ddd);
     sub_4e31(z);                               /* 4DDD */
+    PUNTO_GIRO(0x4de0, 0x4de5);
     SET_HL(z, 0xc2b5);                         /* 4DE0 */
     z->a = M(0xc2b5);                          /* 4DE3 */
     if (z->a)                                  /* 4DE4 or a */
         sub_4dee(z);                           /* 4DE5 call nz */
+    PUNTO_GIRO(0x4de8, 0x4dec);
     M(FASE_C2B8)++;                            /* 4DE8-4DEC pop hl, inc (hl) */
+    PUNTO_GIRO(0x4ded, 0x4ded);
 }
 
 /* 0x4632, fase 1: fase successiva; se c459 ha il bit 5 e uno dei bit 6-7,
@@ -158,6 +196,10 @@ static void sub_4632(struct z80 *z)
 
 /* Punto di sincronia per la NMI del replay (nemici.h, brief 26). */
 void (*nemici_punto)(uint16_t da, uint16_t a);
+
+/* Acceso da gioco_libero.c: i punti PUNTO_GIRO (lotto H4b3) servono solo al
+ * giro dal boot e nel replay storico non agiscono, che resta com'era. */
+int giro_dal_boot = 0;
 
 /* 0x4EE6, fase 2: per ognuno dei 17 slot (IX da c2c1) con l'oggetto (IY da
  * c4fe) a (IY+0) >= 0xc0 chiama il gestore per tipo 4F0F; poi la fase
@@ -193,6 +235,8 @@ void attivita_0a_4da2(uint8_t slot)
 {
     (void)slot;
     struct z80 z = {0};
+    PUNTO_GIRO(0x4da2, 0x4da6);                /* ingresso, fino al rst 38 (H4b3) */
+    PUNTO_GIRO(0x0038, 0x0042);
     z.a = M(FASE_C2B8);                        /* 4DA2 */
     z.e = z.a;                                 /* 4DA5 */
     uint16_t dest = nemici_rst38(&z, 0x4DA6, rst38_4DA6,

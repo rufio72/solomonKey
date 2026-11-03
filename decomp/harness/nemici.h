@@ -61,6 +61,14 @@ extern void (*nemici_punto)(uint16_t da, uint16_t a);
 #define NEMICI_PUNTO(da, a) \
     do { if (nemici_punto) nemici_punto((da), (a)); } while (0)
 
+/* Come NEMICI_PUNTO ma attivo solo nel giro dal boot (lotto H4b3, brief 47):
+ * i punti aggiunti alle routine già verificate del motore dei nemici e ai
+ * corpi 14 e 0A non cambiano l'esito del replay storico. gioco_libero.c
+ * accende giro_dal_boot. */
+extern int giro_dal_boot;
+#define PUNTO_GIRO(da, a) \
+    do { if (giro_dal_boot && nemici_punto) nemici_punto((da), (a)); } while (0)
+
 /* Corpo dell'attività 0A (nemici.c). */
 void attivita_0a_4da2(uint8_t slot);
 
@@ -79,6 +87,11 @@ void attivita_06_75e7(uint8_t slot);
 
 /* Corpo 07 (attivita_attract07*.c, lotto H4b2). */
 void attivita_07_2ccd(uint8_t slot);
+
+/* Corpi 08, 0C e 0B (attivita_attract08.c, lotto H4b3). */
+void attivita_08_7c98(uint8_t slot);
+void attivita_0c_7bf6(uint8_t slot);
+void attivita_0b_2c27(uint8_t slot);
 
 /* 4B98, chiusura dell'oggetto IX (attivita.c). */
 void sub_4b98(uint16_t ix);

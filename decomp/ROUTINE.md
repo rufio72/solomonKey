@@ -71,6 +71,7 @@ i frame sono quelli della cattura riuscita.
 | 0x2BC9 | sub_2bc9 | z80_2xxx.c | 46 | test RAM d'avvio a nibble: pattern rotanti 1..80 (riempimento sub_2c1a), rilettura a coppie byte/nibble; riporto d'uscita = esito, emulato su F | tradotta | — | — | non registrata nel banco: la routine testa tutta la RAM, dura molti frame e la NMI la attraversa sempre, snap.lua scarta ogni occorrenza (come lo smistatore 08CE del lotto 7, non catturabile). Logica identica a sub_2bf3 (verificata) salvo il confronto a nibble |
 | 0x2BF3 | sub_2bf3 | z80_2xxx.c | 39 | test RAM d'avvio a byte intero (come 2BC9), lettura a vuoto di e602 per byte (watchdog) | verificata | 2 | titolo, titolo_n2 | occ 1 f34, occ 2 f67 (siti 2843/284F, prima dell'abilitazione NMI; scrivono) |
 | 0x2C1A | sub_2c1a | z80_2xxx.c | 13 | riempie BC byte da HL col pattern rotante D, lettura a vuoto di e602 per byte (watchdog); l'ingresso è anche il ciclo | verificata | 2 | titolo, titolo_n2 | occ 1 f3, occ 2 f4 (scrivono) |
+| 0x2D8A | sub_2d8a | z80_2dxx.c | 12 | scambia i 49 byte di c237-c267 con quelli di c268-c298 (ciclo 2D92-2D9A); uscita B = 0, HL = c268, DE = c299 | verificata | 2 | gioco, att0B | gioco f1500 (scrive, 14 byte diversi); att0B f2300 banale (0 byte diversi: i due blocchi coincidono); `gioco 2 n2` non esiste; chiamata da 0B (2C34), 6455 e 6A15 (H4c) |
 | 0x2E11 | sub_2e11 | z80_2xxx.c | 13 | c19e = 0 e confronto della stanza corrente c248 con c249 (Z d'uscita emulato su F per il chiamante) | tradotta | 2 | titolo, gioco | titolo f1305, gioco f1855; scrittura sempre banale (c19e già 0 anche con N=2; tardo e N=3 senza occorrenze): ramo non banale non catturato |
 | 0x2E90 | sub_2e90 | z80_2xxx.c | 12 | cancello a conto alla rovescia: dec (HL); se c467 ≥ C azzera c467 e rincrementa (HL) | verificata | 2 | titolo, gioco | titolo f1196, gioco f1702 (scrivono) |
 | 0x2F57 | sub_2f57 | z80_2xxx.c | 29 | carico del fondale di gioco: sub_3f88 (HL = 80D3), azzera d5c0-d61f, sub_4398 sui gestori 1 e 0, c467 = 0 | verificata | 2 | titolo, gioco | titolo f1292, gioco f1667 (scrivono) |
@@ -100,6 +101,7 @@ i frame sono quelli della cattura riuscita.
 | 0x36BD | sub_36bd | z80_3xxx.c | 6 | ripete sub_2402 finché A non arriva a 0 | verificata | 2 | titolo, titolo_n2 | solo titolo (s = g = 0): occorrenze 1 (f152) e 2 (f153) |
 | 0x36C3 | sub_36c3 | z80_3xxx.c | 45 | 4 ldir da ROM: 80D3→e400 (0x200), 8199→c96e, 80D3→c994, 82A7→c9b4 | tradotta | 1 | titolo | solo titolo f603, occorrenza unica entro 6000 frame (N=2 e gioco falliti) |
 | 0x36F0 | sub_36f0 | z80_3xxx.c | 25 | pixel (H, L) → cella della griglia FG: HL = c0bd+offset, DE = offset | verificata | 2 | gioco, tardo | gioco f2402, tardo f4002; solo registri |
+| 0x37B4 | sub_37b4 | z80_38xx.c | 19 | crea un oggetto del quadro: D0 in (HL), coordinate della cella A (4B0E), record C (472E), stato A0 con E = B e BC = 0500 (4AF6), (IX+03) da 4722, 4767; DE conservato | verificata | 4 | titolo, titolo_n2, gioco, gioco_n2 | titolo f1000 (25 byte diversi), gioco f1700; chiamata da 3709 (corpo 07 fase 18) |
 | 0x380A | sub_380a | z80_3xxx.c | 8 | 16 byte 0xff da HL | verificata | 2 | titolo, gioco | titolo f1191 (occorrenza 2), gioco f1564; scrivono entrambe |
 | 0x3812 | sub_3812 | z80_38xx.c | 23 | espande una mappa di bit di 24 righe per 8 colonne da IX nella griglia c0cd: scrive C dove il bit è 1 | verificata | 2 | titolo, gioco | titolo f1190, gioco f1564 (scrivono) |
 | 0x3A1C | sub_3a1c | z80_3xxx.c | 18 | due cifre ASCII di A in D, E; A = D | verificata | 3 | titolo, gioco, titolo_decine | titolo f1189, gioco f1546 (occorrenza 5), A = 01; ramo decine catturato con `SNAP_COND='a>=#10'` in titolo f3406 (A = 0C) |
@@ -160,6 +162,12 @@ coincidenti. 01 e 10 stanno in `harness/attivita_01_10.c`.
 | 01 | 0x48D1 | attivita_01_48d1 | cella davanti a Dana (c82e) secondo (IY+2C) e (IY+29): 49AE se < 80 (slot = esito, 25 con A = 4 e B = 0), altrimenti 4938 e slot 02 | tradotta (replay) |
 | 0A | 0x4DA2 | attivita_0a_4da2 | `rst 38` su c2b8 verso le fasi 4DAD / 4632 / 4EE6 del motore dei nemici (`nemici.c`, lotto N1) | tradotta (replay) |
 | 10 | 0x457B | attivita_10_457b | 4592 con IY = c82e e IX = c49e: riporto acceso → slot 0, spento → c466 = 0 e slot 11 | tradotta (replay) |
+| 06 | 0x75E7 | attivita_06_75e7 | macchina a fasi sul contatore c1ae (`rst 20` a 75EC): primo quadro 78E0, attese 763E, preparazione 760B; fasi 5 (7A0B) e 8 (7B3B) non tradotte | tradotta (giro) |
+| 07 | 0x2CCD | attivita_07_2ccd | macchina a fasi sul contatore c19d (`rst 20` a 2CD2, 26 voci) dell'attract: fasi 0-12 (lotto H4b2, `attivita_attract07*.c`) e 13-25 (H4b3, `07c`, `07d`); la 16 (2D9D) mai eseguita | tradotta (giro) |
+| 08 | 0x7C98 | attivita_08_7c98 | quadro di fine partita: 75AA, 7C84, suono 3E, tre stringhe, fondale 322A, 7ECA; `rst 20` su e605 verso 7D6A (le altre 7 voci non tradotte) | tradotta (giro) |
+| 0B | 0x2C27 | attivita_0b_2c27 | ritorno al quadro di partenza: azzera c234-c236, 33EB, scambio 2D8A, 673F, d440/d040, posta 1F e 07 | tradotta (giro) |
+| 0C | 0x7BF6 | attivita_0c_7bf6 | schermata dei crediti: stringa 7C58/7C6E a d646, cifre di c04c; con c052 & 3 = 1 o 2 toglie i crediti, avvia la partita e posta 0B | tradotta (giro) |
+| 1F | 0x43C8 | attivita_1f_43c8 | copia le tabelle dei canali c09d e c0b7 e passa a 14 | tradotta (giro) |
 
 ## Motore dei nemici (lotto N1)
 
@@ -829,3 +837,5 @@ assegna codice all'etichetta, le istruzioni che la seguono sono coperte).
 `sub_0d38` non ha corpo.
 
 Lotto H4b2 (brief 46): `sub_3adf` (2 catture, titolo f1196 e f1197); banco a 305 voci e 1272 catture.
+
+Lotto H4b3 (brief 47): `sub_2d8a` (2 catture, una banale) e `sub_37b4` (4 catture); banco a 307 voci e 1278 catture.

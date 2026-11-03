@@ -33,6 +33,7 @@ attivita_fn corpo_attivita[SCHED_CODICI];
 extern attivita_fn corpo_attivita_replay[SCHED_CODICI];
 
 #define FRAME_DUMP   602       /* frame del dump completo (giro_boot.sh) */
+#define FRAME_SALDATURA 2410   /* frame della saldatura all'oracolo storico (H4b3) */
 #define LIMITE_PUNTI 40000     /* punti fra due NMI: ben oltre un frame di Z80 */
 #define MAX_FRAME    8192
 
@@ -173,8 +174,10 @@ static void gancio_porta(uint16_t a, uint8_t v)
 
 /* Confronto byte per byte col dump di MAME del frame, prima della NMI di
  * quel frame: richiude il buco delle esclusioni (GIRO.md). Stampa i primi
- * 32 byte diversi; restituisce il loro numero, o -1 se il dump manca. */
-static int diff_dump(long frame)
+ * 32 byte diversi; restituisce il loro numero, o -1 se il dump manca. Con
+ * `pila` acceso dbc0-dbff entra nel confronto (restano fuori solo c040-c043
+ * e cf00-cfff): vale dalla saldatura, quando la pila di avvio non c'è più. */
+static int diff_dump(long frame, int pila)
 {
     char nome[600];
     snprintf(nome, sizeof nome, "%s_%ld.bin", prefisso, frame);
@@ -188,7 +191,9 @@ static int diff_dump(long frame)
     fclose(f);
     int tot = 0, stampati = 0;
     for (unsigned a = 0xc000; a < 0xe600; a++) {
-        if (escluso(a) || ram[a - 0xc000] == mame[a - 0xc000])
+        if (ram[a - 0xc000] == mame[a - 0xc000])
+            continue;
+        if (pila ? ((a >= 0xc040 && a <= 0xc043) || (a >= 0xcf00 && a <= 0xcfff)) : escluso(a))
             continue;
         tot++;
         if (stampati++ < 32)
@@ -199,11 +204,28 @@ static int diff_dump(long frame)
 
 static void sanita(void)
 {
-    int tot = diff_dump(FRAME_DUMP);
+    int tot = diff_dump(FRAME_DUMP, 0);
     if (tot < 0)
         return;
     printf("SANITA %d: byte diversi in c000-e5ff (escluse c040-c043, cf00-cfff, dbc0-dbff): "
            "%d, %s\n", FRAME_DUMP, tot, tot ? "DIVERSO" : "coincide");
+    if (tot) {
+        nmi_divergenti++;
+        ferma(1);
+    }
+}
+
+/* Saldatura al frame 2410: il boot si salda all'oracolo storico 2410-5499.
+ * La RAM del C prima della NMI del frame coincide col dump di MAME
+ * (out/giroboot_2410.bin, identico a replay_2410.bin) escluse solo le
+ * zone c040-c043 (IX/IY salvati dalla NMI) e cf00-cfff (pila). */
+static void saldatura(void)
+{
+    int tot = diff_dump(FRAME_SALDATURA, 1);
+    if (tot < 0)
+        return;
+    printf("SALDATURA %d: byte diversi in c000-e5ff (escluse c040-c043, cf00-cfff): "
+           "%d, %s\n", FRAME_SALDATURA, tot, tot ? "DIVERSO" : "coincide");
     if (tot) {
         nmi_divergenti++;
         ferma(1);
@@ -220,6 +242,8 @@ static void esegui_nmi(const struct riga_f *r)
     nmi_totali++;
     if (r->frame == FRAME_DUMP)
         sanita();
+    if (r->frame == FRAME_SALDATURA)
+        saldatura();
     if (r->frame >= 0 && r->frame < MAX_FRAME) {   /* porte vive del frame */
         ram[0xe600 - 0xc000] = ingressi[r->frame][0];
         ram[0xe601 - 0xc000] = ingressi[r->frame][1];
@@ -392,7 +416,7 @@ static void esegui_nmi_ev(const struct evento *n)
             printf("DIVERGENZA frame %ld: hash C %08X MAME %08X; ritorno NMI oracolo %04X "
                    "(spedidore); ultima D %02X %02X\n", r->frame, h, r->hash, r->ritorno,
                    ultima_d ? ultima_d->slot : 0xff, ultima_d ? ultima_d->codice : 0xff);
-            if (diff_dump(r->frame) >= 0)
+            if (diff_dump(r->frame, 0) >= 0)
                 printf("  (confronto con il dump del frame %ld)\n", r->frame);
             ferma(1);
         }
