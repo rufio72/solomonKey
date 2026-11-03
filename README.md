@@ -124,10 +124,21 @@ YM2149 emulator and compared against the original's — has been passed.
   `GIRO COMPLETO 0-5499: saldatura 0 byte, spedidore 0 divergenze,
   30 a metà attività (attese), 13 frame resi con hash coincidenti`
   (`decomp/giro_completo.sh`).
-- **Next up:** H5-H7 — input, wiring the translated sound driver to SDL
-  audio, and packaging — then classifying the remaining mid-activity NMI
-  divergences, and finally the readability rewrite, module by module,
-  with the harness and the full run as the safety net.
+- **Playable — the game runs on the keyboard.** H5 added `gioca`
+  (`decomp/harness/gioca`): cold boot, SDL2 window, keys mapped on the
+  real port bits from the MAME driver (arrows/WASD, Z jump, X magic,
+  5 coin, 1 start; player 2 on IJKL+N/M), readable DIP-switch options,
+  and record/replay of input files — any played match can become a
+  future oracle. In `--oracolo` mode it replays the recorded match and
+  the final frame's framebuffer hash is **identical to MAME's**; free
+  mode is deterministic and plays the same match through without a
+  single stop (timing differs slightly from MAME by design: no Z80
+  cycle model, same criterion the audio chain ratified).
+- **Next up:** H6 (wiring the translated sound driver to SDL audio,
+  in progress) and H7 (packaging) — then classifying the remaining
+  mid-activity NMI divergences, and finally the readability rewrite,
+  module by module, with the harness and the full run as the safety
+  net.
 
 ## Repository layout
 
