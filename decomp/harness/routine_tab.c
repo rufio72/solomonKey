@@ -125,6 +125,7 @@ const struct voce_routine tabella_routine[] = {
     { "0x3A1C", sub_3a1c, 0, 0 },
     { "0x3A2E", sub_3a2e, 0, 0 },
     { "0x3A54", sub_3a54, 0, 0 },
+    { "0x3ADF", sub_3adf, 0, 0 },
     { "0x3F10", sub_3f10, 0xc061, 0xc067 },
     { "0x3CC1", sub_3cc1, 0, 0 },
     { "0x3CC2", sub_3cc2, 0, 0 },

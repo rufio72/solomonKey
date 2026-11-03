@@ -40,6 +40,7 @@ void sub_2457(struct z80 *z);
 void sub_34d4(struct z80 *z);
 void sub_380a(struct z80 *z);
 void sub_3a2e(struct z80 *z);
+void sub_3adf(struct z80 *z);
 void sub_4722(struct z80 *z);
 void sub_4dee(struct z80 *z);
 void sub_4e31(struct z80 *z);

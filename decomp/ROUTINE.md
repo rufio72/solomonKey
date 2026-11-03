@@ -105,6 +105,7 @@ i frame sono quelli della cattura riuscita.
 | 0x3A1C | sub_3a1c | z80_3xxx.c | 18 | due cifre ASCII di A in D, E; A = D | verificata | 3 | titolo, gioco, titolo_decine | titolo f1189, gioco f1546 (occorrenza 5), A = 01; ramo decine catturato con `SNAP_COND='a>=#10'` in titolo f3406 (A = 0C) |
 | 0x3A2E | sub_3a2e | z80_3xxx.c | 38 | coppia B, C dalle tabelle ROM 8578/858E secondo A | verificata | 2 | titolo, gioco | titolo f1483 (occorrenza 3, A=B7), gioco f1856 (A=01); solo registri |
 | 0x3A54 | sub_3a54 | z80_3xxx.c | 41 | riquadro di 2×2 tile alla cella (D=riga, E=colonna): tile B..B+3 sul piano d400 e attributo C nelle 4 posizioni del piano d000; uscita B += 3, A −= 3, HL e DE conservati | verificata | 2 | titolo, gioco | titolo f1292, gioco f2419 (scrivono) |
+| 0x3ADF | sub_3adf | z80_38xx.c | 12 | riga di 32 coppie del tabellone: C da 4 a 7 in (HL), E nel piano degli attributi (bit 2 di H spento), HL += 32; uscita B = 0, C = 4 | verificata | 2 | titolo | titolo f1196 e f1197 (occorrenze 1 e 2, scrivono via HL); chiamata da 3A7D (corpo 07 fase 7) |
 | 0x3F10 | sub_3f10 | z80_3xxx.c | 41 | tempo BCD c093-c095 in 6 cifre a c061, terminatore ff | verificata | 2 | titolo, gioco | titolo f1196, gioco f2403 |
 | 0x3F88 | sub_3f88 | z80_38xx.c | 11 | copia il record 6 della tabella 3574 da HL (sub_3569) e accende il bit 6 di c044 | verificata | 2 | titolo, gioco | titolo f1189, gioco f1667 (scrivono) |
 | 0x4398 | sub_4398 | z80_4xxx.c | 33 | record 43B9/43C5 (bit 4 di A): OR del bit in c09b/c0b5, (c464) alla parola, 0 alla parola+2 | verificata | 2 | titolo, gioco | titolo f1292, gioco f1667 (scrivono) |
@@ -826,3 +827,5 @@ Totale lotto: 95 catture; banco a 304 voci.
 di sola etichetta `l0db2`, `l0e43`, `l0f04`, `l1077`, `l1088` (gcov non
 assegna codice all'etichetta, le istruzioni che la seguono sono coperte).
 `sub_0d38` non ha corpo.
+
+Lotto H4b2 (brief 46): `sub_3adf` (2 catture, titolo f1196 e f1197); banco a 305 voci e 1272 catture.

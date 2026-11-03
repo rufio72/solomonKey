@@ -280,3 +280,24 @@ void sub_3fb2(struct z80 *z)
     z->b = 0;
     z->c = c_in;                               /* pop bc */
 }
+
+/* 0x3ADF (3A82, 3AC8): riga di 32 coppie (tile, attributo) per il tabellone.
+ * Ingresso: HL, E. Per 32 volte scrive C in (HL) (C parte da 4 e dopo 7
+ * torna a 4), E nel piano degli attributi (HL con il bit 2 di H spento) e
+ * avanza HL. Uscita: B = 0, C = 4, HL += 32. */
+void sub_3adf(struct z80 *z)
+{
+    uint16_t hl = HL(z);
+    uint8_t c = 0x04;
+    for (int i = 0; i < 0x20; i++) {
+        M(hl) = c;
+        M(hl & 0xfbff) = z->e;
+        hl++;
+        c++;
+        if (c & 0x08)
+            c = 0x04;
+    }
+    z->b = 0;
+    z->c = c;
+    SET_HL(z, hl);
+}

@@ -77,6 +77,9 @@ extern void (*attract_punto_largo)(uint16_t da, uint16_t a);
 void attivita_1f_43c8(uint8_t slot);
 void attivita_06_75e7(uint8_t slot);
 
+/* Corpo 07 (attivita_attract07*.c, lotto H4b2). */
+void attivita_07_2ccd(uint8_t slot);
+
 /* 4B98, chiusura dell'oggetto IX (attivita.c). */
 void sub_4b98(uint16_t ix);
 

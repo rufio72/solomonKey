@@ -15,8 +15,8 @@ ogni ciclo nei brief in `compiti/`.
 | …di cui `verificata` (doppia cattura MAME non forzata) | 286 |
 | …di cui `tradotta` con nota (senza cattura o cattura singola) | 61 |
 | …di cui `tradotta (replay)` | 43 |
-| Banco di prova (`harness --tutte`) | 304 voci, 1270 catture, 0 fallite |
-| Catture `regs` in `decomp/out/` | 1270 |
+| Banco di prova (`harness --tutte`) | 305 voci, 1272 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 1272 |
 | Stub residui del motore nemici | 0 (motore completo, `nemici_stub.c` tolto) |
 | Destinazioni mai osservate | 59 documentate in `decomp/ZONE-MAI-ESEGUITE.md`: 53 `DATO`, 0 `MORTO`, 6 `RAGGIUNGIBILE` (5 con ricetta di sveglia provata); le altre 5 delle 64 originali sono ormai tradotte |
 
@@ -171,8 +171,12 @@ ogni ciclo nei brief in `compiti/`.
    macchina, corpi 1F e 06 tradotti (`attivita_attract.c`), strumento
    `registra_r.sh` e sentinella del registro R (0 letture nei frame
    0-5499); il giro arriva al corpo 07 (frame 1188) con 1123 NMI e nessuna
-   divergenza nello spedidore. Restano H4b2 (corpo 07), H4b3 (08, 0C, 0B e
-   confronto al 2410) e H4c (giro 0-5499). Vedi `decomp/GIRO.md`.
+   divergenza nello spedidore.
+   Lotto H4b2 (brief 46) chiuso: corpo 07 (2CCD) tradotto fino alla fase 12
+   (`attivita_attract07*.c`) e routine 3ADF nel banco (305 voci, 1272
+   catture); il giro arriva al frame 1398 (`ROUTINE 2DCE mancante`), 1333 NMI
+   confrontate, 0 divergenze nello spedidore. Restano H4b3 (fasi 13-25 di 07,
+   08, 0C, 0B e confronto al 2410) e H4c (giro 0-5499). Vedi `decomp/GIRO.md`.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

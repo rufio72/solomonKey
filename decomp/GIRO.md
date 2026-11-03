@@ -1,11 +1,12 @@
-# Giro dal boot (lotti H4a e H4b1, brief 44 e 45)
+# Giro dal boot (lotti H4a, H4b1 e H4b2, brief 44, 45 e 46)
 
 Primo pezzo dell'ex «giro libero»: il C parte dal vettore 0000 e gira senza
 che l'oracolo di MAME lo guidi. Dell'oracolo restano il controllo (impronta
 della RAM a ogni NMI) e gli ingressi registrati. Il giro si ferma, atteso e
 misurabile, alla prima attività non tradotta: in H4a `CORPO 1F (43C8)` al
-frame 602, da H4b1 `CORPO 07 (2CCD) non tradotto al frame 1188`. Restano
-H4b2 (corpo 07), H4b3 (08, 0C, 0B e confronto al 2410) e H4c (giro 0-5499).
+frame 602, da H4b1 `CORPO 07 (2CCD) non tradotto al frame 1188`, da H4b2
+`ROUTINE 2DCE mancante (motore dei nemici) al frame 1398`. Restano H4b3
+(fasi 13-25 del corpo 07, 08, 0C, 0B e confronto al 2410) e H4c (giro 0-5499).
 
 ## Uso (da `decomp/`)
 
@@ -118,3 +119,39 @@ spedidore; 9 a metà attività, tutte nel primo corpo 06 (frame 603-611).
 - `sub_2a03` non traduce il ramo di guasto 2AC8 (IX & 7F ≠ 0): esce con
   un avviso. `sub_29cf` e `sub_2a03` non sono catturabili dal banco (durano
   224 frame): la verifica è questo giro.
+
+## H4b2: corpo 07 (2CCD), fasi 0-12 e routine 3ADF (brief 46)
+
+- `attivita_attract07.c` (ingresso, fasi 2, 5, 6, 8-12 con la tabella `rst 20`
+  di 2DB8 sul sotto-contatore c19e), `attivita_attract07a.c` (fasi 0, 1, 3),
+  `attivita_attract07b.c` (fasi 4 e 7), intestazione `attivita_attract07.h`
+  (`PUNTO_LARGO`). `[0x07] = attivita_07_2ccd` in `corpo_attivita_replay`.
+  `sub_3adf` in `z80_38xx.c` (2 catture, entra nel banco: 305 voci, 1272 catture).
+- Istruzioni tradotte: ingresso e fasi 0-12 come da brief (501 stimate). I rami
+  mai eseguiti nei frame 0-2410 chiamano `nemici_manca(indirizzo)` (386A, 3874,
+  38BA, 38CA, 38D9, 3901, 3903, 3960, 398B, 3986, 39B9, 351E, 353B, 352E,
+  365F, 366C, 2D0F, 2E04); il bit 4 di c045 in 2D07 passa da
+  `nemici_r_somma()` (sentinella) e poi `nemici_manca(0x2d1f)`.
+- Punti `NEMICI_PUNTO`: uno per scrittura in RAM o chiamata, secondo la regola
+  di `nemici.h`; nei cicli (fase 0 d840 e c251, fase 2, fase 3, fase 4
+  3642-3668, `ldir` di 34FA, fase 7 dc80/d780) dentro il ciclo; le attese
+  (2E89, 2E5D, 2E79, 2E71, 2E7D) in `attesa()`, che rifà inline `sub_2e90`
+  (stessa semantica) per mettere i punti fra il decremento, l'azzeramento di
+  c467 e l'incremento (ritorni 2E8E, 2E8F, 2E90); `NEMICI_PUNTO(0x0008,
+  0x0026)` per il gestore dei `rst 20`, `(0x0008, 0x0014)` per `rst 08/10` in 358F.
+- `PUNTO_LARGO`: 3ADF (3ADF-3AF2, fase 7, due chiamate), 2F57 (2F57-2F5F, fase 9),
+  3A54 (3A54-3A7C, fasi 9 e 12), 322A e figlie (3225-33B9, fase 6).
+- Deviazione dal modello di 78E0: la fase 6 non chiama `sub_322a` intera ma
+  `fondale_322a()`, copia della stessa sequenza con il `PUNTO_LARGO` prima di
+  `sub_33ba`. 322A dura sette frame (1189-1195); `sub_33ba` accende il bit 6 di
+  c044 (consegna della palette alla NMI) e, con le NMI dei frame 1190-1195
+  eseguite a flag già acceso, la palette partiva sei frame prima di MAME
+  (divergenza nello spedidore al frame 1196: c044 04 contro 44, e500-e52f).
+- Esito del giro: `ROUTINE 2DCE mancante (motore dei nemici) al frame 1398`
+  (fase 13), 21770 spedizioni, 1333 NMI confrontate (615 nello spedidore, 0
+  divergenti; 181 a metà attività, 15 divergenti: quelle con ritorno dentro
+  routine tradotte senza punti interni, come 322A, sono eseguite al confine
+  della routine).
+- Restano a H4b3: fasi 13-25 (gestori 2DCE, 31C5, 2E0A, 2E9C, 3709, 3829, 321E,
+  2EF5, 2E6D, 2F1A, 2E1E; la voce 16, 2D9D, non è mai eseguita), 37B4, i corpi 08,
+  0C e 0B e il confronto al frame 2410.
