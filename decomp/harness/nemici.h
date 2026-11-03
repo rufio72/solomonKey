@@ -258,6 +258,25 @@ void sub_5f82(struct z80 *z);
 void sub_5fac(struct z80 *z);
 void sub_4fef(struct z80 *z);
 
+/* Lotto N9, tipi 15-17 (brief 35), nemici_tipi_15_17.c. Nessuna lascia il
+ * riporto fuori (6B9B e 6C8E lo usano solo dentro). */
+void sub_6b43(struct z80 *z);
+void sub_6b5f(struct z80 *z);
+void sub_6b8f(struct z80 *z);
+void sub_6b9b(struct z80 *z);
+void sub_6c0b(struct z80 *z);
+void sub_6c5f(struct z80 *z);
+void sub_6c8e(struct z80 *z);
+void sub_7f48(struct z80 *z);
+void sub_7f81(struct z80 *z);
+void sub_7f8a(struct z80 *z);
+void sub_7fa6(struct z80 *z);
+void sub_7fcf(struct z80 *z);
+void sub_801d(struct z80 *z);
+void sub_8042(struct z80 *z);
+void sub_808d(struct z80 *z);
+void sub_809c(struct z80 *z);
+
 /* Il registro R (nemici_r.c): somma R1 + R2 dei due `ld a,r` di 54C5, 59E5
  * e 5DDF; nel banco i wrapper cercano il valore di R che riproduce
  * la cattura (vedi l'intestazione di nemici_r.c). */
@@ -278,15 +297,5 @@ void sub_4fd4(struct z80 *z);
 void sub_5fc8(struct z80 *z);
 void sub_610c(struct z80 *z);
 void sub_627f(struct z80 *z);
-void sub_6b43(struct z80 *z);
-void sub_6c0b(struct z80 *z);
-void sub_7f48(struct z80 *z);
-void sub_7f81(struct z80 *z);
-void sub_7f8a(struct z80 *z);
-void sub_7fa6(struct z80 *z);
-void sub_7fcf(struct z80 *z);
-void sub_801d(struct z80 *z);
-void sub_8042(struct z80 *z);
-void sub_809c(struct z80 *z);
 
 #endif

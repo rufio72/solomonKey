@@ -205,7 +205,7 @@ per la NMI del replay (4EE6 fra due slot, 58DF, 5928; `REPLAY.md`).
 | 0x5928 | sub_5928 | nemici_tipo09.c | cella davanti all'oggetto IY secondo (IY+1E) | tradotta (replay) |
 | 0x734D | sub_734d | nemici_comparsa.c | cella vicina in una delle quattro direzioni (scostamenti B, C) | tradotta (replay) |
 | 0x7F51 | sub_7f51 | nemici_tipi_15_17.c | tipo 17, fase 4 di 7F39, poi 809C | tradotta (replay) |
-| 0x7F68 | sub_7f68 | nemici_tipi_15_17.c | tipo 17: `rst 38` a 7F39 ((IY+4) = a1) o a 7F72 | tradotta (replay) |
+| 0x7F68 | sub_7f68 | nemici_tipi_15_17.c | tipo 17: `rst 38` a 7F39 ((IY+4) = a1) o a 7F72 | verificata (banco, lotto N9) |
 
 ## Motore dei nemici (lotto N2)
 
@@ -585,3 +585,44 @@ davanti (5EBB-5EC6, servono celle della griglia c0bd, non forzabili con
 perché 5F82 non è un ingresso catturabile e 5F0C dà l'indice in base alle
 celle; il `ret c` di 5E04 in 5DDF (dipende da R e dalle celle). Il corrispondente
 di 5F4B è invece coperto dalle forzate `forza00-0f`.
+
+## Motore dei nemici (lotto N9)
+
+Tipi 15-17 (brief 35): le 16 routine di 6B43, 6C0B e 7F48-809C in
+`harness/nemici_tipi_15_17.c` (tipo 15 = 6C0B, tipo 16 = 6B43, tipo 17 = 7F68).
+Tolti 10 stub: restano 2474, 4ada, 4fd4, 5fc8, 610c e 627f. 7F68 (tradotta in
+N1) entra nel banco per coprire 7F81, 7F8A e 801D; 6B8F e 808D sono coperte
+dalle forzate di 6B43 e di 7FCF/8042. Nessun ingresso catturabile da MAME per
+6B8F, 7F81, 7F8A, 801D e 808D: sono `tradotte`.
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x6B43 | sub_6b43 | nemici_tipi_15_17.c | 22 | tipo 16: B da (IX+4/5) secondo (IY+4), `rst 38` a 6B58 su (IY+1D) | verificata | 11 | finale, stanza50 | 4 non forzate e 7 forzate |
+| 0x6B5F | sub_6b5f | nemici_tipi_15_17.c | 48 | fase 0: bit 0 di (IX+1), 6BCD con B = 0E/0F; poi suono 2D e fase 2 | verificata | 4 | finale, stanza50 |  |
+| 0x6B8F | sub_6b8f | nemici_tipi_15_17.c | 11 | fase 1: a (IX+8) >= 2E fase 2 | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 6B43 (forza01-02) |
+| 0x6B9B | sub_6b9b | nemici_tipi_15_17.c | 42 | fase 2: direzione da B, parola di 6BC5, prove 57AA e 7379, 57B3 | verificata | 4 | finale, stanza50 | il ramo dopo 7379 (6BB7-6BC1) non è percorso: dipende dalle celle |
+| 0x6C0B | sub_6c0b | nemici_tipi_15_17.c | 4 | tipo 15: `rst 38` a 6C0E su (IY+1D) | verificata | 11 | finale, stanza50 | 4 non forzate e 7 forzate (una per destinazione) |
+| 0x6C5F | sub_6c5f | nemici_tipi_15_17.c | 47 | fase 3: attesa (IX+0D) >= 6, inversione del bit 0 di (IY+1E); altrimenti fase 5 | verificata | 8 | finale, stanza50 | 4 non forzate e 4 forzate |
+| 0x6C8E | sub_6c8e | nemici_tipi_15_17.c | 90 | fase 5: come 6E55 se Dana vicina; altrimenti cella davanti (5C32, C080/C081) | verificata | 11 | finale, stanza50 | 4 non forzate e 7 forzate; non coperto il ramo 6CC7 (bit 1 acceso della cella con (IY+12/13) nulli) |
+| 0x7F48 | sub_7f48 | nemici_tipi_15_17.c | 9 | fase 4 e spegne il bit 5 di (IY+0) | verificata | 4 | stanza07, stanza18 |  |
+| 0x7F81 | sub_7f81 | nemici_tipi_15_17.c | 9 | a (IX+8) >= 78 prosegue a 80A5 | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 7F68 (forza00-01) |
+| 0x7F8A | sub_7f8a | nemici_tipi_15_17.c | 28 | 24BE, 3A54 con BC = 2011, fase 5, (IY+1A) = 30 | tradotta | 0 | - | nessun ingresso catturabile (stanza00/42/43/51 non lo raggiungono); coperta da 7F68 forza02 |
+| 0x7FA6 | sub_7fa6 | nemici_tipi_15_17.c | 41 | attesa (IX+8) >= 10, poi fase 4 | verificata | 5 | stanza07 | 2 non forzate e 3 forzate |
+| 0x7FCF | sub_7fcf | nemici_tipi_15_17.c | 78 | preparazione, 808D/809C, poi attesa (IX+8) >= D2 e cambio fase | verificata | 7 | stanza45 | 2 non forzate e 5 forzate |
+| 0x801D | sub_801d | nemici_tipi_15_17.c | 37 | (IX+0E) = 4 e fase 3 col bit 1 di (IY+1); (IX+8) >= 78 azzera; altrimenti 809C | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 7F68 (forza03-06) |
+| 0x8042 | sub_8042 | nemici_tipi_15_17.c | 71 | come 801D con (IX+0E) = 5, poi tabella 8089 e spostamento di (IY+0E) | verificata | 7 | stanza43 | 2 non forzate e 5 forzate |
+| 0x808D | sub_808d | nemici_tipi_15_17.c | 15 | 24BE, 4C11 con BC = 0, cade in 809C | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 7FCF e 8042 |
+| 0x809C | sub_809c | nemici_tipi_15_17.c | 9 | bit 5 di (IY+0) acceso, fase 6 | verificata | 2 | stanza07 |  |
+| 0x7F68 | sub_7f68 | nemici_tipi_15_17.c | - | tipo 17: `rst 38` a 7F39 o 7F72 (già tradotta in N1, ora nel banco) | verificata | 16 | stanza07 | 2 non forzate e 14 forzate (`forza00-13`): le prime 8 con (IY+4) = 00, le ultime 6 (`forza08-13`) con (IY+4) = a1 per la tabella 7F39 |
+
+**Catture forzate** (`SNAP_FORZA`, suffisso `forzaNN`, N=1). 6B43 (finale):
+`forza01-02` (6B8F), `forza03` (6B9B), `forza04-07` (6B5F). 6C0B (finale):
+`forza00-06`. 6C5F e 6C8E (finale): `forza01-04` e `forza01-07`. 7FA6
+(stanza07) `forza01-03`; 7FCF (stanza45) `forza01-05`; 8042 (stanza43)
+`forza01-05`; 7F68 (stanza07) `forza00-13`. Totale lotto: 90 catture (38 non
+forzate e 52 forzate).
+
+**Non coperte da gcov** (`nemici_tipi_15_17.c`): i casi `0` e `default` dei
+tre `switch` (indici fuori tabella, non forzati); in 6B9B il ramo dopo
+7379 (6BB3-6BC1), che dipende dalle celle di 57AA e 7379; in 6C8E il
+ramo 6CC7 (cella davanti con il bit 1 acceso) e l'uscita 6E8B che ne segue.

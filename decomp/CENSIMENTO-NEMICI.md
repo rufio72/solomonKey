@@ -449,6 +449,12 @@ banco, 35 catture. Vedi `ROUTINE.md`, sezione «Motore dei nemici (lotto N7)».
 84 catture. N10 e N11 non rifanno 4FEF e 5FAC. Vedi `ROUTINE.md`, sezione
 «Motore dei nemici (lotto N8)».
 
+**Lotto N9 fatto** (brief 35, 2026-11-03): tipi 15-17, 16 routine (6B43,
+6B5F, 6B8F, 6B9B, 6C0B, 6C5F, 6C8E, 7F48, 7F81, 7F8A, 7FA6, 7FCF, 801D, 8042,
+808D, 809C) in `nemici_tipi_15_17.c`. Gli stub di `nemici_stub.c` scendono da
+16 a 6 (tolti 10). 12 voci nuove nel banco (11 del lotto più 7F68), 90
+catture. Vedi `ROUTINE.md`, sezione «Motore dei nemici (lotto N9)».
+
 **Lotti N2-N12**: le routine non coperte, un lotto per modulo. Sono in
 ordine di utilità, cioè di byte eseguiti nell'unione storica delle sessioni.
 Ingressi completi in `out/censimento_nemici_lotti.txt`.
