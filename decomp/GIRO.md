@@ -305,3 +305,44 @@ registrazione, resa), `gioca_tasti.c` (tastiera/joystick), `gioca_dsw.c` (DSW),
   partita diversa (altre stanze, registro R, DSW diversi) può raggiungere codice
   non tradotto: il modo libero stampa `FERMO <motivo> al frame <f>`, chiude la
   registrazione e la finestra, riepiloga ed esce con codice 3.
+
+## H6: il gioco suona (brief 50)
+
+`gioca` collega il driver audio tradotto (`audio_*.c`, non modificato) tramite
+`harness/scheda_audio.c` (sequenza dei comandi), `scheda_pcm.c` (emu2149, PCM) e
+`gioca_audio.c` (dispositivo SDL). Il gancio è `macchina_latch_audio`, chiamato
+da `gancio_porta` a ogni scrittura a `e800` (nella NMI del frame).
+
+- Meccanismo (solomon.cpp): `e800` scrive il soundlatch e dà una NMI all'audio
+  (0066, legge il latch a 8000); lo Z80 audio ha un IRQ periodico a 120 Hz, cioè
+  2 per frame, senza legame di fase con la NMI. Misurato su MAME nel frame
+  etichettato F: **IRQ A (0038 + passata 029E), latch/NMI, IRQ B**. Fase 1
+  (predefinita) fa questo; fase 0 = latch, A, B (il vecchio modello del banco);
+  fase 2 = A, B, latch. Prima chiamata (frame 66): avvio e recupero dei frame
+  0-65 con soli A e B, che entra nell'hash ma non nel dispositivo.
+- Oracolo: `sh partita_audio.sh` (MAME senza finestra né audio, 9 s) scrive
+  `out/audio/partita_latch.txt` (165 scritture; md5 1480738c...) e
+  `out/audio/partita_ay.txt` (20409 cambi; md5 c2db4b09...). Il file `_ay.txt`
+  in `out/audio/` entra anche nel giro di `sh audio_wav.sh oracoli` (da 4 a 5
+  "diversi": il nuovo è `partita`, che non ha un C di confronto nel suo modello).
+- Opzioni di `gioca`: `--muto`, `--flusso-ay F`, `--registra-latch F`,
+  `--fase-audio 0|1|2`. Con `-n` l'audio è sempre muto (il PCM si calcola e va
+  nell'hash). Stdout: `AUDIO campioni`, `AUDIO hash`; `AUDIO dispositivo 44100 Hz
+  mono` quando si apre il dispositivo.
+- Latch: `gioca -n 5434 --oracolo ... --registra-latch F` dà esattamente
+  `partita_latch.txt` (cmp uguale).
+- Cambi AY, confronto `python3 partita_audio_confronta.py out/audio/partita_ay.txt
+  <c_ay> 14 5499` (frame 14-5499, insiemi / stati / primo frame):
+  fase 0: 2565 / 1870 / 1190; **fase 1: 604 / 312 / 1190** (scelta); fase 2:
+  3828 / 3344 / 1189. Fissata come atteso esatto in `sh partita_audio.sh confronta`.
+  Residuo fase 1: l'effetto di un comando compare un frame dopo in MAME (es. 3F
+  del frame 1189: `07 FF` in 1191, nel C in 1190); in 152 frame dei 604 i cambi
+  mancanti stanno nel frame adiacente, gli altri sono sequenze di note cadute in
+  un altro punto della passata 029E. La causa probabile è la durata della
+  passata 029E (la NMI la spezza); modellarla è l'eventuale H6b, se all'ascolto
+  stona.
+- Hash audio (regressione): `gioca -n 5434 --oracolo ... --riproduci ...` dà
+  `AUDIO campioni 4042500` e `AUDIO hash c4b40fea06623a96` (fase 1); è uguale
+  all'FNV-1a dei byte di `audio_wav` sul flusso scritto da `gioca`
+  (`partita_audio_confronta.py --hash-wav`). Modo libero 2000 frame:
+  `c8145bb8b3dac910`.

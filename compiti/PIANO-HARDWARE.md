@@ -70,7 +70,7 @@ Materiale già pronto:
   Da qui il gioco si gioca. Verifica: sequenza di input registrata che
   riproduce un percorso noto. *Analista Sonnet.*
 
-- [ ] **H6 — Raccordo audio.** Il gioco scrive i codici al driver audio
+- [x] **H6 — Raccordo audio.** *Fatto (brief 50, 2026-11-03): `gioca` suona; latch identici a MAME, cambi AY con residuo misurato (604/312 frame), eventuale H6b per la durata della passata 029E; vedi GIRO.md.* Il gioco scrive i codici al driver audio
   tradotto; emu2149 suona nel callback SDL audio, sincronizzato al frame.
   Verifica: il flusso dei cambi di registro durante una sequenza nota
   coincide con l'oracolo `_ay.txt` corrispondente. *Analista Sonnet.*

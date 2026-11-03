@@ -134,8 +134,13 @@ YM2149 emulator and compared against the original's — has been passed.
   mode is deterministic and plays the same match through without a
   single stop (timing differs slightly from MAME by design: no Z80
   cycle model, same criterion the audio chain ratified).
-- **Next up:** H6 (wiring the translated sound driver to SDL audio,
-  in progress) and H7 (packaging) — then classifying the remaining
+- **Sound — `gioca` plays the translated audio driver.** H6 wires the
+  game's sound-latch writes to the translated Z80 audio driver, runs it
+  two IRQs per frame, and renders the three YM2149 with emu2149 to SDL audio
+  (`--muto` to disable). The latch sequence is identical to MAME's; the
+  register-change stream still differs in 312 of 5486 frames (timing of the
+  sound routine inside a frame), to be judged by ear.
+- **Next up:** H7 (packaging) — then classifying the remaining
   mid-activity NMI divergences, and finally the readability rewrite,
   module by module, with the harness and the full run as the safety
   net.

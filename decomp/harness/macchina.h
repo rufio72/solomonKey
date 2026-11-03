@@ -14,6 +14,8 @@ extern uint8_t maschera_nmi, ribalta;
 extern uint8_t macchina_dsw1, macchina_dsw2;
 /* Chiamata a ogni NMI dopo la scrittura delle porte e prima di sub_0066. */
 extern void (*macchina_prima_nmi)(long frame);
+/* Chiamata a ogni scrittura a e800 (latch audio), se non nulla (lotto H6). */
+extern void (*macchina_latch_audio)(uint8_t v);
 
 /* Modo libero (macchina_libera.c): senza oracolo. */
 struct libera_opz { long frame_max; /* 0 = illimitato */ };

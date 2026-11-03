@@ -188,6 +188,12 @@ ogni ciclo nei brief in `compiti/`.
    MAME) e una riga di regressione (`sh giro_completo.sh`): `GIRO COMPLETO
    0-5499: saldatura 0 byte, spedidore 0 divergenze, 30 a metà attività
    (attese), 13 frame resi con hash coincidenti`. H4 chiuso. Vedi `decomp/GIRO.md`.
+   H6 (brief 50): `gioca` suona. Le scritture a e800 diventano NMI del driver
+   audio tradotto, due IRQ per frame (ordine IRQ A, latch, IRQ B), emu2149 a
+   44100 Hz mono verso SDL audio (o hash con `-n`). Latch identici a MAME
+   (165 su 165); cambi AY: 604 frame con insieme diverso, 312 con stato
+   diverso (fissati come atteso in `sh partita_audio.sh confronta`); hash audio
+   c4b40fea06623a96. Residuo da modellare in un eventuale H6b. Vedi `decomp/GIRO.md`.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

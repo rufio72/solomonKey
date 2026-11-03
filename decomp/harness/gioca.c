@@ -18,6 +18,11 @@
 #include "ram.h"
 #include "macchina.h"
 #include "nemici.h"
+#include "scheda_audio.h"
+
+int gioca_audio_apri(void);
+void gioca_audio_spingi(const int16_t *buf, int n);
+void gioca_audio_chiudi(void);
 
 int dsw_applica(const char *opzione, const char *valore, uint8_t *d1, uint8_t *d2);
 void tasti_stampa_mappa(void);
@@ -33,6 +38,8 @@ static vsdl_opz opz;
 static char **argv_orig;
 static const char *file_registra, *file_riproduci;
 static const char *orac_oracolo, *orac_disp;
+static const char *file_flusso_ay, *file_registra_latch;
+static int muto, audio_aperto;
 static FILE *registra;
 static uint8_t (*riprodotti)[3];
 static long hash_frame[MAX_HASH];
@@ -47,11 +54,15 @@ static void finale(void)
     if (finito) return;
     finito = 1;
     if (registra) { fclose(registra); registra = NULL; }
+    scheda_audio_chiudi();
+    if (audio_aperto) { gioca_audio_chiudi(); audio_aperto = 0; }
     if (finestra) { tasti_chiudi_joystick(); vsdl_chiudi(); finestra = 0; }
     printf("FRAME rese %ld\n", rese);
     printf("HASH ultimo %016llx\n", (unsigned long long)hash_ultimo);
     if (orac_oracolo)
         printf("FRAME ultimo %ld\n", frame_ultimo);
+    printf("AUDIO campioni %ld\n", scheda_audio_campioni());
+    printf("AUDIO hash %016llx\n", (unsigned long long)scheda_audio_hash());
     fflush(stdout);
 }
 
@@ -101,6 +112,10 @@ static int comandi(void)
  * Ritorna 1 per uscire. */
 static int passo(long frame, const uint8_t v[3])
 {
+    int16_t pcm[SCHEDA_CAMPIONI_FRAME];
+    scheda_audio_frame(frame);
+    int n_pcm = scheda_audio_pcm(pcm);
+    if (n_pcm && audio_aperto) gioca_audio_spingi(pcm, n_pcm);
     if (registra)
         fprintf(registra, "%ld %02X %02X %02X\n", frame, v[0], v[1], v[2]);
     vid_ram vr = { &ram[0xd000 - 0xc000], &ram[0xd400 - 0xc000], &ram[0xd800 - 0xc000],
@@ -168,11 +183,13 @@ int main(int argc, char **argv)
             for (int k = 0; dsw_opz[k]; k++)
                 if (!strcmp(a + 2, dsw_opz[k])) dsw = 1;
         if (!strcmp(a, "--mappa")) mappa = 1;
+        else if (!strcmp(a, "--muto")) muto = 1;
         else if (!strcmp(a, "--stampa-dsw")) stampa_dsw = 1;
         else if (!strcmp(a, "--oracolo")) {
             if (i + 2 >= argc) { fprintf(stderr, "ERRORE: --oracolo vuole oracolo e disp\n"); return 2; }
             orac_oracolo = argv[++i]; orac_disp = argv[++i];
-        } else if (dsw || !strcmp(a, "--registra") || !strcmp(a, "--riproduci") ||
+        } else if (dsw || !strcmp(a, "--flusso-ay") || !strcmp(a, "--registra-latch") ||
+                   !strcmp(a, "--fase-audio") || !strcmp(a, "--registra") || !strcmp(a, "--riproduci") ||
                    !strcmp(a, "--hash-frame") || !strcmp(a, "--dsw1") || !strcmp(a, "--dsw2")) {
             if (i + 1 >= argc) { fprintf(stderr, "ERRORE: %s vuole un valore\n", a); return 2; }
             const char *val = argv[++i];
@@ -181,6 +198,14 @@ int main(int argc, char **argv)
                     fprintf(stderr, "ERRORE: valore \"%s\" non valido per %s\n", val, a);
                     return 2;
                 }
+            } else if (!strcmp(a, "--flusso-ay")) file_flusso_ay = val;
+            else if (!strcmp(a, "--registra-latch")) file_registra_latch = val;
+            else if (!strcmp(a, "--fase-audio")) {
+                if (strcmp(val, "0") && strcmp(val, "1") && strcmp(val, "2")) {
+                    fprintf(stderr, "ERRORE: --fase-audio vuole 0, 1 o 2\n");
+                    return 2;
+                }
+                scheda_audio_fase = atoi(val);
             } else if (!strcmp(a, "--registra")) file_registra = val;
             else if (!strcmp(a, "--riproduci")) file_riproduci = val;
             else if (!strcmp(a, "--hash-frame")) {
@@ -212,7 +237,8 @@ int main(int argc, char **argv)
     if (k < 0) return 2;
     if (k != ac) {
         fprintf(stderr, "uso: gioca [-s N] [-n N | -m N] [--registra F] [--riproduci F] "
-                "[--hash-frame F,..] [--oracolo ORACOLO DISP] [DSW] [--stampa-dsw] [--mappa]\n");
+                "[--hash-frame F,..] [--oracolo ORACOLO DISP] [--muto] [--flusso-ay F]\n"
+                "[--registra-latch F] [--fase-audio 0|1|2] [DSW] [--stampa-dsw] [--mappa]\n");
         return 2;
     }
     if (orac_oracolo && !file_riproduci) {
@@ -229,7 +255,10 @@ int main(int argc, char **argv)
         if (vsdl_apri("Solomon's Key - gioca", opz.scala) != 0) return 2;
         finestra = 1;
         tasti_apri_joystick();
+        if (!muto && gioca_audio_apri() == 0) audio_aperto = 1;
     }
+    scheda_audio_apri(file_flusso_ay, file_registra_latch);
+    macchina_latch_audio = scheda_audio_latch;
 
     int rc;
     macchina_prima_nmi = NULL;

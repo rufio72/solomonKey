@@ -167,14 +167,19 @@ static void ferma(int codice)
     exit(codice);
 }
 
+void (*macchina_latch_audio)(uint8_t v);
+
 void gancio_porta(uint16_t a, uint8_t v)
 {
     if (a == 0xe600)
         maschera_nmi = v & 1;
     else if (a == 0xe604)
         ribalta = v;
-    else
-        ram[a - 0xc000] = v;           /* e800, e803 ecc.: fuori dal confronto */
+    else if (a == 0xe800) {
+        ram[a - 0xc000] = v;
+        if (macchina_latch_audio) macchina_latch_audio(v);
+    } else
+        ram[a - 0xc000] = v;           /* e803 ecc.: fuori dal confronto */
 }
 
 /* Confronto byte per byte col dump di MAME del frame, prima della NMI di
