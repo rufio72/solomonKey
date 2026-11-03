@@ -14,13 +14,19 @@
  * quella dell'oracolo; se i punti passano senza coincidenza oltre la
  * finestra legale (LIMITE_PUNTI), il giro si ferma con una diagnostica.
  * L'impronta è quella del replay più dbc0-dbff (pila del boot, GIRO.md).
- * Dopo il boot lo schema è quello di replay.c: gli stessi corpi tradotti
- * (corpo_attivita_replay[]) e arresto al primo non tradotto. */
+ * Dopo il boot (lotto H4b1, brief 45) lo schema è quello di replay.c: gli
+ * stessi corpi tradotti (corpo_attivita_replay[]), le NMI nella scansione
+ * dello spedidore, prima del corpo e a metà attività (punti NEMICI_PUNTO),
+ * confrontate con l'impronta dell'oracolo; arresto al primo corpo non
+ * tradotto. Le divergenze nello spedidore fermano il giro, quelle a metà
+ * attività si contano. Il registro R non è modellato: una lettura ferma il
+ * giro (nemici_r_gancio). */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "routine.h"
 #include "sched.h"
+#include "nemici.h"
 #include "rst20_tables.h"
 
 attivita_fn corpo_attivita[SCHED_CODICI];
@@ -49,12 +55,12 @@ static uint32_t impronta(void)
 
 /* ---- oracolo, registro delle spedizioni, ingressi */
 struct riga_f { long frame; uint16_t ritorno; uint32_t hash; };
-struct spedizione { long frame; uint8_t slot, codice; };
+struct evento { char tipo; long frame; uint8_t slot, codice; uint16_t ritorno; int letture; };
 
 static struct riga_f *ff;
 static size_t n_ff, k_ff;              /* righe F e prossima NMI da eseguire */
-static struct spedizione *sp;
-static size_t n_sp, k_sp;
+static struct evento *ev;              /* righe D e N del registro */
+static size_t n_ev;
 static uint8_t ingressi[MAX_FRAME][3];
 
 static void *cresci(void *p, size_t *cap, size_t n, size_t dim)
@@ -91,21 +97,26 @@ static void carica_oracolo(const char *nome)
     fclose(f);
 }
 
-/* Solo le righe D: le W le rifà il C, le N non servono (il ritorno sta
- * nelle righe F). */
+/* Righe D (spedizioni) e N (ingresso della NMI) del registro, come
+ * replay.c; le W e le I le rifà il C. */
 static void carica_registro(const char *nome)
 {
     FILE *f = apri(nome);
     char riga[160];
     size_t cap = 0;
     while (fgets(riga, sizeof riga, f)) {
-        struct spedizione e;
+        struct evento e = {0};
         unsigned a, b;
-        if (riga[0] != 'D' || sscanf(riga + 1, "%ld %x %x", &e.frame, &a, &b) != 3)
+        if (riga[0] == 'D' && sscanf(riga + 1, "%ld %x %x", &e.frame, &a, &b) == 3) {
+            e.slot = (uint8_t)a; e.codice = (uint8_t)b;
+        } else if (riga[0] == 'N' && sscanf(riga + 1, "%ld %x %d", &e.frame, &a, &e.letture) == 3) {
+            e.ritorno = (uint16_t)a;
+        } else {
             continue;
-        e.slot = (uint8_t)a; e.codice = (uint8_t)b;
-        sp = cresci(sp, &cap, n_sp, sizeof *sp);
-        sp[n_sp++] = e;
+        }
+        e.tipo = riga[0];
+        ev = cresci(ev, &cap, n_ev, sizeof *ev);
+        ev[n_ev++] = e;
     }
     fclose(f);
 }
@@ -128,6 +139,9 @@ static void carica_ingressi(const char *nome)
 static char prefisso[512];
 static long frame_fine = -1;
 static long nmi_totali, nmi_divergenti;
+static long spedizioni;                /* corpi eseguiti dopo il boot */
+static long dopo_pulite, dopo_meta;    /* NMI dopo il boot per tipo */
+static long div_pulite, div_meta;      /* e divergenti per tipo */
 static long punti;                     /* chiamate di punto dall'ultima NMI */
 static int in_nmi;
 static uint8_t maschera_nmi;           /* e600 in scrittura, bit 0 */
@@ -135,7 +149,10 @@ static uint8_t ribalta;                /* e604 in scrittura */
 
 static void riepilogo(void)
 {
+    printf("spedizioni eseguite: %ld\n", spedizioni);
     printf("NMI confrontate: %ld, divergenti: %ld\n", nmi_totali, nmi_divergenti);
+    printf("dopo il boot: nello spedidore %ld (divergenti %ld), a metà attività %ld "
+           "(divergenti %ld)\n", dopo_pulite, div_pulite, dopo_meta, div_meta);
 }
 
 static void ferma(int codice)
@@ -154,18 +171,19 @@ static void gancio_porta(uint16_t a, uint8_t v)
         ram[a - 0xc000] = v;           /* e800, e803 ecc.: fuori dal confronto */
 }
 
-/* Confronto byte per byte col dump di MAME al frame FRAME_DUMP, prima della
- * NMI di quel frame: richiude il buco delle esclusioni (GIRO.md). */
-static void sanita(void)
+/* Confronto byte per byte col dump di MAME del frame, prima della NMI di
+ * quel frame: richiude il buco delle esclusioni (GIRO.md). Stampa i primi
+ * 32 byte diversi; restituisce il loro numero, o -1 se il dump manca. */
+static int diff_dump(long frame)
 {
     char nome[600];
-    snprintf(nome, sizeof nome, "%s_%d.bin", prefisso, FRAME_DUMP);
+    snprintf(nome, sizeof nome, "%s_%ld.bin", prefisso, frame);
     FILE *f = fopen(nome, "rb");
     static uint8_t mame[0x4000];
     if (!f || fread(mame, 1, sizeof mame, f) != sizeof mame) {
-        printf("SANITA %d: dump %s assente o corto\n", FRAME_DUMP, nome);
+        printf("dump %s assente o corto (REPLAY_DUMPS=%ld per averlo)\n", nome, frame);
         if (f) fclose(f);
-        return;
+        return -1;
     }
     fclose(f);
     int tot = 0, stampati = 0;
@@ -176,6 +194,14 @@ static void sanita(void)
         if (stampati++ < 32)
             printf("  %04X: C %02X MAME %02X\n", a, ram[a - 0xc000], mame[a - 0xc000]);
     }
+    return tot;
+}
+
+static void sanita(void)
+{
+    int tot = diff_dump(FRAME_DUMP);
+    if (tot < 0)
+        return;
     printf("SANITA %d: byte diversi in c000-e5ff (escluse c040-c043, cf00-cfff, dbc0-dbff): "
            "%d, %s\n", FRAME_DUMP, tot, tot ? "DIVERSO" : "coincide");
     if (tot) {
@@ -317,29 +343,220 @@ static void boot_2833(void)
     posta_attivita(0x06);
 }
 
-/* ---- spedidore (dopo `jp 3AF3`): stesso schema di replay.c */
+/* ---- spedidore (dopo `jp 3AF3`): stesso schema di replay.c, vedi lì i
+ * commenti estesi. Una NMI è «pulita» se il ritorno sta in 3AF3-3B10 o se
+ * viene eseguita prima del corpo; «a metà attività» altrimenti. */
 
-/* Ogni corpo passa di qui: confronta slot e codice con la prossima riga D
- * dell'oracolo, poi esegue il corpo tradotto o si ferma. */
+static int nel_rst20(uint16_t r)
+{
+    return (r >= 0x0008 && r <= 0x000d) || (r >= 0x0010 && r <= 0x0014) ||
+           (r >= 0x0018 && r <= 0x001a) || (r >= 0x0020 && r <= 0x0026);
+}
+
+static int pendente(const struct evento *n)
+{
+    return n->ritorno >= 0x3afb && n->ritorno <= 0x3b10 && n->letture == 0;
+}
+
+static int nello_spedidore(uint16_t r)
+{
+    return r >= 0x3af3 && r <= 0x3b10;
+}
+
+static int prima_del_corpo;            /* NMI eseguita prima del corpo */
+static const struct evento *ultima_d;
+static const struct evento *nmi_corpo, *nmi_scan[256];   /* corpi lunghi: fino a 9 NMI in uno (frame 603-611) */
+static const struct evento *attese[64];    /* N con 0 letture dopo la D, in ordine */
+static int n_attese, k_attese;             /* quante, e quante già eseguite */
+static int n_scan, i_scan;
+#define nmi_attesa (k_attese < n_attese ? attese[k_attese] : NULL)
+static int corpo_mancante = -1;
+static uint8_t indice_prima;           /* c04f prima della spedizione in corso */
+
+/* NMI di un evento N dopo il boot: confronto d'impronta con la riga F,
+ * poi esecuzione. La divergenza di una NMI pulita ferma il giro. */
+static void esegui_nmi_ev(const struct evento *n)
+{
+    if (k_ff >= n_ff || ff[k_ff].frame != n->frame) {
+        printf("oracolo e registro disallineati alla NMI del frame %ld\n", n->frame);
+        ferma(2);
+    }
+    const struct riga_f *r = &ff[k_ff];
+    uint32_t h = impronta();
+    int pulita = nello_spedidore(r->ritorno) || prima_del_corpo;
+    if (pulita) dopo_pulite++; else dopo_meta++;
+    if (h != r->hash) {
+        if (pulita) {
+            div_pulite++;
+            nmi_divergenti++;
+            printf("DIVERGENZA frame %ld: hash C %08X MAME %08X; ritorno NMI oracolo %04X "
+                   "(spedidore); ultima D %02X %02X\n", r->frame, h, r->hash, r->ritorno,
+                   ultima_d ? ultima_d->slot : 0xff, ultima_d ? ultima_d->codice : 0xff);
+            if (diff_dump(r->frame) >= 0)
+                printf("  (confronto con il dump del frame %ld)\n", r->frame);
+            ferma(1);
+        }
+        div_meta++;
+        nmi_divergenti++;
+    }
+    esegui_nmi(r);
+}
+
+/* Con `largo` l'impronta non si controlla: il ritorno sta dentro una
+ * routine tradotta senza punti interni, la cui RAM a metà non esiste nel
+ * C; la NMI si esegue al confine (dopo la routine) e il confronto con la
+ * riga F la classifica a metà attività. */
+static int prova_punto_x(uint16_t da, uint16_t a, int largo)
+{
+    const struct evento *n = nmi_attesa;
+    if (!n || n->ritorno < da || n->ritorno > a)
+        return 0;
+    if (k_ff >= n_ff || ff[k_ff].frame != n->frame || (!largo && impronta() != ff[k_ff].hash))
+        return 0;
+    k_attese++;
+    esegui_nmi_ev(n);
+    return 1;
+}
+
+static int prova_punto(uint16_t da, uint16_t a)
+{
+    return prova_punto_x(da, a, 0);
+}
+
+static void punto_largo(uint16_t da, uint16_t a)
+{
+    while (prova_punto_x(da, a, 1))
+        ;                              /* più NMI in coda nella stessa routine */
+}
+
+static void punto_nemici(uint16_t da, uint16_t a)
+{
+    prova_punto(da, a);
+}
+
+static void gancio_scansione(int lettura)
+{
+    while (i_scan < n_scan && nmi_scan[i_scan]->letture <= lettura)
+        esegui_nmi_ev(nmi_scan[i_scan++]);
+}
+
+/* Sentinella del registro R: il giro non ha valori di R (registra_r.sh). */
+static void r_letto(void)
+{
+    printf("R letto prima della NMI del frame %ld: oracolo del registro R assente "
+           "(registra_r.sh)\n", k_ff < n_ff ? ff[k_ff].frame : -1L);
+    ferma(1);
+}
+
+/* Involucro di tutti i corpi: la NMI pendente, poi il corpo tradotto. */
 static void involucro(uint8_t slot)
 {
-    uint8_t codice = tabella[slot];
-    if (k_sp >= n_sp) {
-        printf("spedizioni registrate finite\n");
-        ferma(0);
+    uint8_t codice = tabella[slot];   /* letto prima della NMI, come B a 3B02 */
+    if (nmi_corpo) {
+        const struct evento *n = nmi_corpo;
+        nmi_corpo = NULL;
+        prima_del_corpo = 1;
+        if (n->ritorno < 0x3b0f) {
+            uint8_t nuovo = indice;
+            indice = indice_prima;
+            esegui_nmi_ev(n);
+            indice = nuovo;
+        } else {
+            esegui_nmi_ev(n);          /* 3B0F-3B10: c04f già scritto */
+        }
+        prima_del_corpo = 0;
     }
-    const struct spedizione *e = &sp[k_sp++];
-    if (slot != e->slot || codice != e->codice) {
-        printf("DISPATCH frame %ld: atteso %02X/%02X, ottenuto %02X/%02X\n",
-               e->frame, e->slot, e->codice, slot, codice);
-        ferma(1);
+    if (nmi_attesa) {
+        uint16_t r = nmi_attesa->ritorno;
+        if (nel_rst20(r) || (codice < SCHED_CODICI && r == rst20_3B10[codice]) ||
+            (codice == 0x0a && r >= 0x0038 && r <= 0x0042)) {
+            prima_del_corpo = 1;       /* c04f già scritto a 3B0C */
+            prova_punto(r, r);
+            prima_del_corpo = 0;
+        }
     }
     if (codice >= SCHED_CODICI || !corpo_attivita_replay[codice]) {
-        printf("CORPO %02X (%04X) non tradotto al frame %ld\n", codice,
-               codice < SCHED_CODICI ? rst20_3B10[codice] : 0, e->frame);
-        ferma(1);
+        corpo_mancante = codice;
+        return;
     }
     corpo_attivita_replay[codice](slot);
+}
+
+/* Dopo il boot: eventi D/N del registro dalla D che segue la N dell'ultima
+ * NMI del boot, fino all'ultima N entro frame_fine. Ritorna il codice di
+ * uscita. */
+static int giro_spedidore(void)
+{
+    size_t i0 = 0;
+    long f_boot = k_ff ? ff[k_ff - 1].frame : -1;
+    while (i0 < n_ev && !(ev[i0].tipo == 'N' && ev[i0].frame == f_boot)) i0++;
+    i0++;
+    if (i0 >= n_ev || ev[i0].tipo != 'D' || ev[i0].frame != f_boot || ev[i0].slot != 0 ||
+        ev[i0].codice != 0x1f) {
+        printf("registro: dopo la NMI del frame %ld manca la D 00 1F\n", f_boot);
+        ferma(2);
+    }
+    size_t i1 = i0;
+    for (size_t i = i0; i < n_ev; i++)
+        if (ev[i].tipo == 'N' && (frame_fine < 0 || ev[i].frame <= frame_fine)) i1 = i + 1;
+    if (frame_fine < 0)
+        frame_fine = ff[n_ff - 1].frame;
+
+    for (size_t i = i0; i < i1; i++) {
+        const struct evento *e = &ev[i];
+        if (e->tipo == 'N') {
+            if (n_scan == (int)(sizeof nmi_scan / sizeof nmi_scan[0])) {
+                printf("troppe NMI fra due spedizioni al frame %ld\n", e->frame);
+                ferma(2);
+            }
+            nmi_scan[n_scan++] = e;
+            continue;
+        }
+        if (i + 1 < i1 && ev[i + 1].tipo == 'N' && pendente(&ev[i + 1])) {
+            nmi_corpo = &ev[i + 1];
+            i++;
+        } else {
+            for (size_t j = i + 1; j < i1 && n_attese < 64 && ev[j].tipo == 'N' &&
+                                   ev[j].letture == 0; j++)
+                attese[n_attese++] = &ev[j];
+        }
+        ultima_d = e;
+        uint8_t slot = 0xff, codice = 0;
+        indice_prima = indice;
+        int r = spedisci_una(&slot, &codice);
+        i += k_attese;                 /* N già eseguite in un punto di sincronia */
+        n_attese = k_attese = 0;
+        if (r != 1 || slot != e->slot || codice != e->codice) {
+            printf("DISPATCH frame %ld: atteso %02X/%02X, ottenuto %02X/%02X (esito %d)\n",
+                   e->frame, e->slot, e->codice, slot, codice, r);
+            ferma(1);
+        }
+        if (corpo_mancante >= 0) {
+            printf("CORPO %02X (%04X) non tradotto al frame %ld\n", corpo_mancante,
+                   corpo_mancante < SCHED_CODICI ? rst20_3B10[corpo_mancante] : 0, e->frame);
+            ferma(1);
+        }
+        spedizioni++;
+        if (nemici_mancante) {
+            printf("ROUTINE %04X mancante (motore dei nemici) al frame %ld\n",
+                   nemici_mancante, e->frame);
+            ferma(1);
+        }
+        if (nemici_fuori_sito) {
+            printf("INDICE %02X fuori dalla tabella rst del sito %04X al frame %ld\n",
+                   nemici_fuori_indice, nemici_fuori_sito, e->frame);
+            ferma(1);
+        }
+        if (i_scan < n_scan) {
+            printf("NMI del frame %ld non iniettata nella scansione\n", nmi_scan[i_scan]->frame);
+            ferma(1);
+        }
+        n_scan = i_scan = 0;
+    }
+    for (; i_scan < n_scan; i_scan++)  /* NMI finali dopo l'ultima spedizione */
+        esegui_nmi_ev(nmi_scan[i_scan]);
+    riepilogo();
+    return div_pulite == 0 ? 0 : 1;
 }
 
 int macchina_esegui(const char *oracolo, const char *disp, const char *ingr, long fine)
@@ -352,18 +569,22 @@ int macchina_esegui(const char *oracolo, const char *disp, const char *ingr, lon
     char *suff = strstr(prefisso, "_oracolo.txt");
     if (suff) *suff = 0;
     carica_rom();
-    for (int i = 0; i < SCHED_CODICI; i++)
-        corpo_attivita[i] = involucro;
+    /* f000-ffff è ROM (tabelle dei fondali e delle palette) ma leggi() la
+     * cerca in ram[]: il replay la ha nel dump, qui si copia (brief 45) */
+    memcpy(&ram[0xf000 - 0xc000], &rom[0xf000], 0x1000);
     macchina_punto = punto;
     porte_gancio_scrittura = gancio_porta;
 
     boot_2833();
-    for (;;) {
-        uint8_t slot, codice;
-        int r = spedisci_una(&slot, &codice);
-        if (r != 1) {
-            printf("spedidore: esito %d\n", r);
-            ferma(1);
-        }
-    }
+
+    /* fine del boot: i punti del boot non iniettano più NMI, subentrano
+     * quelli dello spedidore e dei corpi */
+    macchina_punto = NULL;
+    nemici_punto = punto_nemici;
+    attract_punto_largo = punto_largo;
+    sched_gancio_scansione = gancio_scansione;
+    nemici_r_gancio = r_letto;
+    for (int i = 0; i < SCHED_CODICI; i++)
+        corpo_attivita[i] = involucro;
+    return giro_spedidore();
 }

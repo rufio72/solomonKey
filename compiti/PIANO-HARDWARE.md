@@ -44,12 +44,15 @@ Materiale già pronto:
   script del framebuffer (SDL non cambia i pixel) + sanità manuale.
   *Analista Sonnet.*
 
-- [ ] **H4 — Giro libero.** *H4a fatto (brief 44, 2026-11-03), restano
-  H4b/H4c.* Spezzato in tre dal brief 44 (Fable,
+- [ ] **H4 — Giro libero.** *H4a fatto (brief 44), H4b1 fatto (brief 45,
+  2026-11-03), restano H4b2/H4b3/H4c.* Spezzato in tre dal brief 44 (Fable,
   2026-11-03): **H4a** macchina+boot+ingressi registrati con arresto
   atteso al corpo 1F; **H4b** traduzione dei corpi attract/titolo
-  (~950 istruzioni: 1F, 06, 07, 08+0C, 0B, regione 6253-673F) più
-  l'oracolo del registro R; **H4c** giro completo 0-5499 contro
+  (~930 istruzioni), spezzato dal brief 45 in **H4b1** (fatto: NMI complete,
+  corpi 1F e 06, strumento e sentinella per R; arresto al corpo 07, frame
+  1188), **H4b2** (corpo 07, ~690 istruzioni) e **H4b3** (corpi 08, 0C, 0B
+  più il confronto byte per byte al frame 2410); la regione 6253-673F passa
+  a H4c; **H4c** giro completo 0-5499 contro
   `replay_2410.bin` e l'oracolo storico. Staccare il gioco dall'oracolo: ciclo
   principale vero (NMI a 60 Hz, scheduler, RAM inizializzata come al
   boot), il gioco gira da solo senza replay, prima headless. Verifica:

@@ -26,9 +26,13 @@
 static uint8_t r_valori[2];
 static unsigned r_usati;
 
+void (*nemici_r_gancio)(void) = NULL;
+
 /* Come nemici_r_somma, ma scrive anche R1 (5DDF lascia C = R1). */
 uint8_t nemici_r_somma_r1(uint8_t *r1)
 {
+    if (nemici_r_gancio)
+        nemici_r_gancio();
     uint8_t v = r_valori[r_usati < 2 ? r_usati : 1];
     r_usati++;
     uint8_t r2 = (uint8_t)((v & 0x80) | ((v + 3) & 0x7f));

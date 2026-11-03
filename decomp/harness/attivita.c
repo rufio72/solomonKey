@@ -8,7 +8,8 @@
  * Tradotti qui: 02 (4B84), 03 (4BC6), 0D (5C8E), 0E (63A4), 11 (456E),
  * 14 (44B5), 20 (3E90). Il corpo 0A (4DA2), motore dei nemici, sta in
  * nemici.c (lotto N1, brief 25); i corpi 01 (48D1) e 10 (457B) in
- * attivita_01_10.c (brief 26). Nella finestra del replay nessun codice
+ * attivita_01_10.c (brief 26); i corpi 06 (75E7) e 1F (43C8) dell'avvio in
+ * attivita_attract.c (brief 45). Nella finestra del replay nessun codice
  * spedito resta NULL in corpo_attivita_replay. */
 #include <stddef.h>
 #include "routine.h"
@@ -341,11 +342,13 @@ attivita_fn corpo_attivita_replay[SCHED_CODICI] = {
     [0x01] = attivita_01_48d1,
     [0x02] = attivita_02_4b84,
     [0x03] = attivita_03_4bc6,
+    [0x06] = attivita_06_75e7,
     [0x0a] = attivita_0a_4da2,
     [0x0d] = attivita_0d_5c8e,
     [0x0e] = attivita_0e_63a4,
     [0x10] = attivita_10_457b,
     [0x11] = attivita_11_456e,
     [0x14] = attivita_14_44b5,
+    [0x1f] = attivita_1f_43c8,
     [0x20] = attivita_20_3e90,
 };

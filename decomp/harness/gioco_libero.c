@@ -6,7 +6,7 @@
  *     (giro_boot.sh); accanto serve il dump out/giroboot_602.bin
  *   ingressi.txt: out/ingressi_replay.txt (estrai_ingressi.sh)
  * Si ferma, con codice 1, alla prima attività il cui corpo non è tradotto
- * (oggi: CORPO 1F al frame 602); vedi GIRO.md. */
+ * (oggi: CORPO 07 al frame 1188, brief 45); vedi GIRO.md. */
 #include <stdio.h>
 #include <stdlib.h>
 

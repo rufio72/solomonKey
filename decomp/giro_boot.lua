@@ -3,9 +3,9 @@
 -- dello spedidore, con gli ingressi convenzionali (come sched_log.lua).
 -- Uso (da decomp/): sh replay.sh, che lancia MAME con -debug e questo script.
 -- Variabili d'ambiente:
---   REPLAY_FINE  frame finale (predefinito 2410)
+--   REPLAY_FINE  frame finale (predefinito 2411)
 --   REPLAY_F0    frame di partenza del replay: dump completo (predefinito 602)
---   REPLAY_DUMPS altri frame con dump completo, separati da virgola (vuota)
+--   REPLAY_DUMPS altri frame con dump completo, separati da virgola (giro_boot.sh passa 2410)
 --   REPLAY_NOME  prefisso dei file in out/ (predefinito giroboot)
 -- Prodotti:
 --   out/<nome>_oracolo.txt  una riga per NMI:
@@ -20,7 +20,7 @@
 --     frame f (aggiunta al formato: dice fra quali spedizioni cade la NMI;
 --     letture = letture a 3AFA dopo l'ultima D, come il campo delle W).
 --   out/<nome>_<f>.bin  c000-ffff (16384 byte) a F0 e ai frame di REPLAY_DUMPS.
-local fine = tonumber(os.getenv("REPLAY_FINE") or "2410")
+local fine = tonumber(os.getenv("REPLAY_FINE") or "2411")
 local f0 = tonumber(os.getenv("REPLAY_F0") or "602")
 local nome = os.getenv("REPLAY_NOME") or "giroboot"
 local dumps = {}

@@ -166,8 +166,13 @@ ogni ciclo nei brief in `compiti/`.
    vettore 0000 (boot 2833-2959, `sub_29cf`/`sub_2a03` tradotte), NMI una
    per frame con gli ingressi registrati; 537 NMI (frame 66-602)
    coincidono con MAME e il dump 602 coincide byte per byte; si ferma al
-   corpo 1F (43C8). Restano H4b (corpi attract/titolo ~950 istruzioni,
-   oracolo del registro R) e H4c (giro 0-5499). Vedi `decomp/GIRO.md`.
+   corpo 1F (43C8).
+   Lotto H4b1 (brief 45) chiuso: NMI nello spedidore e a metà attività nella
+   macchina, corpi 1F e 06 tradotti (`attivita_attract.c`), strumento
+   `registra_r.sh` e sentinella del registro R (0 letture nei frame
+   0-5499); il giro arriva al corpo 07 (frame 1188) con 1123 NMI e nessuna
+   divergenza nello spedidore. Restano H4b2 (corpo 07), H4b3 (08, 0C, 0B e
+   confronto al 2410) e H4c (giro 0-5499). Vedi `decomp/GIRO.md`.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

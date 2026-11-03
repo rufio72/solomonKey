@@ -68,6 +68,15 @@ void attivita_0a_4da2(uint8_t slot);
 void attivita_01_48d1(uint8_t slot);
 void attivita_10_457b(uint8_t slot);
 
+/* Come NEMICI_PUNTO ma senza controllo d'impronta, per i ritorni dentro
+ * routine tradotte senza punti interni (attivita_attract.c, lotto H4b1):
+ * macchina.c ci aggancia il suo gancio, altrove è NULL. */
+extern void (*attract_punto_largo)(uint16_t da, uint16_t a);
+
+/* Corpi 1F e 06 (attivita_attract.c, lotto H4b1). */
+void attivita_1f_43c8(uint8_t slot);
+void attivita_06_75e7(uint8_t slot);
+
 /* 4B98, chiusura dell'oggetto IX (attivita.c). */
 void sub_4b98(uint16_t ix);
 
@@ -328,6 +337,12 @@ void sub_627f(struct z80 *z);
  * la cattura (vedi l'intestazione di nemici_r.c). */
 uint8_t nemici_r_somma(void);
 uint8_t nemici_r_somma_r1(uint8_t *r1);   /* somma e R1 */
+/* Sentinella del registro R (brief 45): se non NULL, nemici_r_somma_r1 la
+ * chiama prima di leggere R. macchina.c ci aggancia r_letto, che ferma il
+ * giro: la partita registrata non legge R (registra_r.sh), un percorso
+ * diverso sì. NULL nel banco e nel replay: nessun effetto. */
+extern void (*nemici_r_gancio)(void);
+
 void banco_r_54c5(struct z80 *z);
 void banco_r_51d7(struct z80 *z);
 void banco_r_5995(struct z80 *z);
