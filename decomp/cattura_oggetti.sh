@@ -4,6 +4,7 @@
 # sessione «oggetti» di sessioni.sh, ripetuti due volte (14 terne, una posta
 # ogni 100 frame da 2300 a 3600). Uso (da decomp/):
 #   sh cattura_oggetti.sh <ENTRY> [N] [SUFFISSO]
+# SNAP_POKE_EXTRA (opzionale): poke «frame:addr:val» davanti alle terne.
 # I file sono out/snap_<ENTRY>_gioco_oggetti[_SUFFISSO]_*.
 set -u
 POKE=
@@ -19,5 +20,5 @@ for terna in "08 09 0a" "0b 0c 0d" "0e 0f 10" "11 12 13" "14 15 16" "17 18 19" "
     POSTA="$POSTA$((f + 50)):0x22,"
     f=$((f + 100))
 done
-export SNAP_POKE="$POKE" SNAP_POSTA="$POSTA"
+export SNAP_POKE="${SNAP_POKE_EXTRA:+$SNAP_POKE_EXTRA,}$POKE" SNAP_POSTA="$POSTA"
 exec sh cattura.sh "$1" gioco "${2:-1}" "oggetti${3:+_$3}"

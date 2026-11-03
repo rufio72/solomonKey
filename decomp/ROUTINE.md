@@ -724,3 +724,55 @@ banco a 1110 catture e 264 voci.
 `switch` di 610C (il nibble è sempre < 16). `sub_2474` e `sub_4ada` sono
 coperte per intero. In `nemici_comuni.c` restano scoperte le parti di 49AE e
 4B20 che non esercitano le catture (non compito di questo lotto).
+
+## Routine dei quadri bonus e del finale (lotto 38)
+
+Lotto 38 (compito 38): le 23 routine di `CENSIMENTO-12.md` ancora da tradurre,
+in `z80_1xxx.c`, `z80_2xxx.c`, `z80_38xx.c`, `z80_4xxx.c` (con
+`#include "nemici.h"`), `z80_6xxx.c`, `z80_7xxx.c` e `nmi.c` (03EE al posto
+dello stub). 250E è ora `sub_250e` in `z80_2xxx.c`; in `attivita.c` la
+vecchia statica diventa l'involucro `conta_250e` (il replay prova che
+`attivita_0d_5c8e` non cambia). 4302 legge due volte il registro R: nel
+banco passa dal wrapper `banco_r_4302` (`nemici_r.c`, regola dei lotti
+N3-N12). Strumenti di cattura nuovi: gli stati `finale2` (inneschi di
+`finale`, partenza al frame 4500) e `attNN` (c19d/c19e azzerati e posta
+dell'attività NN al 2300) di `cattura.sh`, e `SNAP_POKE_EXTRA` di
+`cattura_oggetti.sh` (poke «frame:addr:val» davanti alle terne). Le forzate
+usano anche poke di RAM un frame prima dell'ingresso (1533, 147F, 4319,
+6976) oltre a `SNAP_FORZA`. Stato `verificata` con almeno due catture non
+forzate; 2441, 4302 e 4319 restano `tradotta` (una sola occorrenza naturale).
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x03EE | sub_03ee | nmi.c | 13 | B = A, (HL) = 0, C D E da HL+1..HL+3, poi 3A54 (sostituisce lo stub) | verificata | 2 | stanza17 | 2 non forzate e 0 forzate |
+| 0x1471 | sub_1471 | z80_1xxx.c | 3 | HL = c093 e cade in 1474 | verificata | 2 | gioco | 2 non forzate e 0 forzate; cade in 1474 |
+| 0x1474 | sub_1474 | z80_1xxx.c | 11 | raddoppio BCD di 3 byte a HL (adc a,a; daa) col riporto fra i byte | verificata | 2 | gioco | 2 non forzate e 0 forzate |
+| 0x147F | sub_147f | z80_1xxx.c | 18 | HL = 8EA4 + 2·(c243), rst 10 (ROM), HL = 0009 + parola | verificata | 3 | gioco | 2 non forzate e 1 forzate |
+| 0x1533 | sub_1533 | z80_1xxx.c | 22 | cerca coppia di bit libera nella bitmap da c25d: Z se trovata, riporto se esaurita | verificata | 4 | gioco | 2 non forzate e 2 forzate |
+| 0x2425 | sub_2425 | z80_2xxx.c | 11 | somma a 16 bit di (DE) a (HL) byte per byte, HL e DE += 2 | verificata | 3 | bonus, porta | 3 non forzate e 0 forzate |
+| 0x2430 | sub_2430 | z80_2xxx.c | 17 | scrive a DE {0,H,0,L,0,0,0}, A = B | verificata | 2 | finale, porta | 2 non forzate e 0 forzate |
+| 0x2441 | sub_2441 | z80_2xxx.c | 9 | HL = 16·A (A invariato) | tradotta | 1 | gioco | 1 non forzate e 0 forzate; una sola cattura naturale |
+| 0x250E | sub_250e | z80_2xxx.c | 15 | C = (HL), (HL) = 0, la parola a HL+1 cresce di C; riporto in F | verificata | 2 | gioco | 2 non forzate e 0 forzate; involucro `conta_250e` in attivita.c; coperto dal replay |
+| 0x3CC1 | sub_3cc1 | z80_38xx.c | 1 | (HL) = A e cade in 3CC2 | verificata | 2 | att25 | 2 non forzate e 0 forzate; cade in 3CC2 |
+| 0x3CC2 | sub_3cc2 | z80_38xx.c | 8 | tile 0x65 a HL con bit 2 di H spento, poi acceso, HL += 1 | verificata | 2 | att25 | 2 non forzate e 0 forzate |
+| 0x3D20 | sub_3d20 | z80_38xx.c | 15 | B volte DE:HL += 000186A0, poi cade in 3D2F | verificata | 2 | att25 | 2 non forzate e 0 forzate; cade in 3D2F |
+| 0x3D2F | sub_3d2f | z80_38xx.c | 20 | somma HL e E al valore a 24 bit c1aa-c1ac | verificata | 2 | att25 | 2 non forzate e 0 forzate |
+| 0x3D43 | sub_3d43 | z80_38xx.c | 9 | DE = c061, C = 0, 4D87 | verificata | 2 | att25 | 2 non forzate e 0 forzate |
+| 0x3DA6 | sub_3da6 | z80_38xx.c | 13 | (IX+0B/0C) = L/H, (IX+12/13) = E/D | verificata | 3 | att25, att26 | 3 non forzate e 0 forzate |
+| 0x3DEA | sub_3dea | z80_38xx.c | 36 | prepara l'oggetto c88e (IX non ripristinato) e chiama 4AF6 | verificata | 2 | att25, att26 | 2 non forzate e 0 forzate |
+| 0x3FB2 | sub_3fb2 | z80_38xx.c | 28 | 3 byte BCD di c095..c093 a 6 cifre, ognuna pesata (3FCE) sul punteggio c1aa-c1ac | verificata | 3 | att25, finale, porta | 3 non forzate e 0 forzate |
+| 0x3FCE | sub_3fce | z80_38xx.c | 26 | C volte somma a 24 bit di 3 byte ROM (DE) in c1aa-c1ac, DE += 3; con Z salta | verificata | 4 | porta | 4 non forzate e 0 forzate; Z in ingresso nel bit 6 di F; 3 nuove più la preesistente `porta` |
+| 0x4302 | sub_4302 | z80_4xxx.c | 23 | byte a caso (due `ld a,r`) nella riga A della tabella ROM 82DA | tradotta | 3 | gioco | 1 non forzate e 2 forzate; solo via `banco_r_4302` |
+| 0x4319 | sub_4319 | z80_4xxx.c | 127 | azioni su oggetto portato secondo A-0F (4B98, 6EB7, 24BE, 4C11) | tradotta | 9 | gioco | 1 non forzate e 8 forzate; solo 1 cattura naturale |
+| 0x6976 | sub_6976 | z80_6xxx.c | 49 | incrementa tre contatori (c1ba, c1ca, c1fc) | verificata | 4 | att16, finale2 | 2 non forzate e 2 forzate |
+| 0x7B95 | sub_7b95 | z80_7xxx.c | 9 | (HL) = C, tile 04 con bit 2 di H spento, HL -= 1 | verificata | 2 | finale2 | 2 non forzate e 0 forzate |
+| 0x7B9E | sub_7b9e | z80_7xxx.c | 19 | elenco di coppie ROM chiuso da ff, ognuna a 3A54 con D += 2 | verificata | 2 | finale2 | 2 non forzate e 0 forzate |
+
+Forzate: 1533 `forza01-02` (poke c25d, e c259 per la discesa di byte), 147F
+`forza01` (c243 alto), 4302 `forza01-02` (`a:03`, `a:0b`), 4319 `forza01-08`
+(`a:13-17`, poke di c42a, `a:15` con c42a = 0), 6976 `forza01-02` (poke di
+c23c e c23b). Totale lotto: 63 catture (di cui 48 non forzate e 15
+forzate; 3FCE ne ha una in più dal lotto 16); banco a 1172 catture e 287 voci.
+
+**Non coperte da gcov**: nessuna riga nelle 23 funzioni. L'involucro
+`conta_250e` non è esercitato dal banco (lo prova il replay).

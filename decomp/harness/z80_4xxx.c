@@ -2,6 +2,7 @@
  * Si riproducono l'effetto sulla RAM e i registri A, BC, DE, HL, IX, IY
  * all'uscita (le bandiere F no). */
 #include "routine.h"
+#include "nemici.h"
 
 /* 0x4AF6: inizializza i campi di un oggetto a IX.
  * IX+04 = E, IX+05 = ff, IX+1B = E, IX+1C = ff, IX+1D = B, IX+1E = C,
@@ -436,4 +437,96 @@ void sub_4d05(struct z80 *z)
     SET_DE(z, 0xc061);
     z->c = 0x71;
     sub_4d87(z);
+}
+
+/* ------------------------------------------------------------------ */
+/* Lotto 38 (compito 38): pesca casuale e oggetti portati. */
+
+/* 0x4302: sceglie un byte a caso in una riga di 16 della tabella ROM
+ * 82DA (riga A). Legge R due volte (nemici_r_somma: R1 + R2); indice =
+ * (somma & 1E) >> 1. Uscita: A = byte scelto, DE = 82DA + 16·A d'ingresso,
+ * HL = DE + indice. Nel banco passa dal wrapper banco_r_4302. */
+void sub_4302(struct z80 *z)
+{
+    sub_2441(z);                               /* 4302: HL = 16·A */
+    SET_DE(z, HL(z) + 0x82da);                 /* 4305-4309 */
+    uint8_t r1;
+    uint8_t somma = nemici_r_somma_r1(&r1);    /* 430A-430F ld a,r ... add a,l */
+    uint8_t indice = (uint8_t)((somma & 0x1e) >> 1);   /* 4310-4312 */
+    SET_HL(z, DE(z) + indice);                 /* 4313-4316 */
+    z->a = leggi(HL(z));                       /* 4317 */
+}
+
+/* 0x4319 (A = codice dell'oggetto, HL = oggetto, IX = oggetto di
+ * Dana): azioni secondo A - 0F. 0-3: se il bit 3 del byte HL-7 è acceso
+ * (e col bit 4 si spegne il bit 0 di c2ba) chiude l'oggetto portato con
+ * sub_4b98 e azzera i suoi due byte con sub_6eb7; 4 e 7: niente;
+ * 5 e 6: se il bit 3 di (HL-7) è acceso azzera con sub_6eb7 i due byte
+ * di (HL+6) e (HL+7); 8: allinea (IX+0E) a 16 e chiama sub_24be e
+ * sub_4c11. Uscita: A = A - 0F (salvo dove sub_6eb7 lo cambia). */
+void sub_4319(struct z80 *z)
+{
+    uint8_t a = (uint8_t)(z->a - 0x0f);        /* 4319 */
+    z->a = a;
+    uint16_t hl = HL(z);
+    if (a < 4) {                               /* 431B-431D -> 432B */
+        uint16_t sotto = (uint16_t)(hl - 7);   /* 432C-432F */
+        a = leggi(sotto);                      /* 4330 */
+        z->a = a;
+        SET_DE(z, sotto);                      /* ex de,hl */
+        if (!(a & 0x08))                       /* 4331-4334 */
+            return;
+        if (a & 0x10) {                        /* 4337-4339 */
+            M(0xc2ba) &= (uint8_t)~0x01;       /* 433C-433F */
+            SET_DE(z, 0xc2ba);
+        }
+        uint16_t bc = BC(z);                   /* 4342-4343 push hl, bc */
+        z->c = 0;                              /* 4344 */
+        SET_DE(z, 0x0006);                     /* 4346 */
+        a = M(hl + 6);                         /* 4349-434A */
+        SET_HL(z, 0x48af);                     /* 434C */
+        z->a = a;
+        sub_0008(z);                           /* 434F */
+        sub_0018(z);                           /* 4350: HL = parola di 48AF */
+        uint16_t ix = z->ix;
+        z->ix = HL(z);                         /* 4351-4352 ex (sp),ix */
+        sub_4b98(z->ix);                       /* 4354 */
+        z->ix = ix;                            /* 4357 pop ix */
+        z->a = a;                              /* 4359 pop af */
+        sub_6eb7(z);                           /* 435A */
+        SET_BC(z, bc);                         /* 435D pop bc */
+        SET_HL(z, hl);                         /* 435E pop hl */
+        return;
+    }
+    if (a == 4)                                /* 431F-4321 ret c */
+        return;
+    if (a < 7) {                               /* 4322-4324 -> 4360 */
+        uint16_t sotto = (uint16_t)(hl - 7);   /* 4361-4364 */
+        SET_DE(z, sotto);                      /* ex de,hl */
+        if (!(leggi(sotto) & 0x08))            /* 4365-4368 ret z */
+            return;
+        uint16_t bc = BC(z);                   /* 4369-436A */
+        a = M(hl + 6);                         /* 436B-436F */
+        z->b = M(hl + 7);                      /* 4370-4371 */
+        z->a = a;
+        sub_6eb7(z);                           /* 4372 */
+        z->a = z->b;                           /* 4375 */
+        sub_6eb7(z);                           /* 4376 */
+        SET_HL(z, hl);                         /* 4379 pop hl */
+        SET_BC(z, bc);                         /* 437A pop bc */
+        return;
+    }
+    if (a != 8)                                /* 4326-4328, 432A ret */
+        return;
+    uint8_t y = (uint8_t)((M(z->ix + 0x0e) + 7) & 0xf0);   /* 437C-4381 */
+    M(z->ix + 0x0e) = y;                       /* 4383 */
+    z->a = y;
+    z->d = y;                                  /* 4386 */
+    z->e = M(z->ix + 0x15);                    /* 4387 */
+    sub_24be(z);                               /* 438A */
+    uint16_t hl2 = HL(z), bc2 = BC(z);         /* 438D-438E */
+    SET_BC(z, 0);                              /* 438F */
+    sub_4c11(z);                               /* 4392 */
+    SET_BC(z, bc2);                            /* 4395-4396 */
+    SET_HL(z, hl2);
 }

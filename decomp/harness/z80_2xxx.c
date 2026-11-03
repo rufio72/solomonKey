@@ -500,3 +500,68 @@ void sub_2551(struct z80 *z)
     SET_DE(z, record);
     SET_HL(z, contatore);
 }
+
+/* ------------------------------------------------------------------ */
+/* Lotto 38 (compito 38): quadri bonus e finale. */
+
+/* 0x2425: somma a 16 bit della parola in DE alla parola in HL, byte per
+ * byte: il riporto del primo passa al secondo. Uscita: A = byte alto
+ * della somma, HL e DE avanzati di 2, riporto in F bit 0. */
+void sub_2425(struct z80 *z)
+{
+    uint16_t hl = HL(z), de = DE(z);
+    unsigned s = leggi(de) + M(hl);            /* 2425-2426 */
+    M(hl) = (uint8_t)s;                        /* 2427 */
+    unsigned s2 = leggi(de + 1) + M(hl + 1) + (s > 0xff);   /* 242A-242B adc */
+    M(hl + 1) = (uint8_t)s2;                   /* 242C */
+    z->a = (uint8_t)s2;
+    SET_HL(z, hl + 2);
+    SET_DE(z, de + 2);
+    z->f = (uint8_t)((z->f & ~1) | (s2 > 0xff));
+}
+
+/* 0x2430: scrive a DE sette byte {0, H, 0, L, 0, 0, 0} (H e L d'ingresso)
+ * e ricarica A da B. Uscita: A = B, D = H, E = L, HL = DE + 6. */
+void sub_2430(struct z80 *z)
+{
+    uint16_t dest = DE(z);
+    uint8_t h = z->h, l = z->l;
+    M(dest) = 0;                               /* 2432 */
+    M(dest + 1) = h;                           /* 2434 */
+    M(dest + 2) = 0;                           /* 2436 */
+    M(dest + 3) = l;                           /* 2438 */
+    M(dest + 4) = 0;                           /* 243A */
+    M(dest + 5) = 0;                           /* 243C */
+    M(dest + 6) = 0;                           /* 243E */
+    z->d = h;                                  /* ex de,hl */
+    z->e = l;
+    SET_HL(z, dest + 6);
+    z->a = z->b;                               /* 243F */
+}
+
+/* 0x2441: HL = 16·A (A invariato). */
+void sub_2441(struct z80 *z)
+{
+    SET_HL(z, (uint16_t)(z->a << 4));
+}
+
+/* 0x250E: (HL) è un incremento: C = (HL), (HL) = 0, e la parola a HL+1
+ * (byte basso prima) cresce di C. Uscita: A = 0, B = 0, C = incremento,
+ * DE = HL d'ingresso + 1, HL = parola nuova, riporto di `add hl,bc` in
+ * F bit 0. Scrive (HL+1) = E, (HL+2) = D della parola nuova. */
+void sub_250e(struct z80 *z)
+{
+    uint16_t hl0 = HL(z);
+    z->a = 0;                                  /* 250E xor a */
+    z->c = M(hl0);                             /* 250F */
+    z->b = 0;                                  /* 2510 */
+    M(hl0) = 0;                                /* 2511 */
+    SET_HL(z, hl0 + 1);
+    sub_0010(z);                               /* 2513 rst 10: DE = parola */
+    uint32_t somma = (uint32_t)DE(z) + BC(z);  /* 2514-2516 */
+    M(hl0 + 2) = (uint8_t)(somma >> 8);        /* 2518 */
+    M(hl0 + 1) = (uint8_t)somma;               /* 251A */
+    SET_DE(z, hl0 + 1);                        /* 251B ex de,hl */
+    SET_HL(z, (uint16_t)somma);
+    z->f = (uint8_t)((z->f & ~1) | (somma > 0xffff));
+}

@@ -134,7 +134,7 @@ void sub_797e(struct z80 *z);
 void sub_7c84(struct z80 *z);
 
 /* Lotto 10 (compito 14): la catena della NMI (nmi.c, nmi_oggetti.c,
- * z80_0xxx.c, z80_08xx.c, z80_1xxx.c). Lo stub 03EE è statico in nmi.c. */
+ * z80_0xxx.c, z80_08xx.c, z80_1xxx.c). 03EE è ora tradotta (lotto 38). */
 void sub_0028(struct z80 *z);
 void sub_0066(struct z80 *z);
 void sub_01d5(struct z80 *z);
@@ -159,5 +159,30 @@ void sub_6c2c(struct z80 *z);
 void sub_7379(struct z80 *z);
 void sub_7eca(struct z80 *z);
 void sub_7f2d(struct z80 *z);
+
+/* Lotto 38 (compito 38): quadri bonus e finale. */
+void sub_03ee(struct z80 *z);
+void sub_1471(struct z80 *z);
+void sub_1474(struct z80 *z);
+void sub_147f(struct z80 *z);
+void sub_1533(struct z80 *z);
+void sub_2425(struct z80 *z);
+void sub_2430(struct z80 *z);
+void sub_2441(struct z80 *z);
+void sub_250e(struct z80 *z);
+void sub_3cc1(struct z80 *z);
+void sub_3cc2(struct z80 *z);
+void sub_3d20(struct z80 *z);
+void sub_3d2f(struct z80 *z);
+void sub_3d43(struct z80 *z);
+void sub_3da6(struct z80 *z);
+void sub_3dea(struct z80 *z);
+void sub_3fb2(struct z80 *z);
+void sub_3fce(struct z80 *z);
+void sub_4302(struct z80 *z);              /* col registro R: banco_r_4302 */
+void sub_4319(struct z80 *z);
+void sub_6976(struct z80 *z);
+void sub_7b95(struct z80 *z);
+void sub_7b9e(struct z80 *z);
 
 #endif

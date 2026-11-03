@@ -338,5 +338,6 @@ void banco_r_5e1a(struct z80 *z);
 void banco_r_4fd4(struct z80 *z);
 void banco_r_50df(struct z80 *z);
 void banco_r_5cfb(struct z80 *z);
+void banco_r_4302(struct z80 *z);
 
 #endif

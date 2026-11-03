@@ -227,3 +227,43 @@ void sub_7f2d(struct z80 *z)
     z->c = c;
     SET_HL(z, hl);
 }
+
+/* ------------------------------------------------------------------ */
+/* Lotto 38 (compito 38): quadro finale. */
+
+/* 0x7B95: scrive C a HL e il tile 04 a HL con il bit 2 di H spento, poi
+ * riaccende il bit 2 e arretra. Uscita: HL = HL - 1 (bit 2 di H
+ * acceso prima del `dec`). */
+void sub_7b95(struct z80 *z)
+{
+    M(HL(z)) = z->c;                           /* 7B95 */
+    z->h &= (uint8_t)~0x04;                    /* 7B96 res 2,h */
+    M(HL(z)) = 0x04;                           /* 7B98 */
+    z->h |= 0x04;                              /* 7B9A set 2,h */
+    SET_HL(z, HL(z) - 1);                      /* 7B9C */
+}
+
+/* 0x7B9E: elenco di coppie ROM (B, C) a HL, chiuso da ff: per ciascuna
+ * chiama sub_3a54 (con DE conservato e D + 2 per la coppia dopo).
+ * Uscita: A = ff, HL = dopo il terminatore, B e C dell'ultima coppia,
+ * D avanzato di 2 per coppia. */
+void sub_7b9e(struct z80 *z)
+{
+    for (;;) {
+        uint16_t hl = HL(z);
+        z->a = leggi(hl);                      /* 7B9E */
+        hl++;                                  /* 7B9F */
+        SET_HL(z, hl);
+        if (z->a == 0xff)                      /* 7BA0-7BA2 ret z */
+            return;
+        z->b = z->a;                           /* 7BA3 */
+        z->c = leggi(hl);                      /* 7BA4 */
+        hl++;                                  /* 7BA5 */
+        SET_HL(z, hl);
+        uint16_t de = DE(z);                   /* 7BA6-7BA7 */
+        sub_3a54(z);                           /* 7BA8 */
+        SET_DE(z, de);                         /* 7BAB-7BAC */
+        SET_HL(z, hl);
+        z->d = (uint8_t)(z->d + 2);            /* 7BAD-7BAE */
+    }
+}

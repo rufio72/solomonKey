@@ -1,0 +1,7 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+Error parsing XML configuration file default.cfg
+POKE 2250 C19D 00
+POKE 2250 C19E 00
+POSTA 2300 00 25
+SNAP: catturata occorrenza 1 di 0x3CC2 [att25] al frame 2501, scartate 0
+Average speed: 2359.38% (41 seconds)

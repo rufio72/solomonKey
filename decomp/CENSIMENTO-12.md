@@ -1,6 +1,6 @@
 # Censimento del lotto 12: routine nuove dei quadri bonus e del finale
 
-Brief 16 (2026-10-22). Destinazioni statiche di `call` fra le 104 mai osservate prima del lotto (`out/call_mai_prima_lotto12.txt`) che le sessioni del blocco `lotto12` di `sessioni.sh` hanno eseguito. Base dei lotti di traduzione futuri: nessuna di queste routine è tradotta.
+Brief 16 (2026-10-22). Destinazioni statiche di `call` fra le 104 mai osservate prima del lotto (`out/call_mai_prima_lotto12.txt`) che le sessioni del blocco `lotto12` di `sessioni.sh` hanno eseguito. Base dei lotti di traduzione; al brief 16 nessuna di queste routine era tradotta, oggi lo sono tutte tranne le 8 documentate in fondo (sezione in fondo).
 
 Colonne: **estensione** = blocco di PC eseguiti contigui (passo ≤ 4 byte) che contiene l'ingresso, unione delle sessioni del lotto; può unire routine adiacenti o fermarsi prima della fine su rami mai presi. **Invocazioni** = somma delle chiamate osservate (`out/<sessione>_chiamate.txt`), con i siti chiamanti `sito×numero`. Le occorrenze attraversate dalla NMI si vedono solo in cattura (`cattura.sh`), non qui.
 
@@ -146,3 +146,50 @@ fine spetta ai lotti di traduzione.
 | AFE6 | AA71 | NO |
 | AFF0 | AA80 | NO |
 | BE2B | 2D83 | NO |
+
+## Destino delle 40 destinazioni (brief 38)
+
+23 tradotte nel lotto 38, 9 già tradotte dai lotti N3-N12, 8 solo documentate (interne o gestori della chiave 0D18, lotto a parte).
+
+| ingresso | destino |
+|---|---|
+| 03EE | tradotta nel lotto 38, `nmi.c` |
+| 1471 | tradotta nel lotto 38, `z80_1xxx.c` |
+| 1474 | tradotta nel lotto 38, `z80_1xxx.c` |
+| 147F | tradotta nel lotto 38, `z80_1xxx.c` |
+| 1533 | tradotta nel lotto 38, `z80_1xxx.c` |
+| 2425 | tradotta nel lotto 38, `z80_2xxx.c` |
+| 2430 | tradotta nel lotto 38, `z80_2xxx.c` |
+| 2441 | tradotta nel lotto 38, `z80_2xxx.c` |
+| 250E | tradotta nel lotto 38, `z80_2xxx.c` |
+| 3CC1 | tradotta nel lotto 38, `z80_38xx.c` |
+| 3CC2 | tradotta nel lotto 38, `z80_38xx.c` |
+| 3D20 | tradotta nel lotto 38, `z80_38xx.c` |
+| 3D2F | tradotta nel lotto 38, `z80_38xx.c` |
+| 3D43 | tradotta nel lotto 38, `z80_38xx.c` |
+| 3DA6 | tradotta nel lotto 38, `z80_38xx.c` |
+| 3DEA | tradotta nel lotto 38, `z80_38xx.c` |
+| 3FB2 | tradotta nel lotto 38, `z80_38xx.c` |
+| 3FCE | tradotta nel lotto 38, `z80_38xx.c` |
+| 4302 | tradotta nel lotto 38, `z80_4xxx.c` |
+| 4319 | tradotta nel lotto 38, `z80_4xxx.c` |
+| 6976 | tradotta nel lotto 38, `z80_6xxx.c` |
+| 7B95 | tradotta nel lotto 38, `z80_7xxx.c` |
+| 7B9E | tradotta nel lotto 38, `z80_7xxx.c` |
+| 134B | già tradotta e verificata (lotti N3-N12), `nemici_comparsa.c` |
+| 4ADA | già tradotta (lotti N3-N12), `nemici_comuni.c` |
+| 5DDF | già tradotta, `nemici_tipo07a.c` (col wrapper `banco_r_5ddf`) |
+| 5E09 | già tradotta, `nemici_tipo07a.c` |
+| 5FDC | già tradotta, `nemici_tipo07b.c` |
+| 6248 | già tradotta, `nemici_tipo07b.c` |
+| 5115 | già tradotta, `nemici_tipo06a.c` (senza ingresso catturabile) |
+| 5124 | già tradotta e verificata, `nemici_tipo06a.c` |
+| 51FA | già tradotta e verificata, `nemici_tipo06a.c` |
+| 02A2 | documentata: etichetta interna di `sub_027c` (`nmi_oggetti.c`) |
+| 02A4 | documentata: etichetta interna di `sub_027c` (`nmi_oggetti.c`) |
+| 02A5 | documentata: etichetta interna di `sub_027c` (`nmi_oggetti.c`) |
+| 40FF | documentata: interno del ciclo 40FE del corpo dell'attività 1C (spedidore a passi, non tradotto) |
+| 7B64 | documentata: interno del passo 7B3B-7B94 (`djnz 7B64`) |
+| 0CFD | documentata: gestore della tabella 0D18 (chiave, continuazione 0CF3 di `sub_0ce6`); lotto futuro (1278 B) |
+| 0E0B | documentata: gestore della tabella 0D18, dentro il gestore 0D8E; lotto futuro (1278 B) |
+| 11A5 | documentata: gestore della tabella 0D18, dentro 113C; lotto futuro (1278 B) |

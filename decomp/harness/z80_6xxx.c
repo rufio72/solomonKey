@@ -79,3 +79,38 @@ void sub_6c2c(struct z80 *z)
     sub_0028(z);
     NEMICI_PONI_RIPORTO(z, 1);                 /* rst 28 preserva AF: riporto del rrca */
 }
+
+/* ------------------------------------------------------------------ */
+/* Lotto 38 (compito 38): contatori di quadro. */
+
+/* 0x6976: incrementa tre contatori. (c1ba + H di 8·(c235 parola)); poi,
+ * con la parola W = (c23a) e il byte (c23c): offset = 0x31 se (c23c) non
+ * è zero o H(W) > 0D, altrimenti H(4·W); (c1ca + offset) e
+ * (c1fc + (c243)). Uscita: A = C = (c243), B = 0, HL = c1fc + B:C,
+ * DE = parola W (se (c23c) != 0) oppure c23c. */
+void sub_6976(struct z80 *z)
+{
+    uint16_t w8 = (uint16_t)((M(0xc235) | (M(0xc236) << 8)) << 3);   /* 6976-697B */
+    SET_DE(z, w8 >> 8);                        /* 697C-697D */
+    M(0xc1ba + (w8 >> 8))++;                   /* 697F-6983 */
+    SET_HL(z, 0xc23a);                         /* 6984 */
+    sub_0010(z);                               /* 6987: DE = parola, HL = c23c */
+    SET_BC(z, 0x0031);                         /* 6988 */
+    z->a = M(0xc23c);                          /* 698B */
+    if (z->a == 0) {                           /* 698C-698D */
+        uint16_t w = DE(z);                    /* 698F ex de,hl */
+        SET_DE(z, HL(z));
+        SET_HL(z, w);
+        z->a = 0x0d;                           /* 6990 */
+        if (!(0x0d < (w >> 8))) {              /* 6992-6993 cp h; jr c */
+            uint16_t w4 = (uint16_t)(w << 2);  /* 6995-6996 */
+            SET_HL(z, w4);
+            z->c = (uint8_t)(w4 >> 8);         /* 6997 */
+        }
+    }
+    M(0xc1ca + BC(z))++;                       /* 6998-699C */
+    z->a = M(0xc243);                          /* 69A0 */
+    z->c = z->a;                               /* 69A3 */
+    SET_HL(z, 0xc1fc + BC(z));                 /* 699D, 69A4 */
+    M(HL(z))++;                                /* 69A5 */
+}

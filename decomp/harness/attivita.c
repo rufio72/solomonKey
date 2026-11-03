@@ -81,21 +81,18 @@ static void attivita_03_4bc6(uint8_t slot)
 }
 
 /* ------------------------------------------------------------------ */
-/* 0x250E: A = 0, C = (HL) e (HL) = 0; la parola a HL+1 cresce di C.
- * Restituisce la parola nuova (HL dell'originale) e in *riporto il
- * riporto a 16 bit di `add hl,bc`, che arriva al `sbc hl,bc` di 5CA5.
- * DE dell'originale finisce su HL+1 (c29b per 5C9E). */
-static uint16_t sub_250e(uint16_t hl, int *riporto)
+/* 0x250E: involucro di sub_250e (z80_2xxx.c, lotto 38): A = 0, C = (HL) e
+ * (HL) = 0; la parola a HL+1 cresce di C. Restituisce la parola nuova (HL
+ * dell'originale) e in *riporto il riporto a 16 bit di `add hl,bc`, che
+ * arriva al `sbc hl,bc` di 5CA5. DE dell'originale finisce su HL+1 (c29b
+ * per 5C9E). */
+static uint16_t conta_250e(uint16_t hl, int *riporto)
 {
-    uint8_t c = M(hl);                         /* 250F ld c,(hl); ld b,a */
-    M(hl) = 0;                                 /* 2511 */
-    uint16_t p = parola(hl + 1);               /* 2512 inc hl; rst 10 */
-    uint32_t somma = (uint32_t)p + c;          /* 2516 add hl,bc */
-    *riporto = somma > 0xffff;
-    uint16_t nuova = (uint16_t)somma;
-    M(hl + 2) = (uint8_t)(nuova >> 8);         /* 2518 ld (hl),d */
-    M(hl + 1) = (uint8_t)nuova;                /* 251A ld (hl),e */
-    return nuova;
+    struct z80 z = {0};
+    SET_HL(&z, hl);
+    sub_250e(&z);
+    *riporto = z.f & 1;
+    return HL(&z);
 }
 
 /* 0D, ingresso 5C8E: il cancello c4ce. Con il bit 7 di (c4ce) spento
@@ -115,7 +112,7 @@ static void attivita_0d_5c8e(uint8_t slot)
         return;
     if (a & 0x40) {                            /* 5C9B rla; jr nc 5CDE */
         int riporto;
-        uint16_t hl = sub_250e(0xc29a, &riporto);   /* 5C9E */
+        uint16_t hl = conta_250e(0xc29a, &riporto);   /* 5C9E */
         uint16_t bc = parola(0xc25a);          /* 5CA1 */
         int32_t diff = (int32_t)hl - bc - riporto;  /* 5CA5 sbc hl,bc */
         if (diff < 0)

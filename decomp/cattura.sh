@@ -19,6 +19,9 @@
 # Per questi tre stati il primo frame provato è 2300 (la posta stessa): la
 # sequenza della porta dura 2300-2577 e i suoi passi iniziali cadono prima
 # del 2400.
+# Stati del brief 38: finale2 = inneschi di finale con partenza al frame 4500
+# (la stanza finale); attNN (es. att25) = c19d/c19e azzerati e posta
+# dell'attività NN al 2300 (inneschi di att_XX di sessioni.sh).
 # Stato stanzaNN (brief 27): partita nella stanza NN forzata (SNAP_ROOM, tap
 # su c243 fra i frame 1500 e 1950), ingressi «traccia», senza poke né poste;
 # il primo frame provato è 1951, a tap tolto (snap.lua).
@@ -44,15 +47,26 @@ case "$STATO" in
             POKE_DEF=2250:0xc19d:0,2250:0xc19e:0,2250:0xc24a:0; SNAP_ROOM=4 ;;
     finale) INGRESSI=traccia; FRAMES="2300 2400 2600 3000"
             POKE_DEF=2250:0xc19d:0,2250:0xc19e:0,2250:0xc24b:0x32,2250:0xc24c:0x32,2250:0xc24d:0x32 ;;
+    finale2) INGRESSI=traccia; FRAMES="4500"; SNAP_LIMITE=${SNAP_LIMITE:-9500}; export SNAP_LIMITE
+            POKE_DEF=2250:0xc19d:0,2250:0xc19e:0,2250:0xc24b:0x32,2250:0xc24c:0x32,2250:0xc24d:0x32 ;;
+    att[0-9A-F][0-9A-F])
+            INGRESSI=traccia; FRAMES="2300"
+            POKE_DEF=2250:0xc19d:0,2250:0xc19e:0 ;;
     stanza[0-9]|stanza[0-9][0-9])
             INGRESSI=traccia; FRAMES="1951 2100 2300"
             SNAP_ROOM=$(echo "${STATO#stanza}" | sed 's/^0*\([0-9]\)/\1/') ;;
-    *) echo "stato sconosciuto: $STATO (titolo, gioco, tardo, porta, bonus, finale, stanzaNN)" >&2; exit 2 ;;
+    *) echo "stato sconosciuto: $STATO (titolo, gioco, tardo, porta, bonus, finale, finale2, attNN, stanzaNN)" >&2; exit 2 ;;
 esac
 case "$STATO" in
     porta|bonus|finale)
         SNAP_POKE=${SNAP_POKE:-$POKE_DEF}
         SNAP_POSTA=${SNAP_POSTA:-2300:0x1c} ;;
+    finale2)
+        SNAP_POKE=${SNAP_POKE:-$POKE_DEF}
+        SNAP_POSTA=${SNAP_POSTA:-2300:0x1c} ;;
+    att[0-9A-F][0-9A-F])
+        SNAP_POKE=${SNAP_POKE:-$POKE_DEF}
+        SNAP_POSTA=${SNAP_POSTA:-2300:0x${STATO#att}} ;;
     *)
         SNAP_POKE=${SNAP_POKE:-}
         SNAP_POSTA=${SNAP_POSTA:-} ;;

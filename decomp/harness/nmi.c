@@ -2,7 +2,6 @@
  * (01D5, 0219) e lo stub 03EE. Una NMI per frame, a maschera abilitata.
  * Come per le altre traduzioni si riproducono l'effetto sulla RAM e i
  * registri A, BC, DE, HL, IX, IY all'uscita (le bandiere F no). */
-#include <stdio.h>
 #include "routine.h"
 
 /* Celle di sistema usate dalla catena della NMI. */
@@ -21,12 +20,19 @@
 #define BONUS_TEMPO   0xc234   /* parola del bonus tempo (bit 1 di c045) */
 
 /* 0x03EE (dalla NMI, 010B, quando c078 non è zero: mai eseguito nelle
- * tracce): consegnerebbe il record c078-c07b a sub_3a54 (non tradotta,
- * filone rst 20). Stub: avviso su stderr, stato invariato. */
-static void sub_03ee(struct z80 *z)
+ * tracce): B = A, (HL) = 0 e dal record HL+1..HL+3 carica C, D, E; poi
+ * consegna a sub_3a54. Uscita: HL = HL d'ingresso + 3, B = A d'ingresso,
+ * il resto da sub_3a54. */
+void sub_03ee(struct z80 *z)
 {
-    (void)z;
-    fprintf(stderr, "03ee: c078 non zero, sub_3a54 non tradotta: nessun effetto\n");
+    uint16_t hl = HL(z);
+    z->b = z->a;                               /* 03EE */
+    M(hl) = 0;                                 /* 03EF */
+    z->c = M(hl + 1);                          /* 03F1-03F2 */
+    z->d = M(hl + 2);                          /* 03F3-03F4 */
+    z->e = M(hl + 3);                          /* 03F5-03F6 */
+    SET_HL(z, hl + 3);
+    sub_3a54(z);                               /* 03F7 */
 }
 
 /* 0x0219 (da 01D5, fronte di rilascio di una moneta): HL = c046 (COIN1) o
