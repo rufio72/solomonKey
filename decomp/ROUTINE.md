@@ -46,7 +46,7 @@ i frame sono quelli della cattura riuscita.
 | 0x0C7C | sub_0c7c | z80_08xx.c | 82 | gestore d'urto (indice E, e da 0CCE): angolo in alto a destra; stato 1 direzione 2 o velocità azzerate | tradotta (replay) | 0 | — | brief 26: eseguita dal replay dal frame 2894 (prima era NULL e Dana non urtava) |
 | 0x0CCE | sub_0cce | z80_08xx.c | 12 | gestore d'urto (indice A): 0C7C col bit 7 di (IX+0C), altrimenti 0BF6 | tradotta (replay) | 0 | — | brief 26: eseguita dal replay |
 | 0x0CDA | sub_0cda | z80_08xx.c | 12 | gestore d'urto (indice 5): 0C2D col bit 7 di (IX+0C), altrimenti 0BBB | tradotta (replay) | 0 | — | brief 26: come 0BBB, non in onda |
-| 0x0CE6 | sub_0ce6 | z80_08xx.c | 13 | stati della chiave: IX = c4ce, IY = c299, esce col bit 7 di c4ce spento (sempre nelle tracce); continuazione 0CF3 (`jp (hl)` sulla tabella 0D18) non tradotta: avviso su stderr | verificata | 2 | gioco, tardo | gioco f2402, tardo f4002; solo registri |
+| 0x0CE6 | sub_0ce6 | z80_08xx.c | 13 | stati della chiave: IX = c4ce, IY = c299, esce col bit 7 di c4ce spento; altrimenti A = (IX+1D), con A >= 2 esce, con A < 2 smista con 0CFD (tabella 0D18, lotto 39) | verificata | 4 | gioco, tardo, oggetti | gioco f2402, tardo f4002 (solo registri) più 2 non forzate di `oggetti` (f2402, f2404) con la chiave attiva |
 | 0x1288 | sub_1288 | z80_1xxx.c | 35 | classe della cella al centro di Dana (sub_36f0), esce se ≥ 37 (sempre nelle tracce); continuazione 12AB (raccolta, zona mai eseguita) non tradotta: avviso su stderr | verificata | 2 | gioco, tardo | gioco f2402, tardo f4002; solo registri |
 | 0x234A | sub_234a | z80_2xxx.c | 9 | (HL) = C, (HL+1) = A; A = bit 6-7 di B (Lives, con B = DSW1 a nibble scambiati; da 2980) | verificata | 2 | titolo, titolo_n2 | occorrenze 1 (f152) e 2 (f378) al boot (scrivono) |
 | 0x2368 | sub_2368 | z80_2xxx.c | 14 | HL = 12·byte(HL+A), DE = 2·byte | verificata | 2 | titolo, gioco | titolo f3698 (occorrenza 3, A=33), gioco f1855; solo registri |
@@ -776,3 +776,51 @@ forzate; 3FCE ne ha una in più dal lotto 16); banco a 1172 catture e 287 voci.
 
 **Non coperte da gcov**: nessuna riga nelle 23 funzioni. L'involucro
 `conta_250e` non è esercitato dal banco (lo prova il replay).
+
+## La chiave: tabella 0D18 (lotto 39)
+
+Lo smistamento della chiave (compito 39): `sub_0cfd` legge il nibble basso di
+(IX+1A) e sceglie il gestore nella tabella ROM 0D18 (16 parole, tabella di
+puntatori a funzione in `z80_chiave_a.c`), poi i 16 gestori. `z80_chiave_a.c`
+ha il dispatcher e i gestori 0D3C-0EDF, `z80_chiave_b.c` 0F6B-11D8 più 0D38.
+`sub_0ce6` (08xx) è completata: con il bit 7 di c4ce acceso e (IX+1D) < 2
+chiama 0CFD; l'avviso su stderr non c'è più. 0D38 (`ld (0000),a; ret`)
+scrive in ROM: in C non si scrive. Le tabelle dati (0D6E, 123C, 1246, 124F,
+1258, 1261, 126A, 1274, 127E) si leggono con `leggi()`. Le etichette 0E0B
+(dentro 0D8E) e 11A5 (dentro 1172) sono interne. Tutte le catture sono dello
+stato `oggetti` (`cattura_oggetti.sh`); le forzate valgono per i rami non
+coperti dalle naturali e non per `verificata`.
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---:|---|---|
+| 0x0CFD | sub_0cfd | z80_chiave_a.c | 27 | A = tipo & 0F, HL = parola ROM a 0D18 + 2A (indirizzo del gestore), E = X, D = Y, B = 0, poi `jp (hl)`: tabella di puntatori a funzione | verificata | 2 | oggetti | 2 non forzate e 0 forzate; HL esce con l'indirizzo del gestore |
+| 0x0D38 | sub_0d38 | z80_chiave_b.c | 4 | indice F: `ld (0000),a; ret`, scrittura in ROM senza effetto: in C solo `return` | tradotta | 1 | oggetti | 0 non forzate e 1 forzate; mai raggiunta in modo naturale: forzata con poke di (IX+1A) = 0F un frame prima (frame 2430) |
+| 0x0D3C | sub_0d3c | z80_chiave_a.c | 50 | indice 0: con stato 1 sceglie dalla tabella ROM 0D6E (16 coppie) direzione e (IY+05) da (IY+04), Y e bit 0 della direzione; stato 0 | verificata | 5 | oggetti | 2 non forzate e 3 forzate |
+| 0x0D8E | sub_0d8e | z80_chiave_a.c | 145 | indice 1: confronto su E (tabella 123C su Y) o su D (tabella 1246 su X); cambia fase, (IY+04) = 0; contiene 0E0B | verificata | 11 | oggetti | 2 non forzate e 9 forzate |
+| 0x0E1F | sub_0e1f | z80_chiave_a.c | 141 | indice 2: come 0D8E con E-8, tabelle 124F e 1258, (IY+04) = 1, direzione 2/3 | verificata | 11 | oggetti | 2 non forzate e 9 forzate |
+| 0x0EAC | sub_0eac | z80_chiave_a.c | 51 | indice 3: stato 1 -> direzione dal bit 1; altrimenti nibble di Y >= 4 e direzione da (IY+05); Y = (Y&F0)+3, (IY+05) = 3 | verificata | 3 | oggetti | 2 non forzate e 1 forzate |
+| 0x0EDF | sub_0edf | z80_chiave_a.c | 140 | indice 4: come 0D8E con E-8, tabelle 1261 e 126A, (IY+04) = 2 | verificata | 11 | oggetti | 2 non forzate e 9 forzate |
+| 0x0F6B | sub_0f6b | z80_chiave_b.c | 10 | indice 5: bit 3 di Y spento -> `sub_0fa9`, acceso -> `sub_1172` | verificata | 3 | oggetti | 2 non forzate e 1 forzate |
+| 0x0F75 | sub_0f75 | z80_chiave_b.c | 52 | indice 6: come 0EAC su X: X = (X&F0)+0B, (IY+05) = 1 | verificata | 4 | oggetti | 2 non forzate e 2 forzate |
+| 0x0FA9 | sub_0fa9 | z80_chiave_b.c | 101 | indice 7: B = stato-1 con i flag di riposizionamento (bit 0 X, bit 1 Y, bit 2 direzione); Y = (Y&F0)+3, X = (X&F0)+0B | verificata | 7 | oggetti | 2 non forzate e 5 forzate |
+| 0x100E | sub_100e | z80_chiave_b.c | 142 | indice 8: come 0D8E con E-2, tabelle 1274 e 127E, (IY+04) = 3 | verificata | 10 | oggetti | 2 non forzate e 8 forzate |
+| 0x109C | sub_109c | z80_chiave_b.c | 51 | indice 9: come 0EAC su X: X = (X&F0)+5, (IY+05) = 0 | verificata | 3 | oggetti | 2 non forzate e 1 forzate |
+| 0x10CF | sub_10cf | z80_chiave_b.c | 10 | indice A: bit 3 di Y spento -> `sub_10d9`, acceso -> `sub_11d8` | verificata | 3 | oggetti | 2 non forzate e 1 forzate |
+| 0x10D9 | sub_10d9 | z80_chiave_b.c | 99 | indice B: come 0FA9 su X = (X&F0)+5 e Y = (Y&F0)+3 | verificata | 5 | oggetti | 2 non forzate e 3 forzate |
+| 0x113C | sub_113c | z80_chiave_b.c | 54 | indice C: come 0EAC su Y con soglia 0D: Y = (Y&F0)+0D, (IY+05) = 2 | verificata | 5 | oggetti | 2 non forzate e 3 forzate |
+| 0x1172 | sub_1172 | z80_chiave_b.c | 102 | indice D: come 0FA9 su X = (X&F0)+5 e Y = (Y&F0)+0D; contiene 11A5 | verificata | 5 | oggetti | 2 non forzate e 3 forzate |
+| 0x11D8 | sub_11d8 | z80_chiave_b.c | 100 | indice E: come 0FA9 su Y = (Y&F0)+0D e X = (X&F0)+0B | verificata | 6 | oggetti | 2 non forzate e 4 forzate |
+
+Forzate (tag `forzaNN`, `SNAP_FORZA` all'ingresso, un'occorrenza ciascuna; le
+liste complete sono nei log `out/snap_<ENTRY>_gioco_oggetti_forzaNN.log`):
+0D3C 3 (`ix+1d:1` con `iy+04` e `d` diversi), 0D8E 9, 0E1F 9, 0EDF 9 (E e D
+scelti per il ramo alto e il ramo basso, stato 0/1, direzione 0-3),
+100E 8, 0EAC 1, 0F6B 1 (`ix+0e:08`), 0F75 2, 0FA9 5 (stato 1 con bit 0 della
+direzione; stato 0 con le tre combinazioni di nibble), 109C 1, 10CF 1
+(`ix+0e:00`), 10D9 3, 113C 3, 1172 3, 11D8 4, 0D38 1 (`SNAP_POKE_EXTRA=2429:0xc4e8:0x0f`).
+Totale lotto: 95 catture; banco a 304 voci.
+
+**Non coperte da gcov** (`z80_chiave_a.c`, `z80_chiave_b.c`): solo le righe
+di sola etichetta `l0db2`, `l0e43`, `l0f04`, `l1077`, `l1088` (gcov non
+assegna codice all'etichetta, le istruzioni che la seguono sono coperte).
+`sub_0d38` non ha corpo.

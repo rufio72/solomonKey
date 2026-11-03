@@ -149,7 +149,7 @@ fine spetta ai lotti di traduzione.
 
 ## Destino delle 40 destinazioni (brief 38)
 
-23 tradotte nel lotto 38, 9 già tradotte dai lotti N3-N12, 8 solo documentate (interne o gestori della chiave 0D18, lotto a parte).
+23 tradotte nel lotto 38, 9 già tradotte dai lotti N3-N12, 8 solo documentate; di queste 0CFD, 0E0B e 11A5 (la chiave, tabella 0D18) sono poi state tradotte nel lotto 39.
 
 | ingresso | destino |
 |---|---|
@@ -190,6 +190,6 @@ fine spetta ai lotti di traduzione.
 | 02A5 | documentata: etichetta interna di `sub_027c` (`nmi_oggetti.c`) |
 | 40FF | documentata: interno del ciclo 40FE del corpo dell'attività 1C (spedidore a passi, non tradotto) |
 | 7B64 | documentata: interno del passo 7B3B-7B94 (`djnz 7B64`) |
-| 0CFD | documentata: gestore della tabella 0D18 (chiave, continuazione 0CF3 di `sub_0ce6`); lotto futuro (1278 B) |
-| 0E0B | documentata: gestore della tabella 0D18, dentro il gestore 0D8E; lotto futuro (1278 B) |
-| 11A5 | documentata: gestore della tabella 0D18, dentro 113C; lotto futuro (1278 B) |
+| 0CFD | tradotta nel lotto 39 (`z80_chiave_a.c`/`b.c`): dispatcher della tabella 0D18, continuazione 0CF3 di `sub_0ce6` |
+| 0E0B | tradotta nel lotto 39 (`z80_chiave_a.c`/`b.c`, 0E0B dentro 0D8E) |
+| 11A5 | tradotta nel lotto 39 (`z80_chiave_a.c`/`b.c`, 11A5 dentro 1172) |

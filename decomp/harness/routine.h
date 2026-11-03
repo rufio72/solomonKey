@@ -185,4 +185,23 @@ void sub_6976(struct z80 *z);
 void sub_7b95(struct z80 *z);
 void sub_7b9e(struct z80 *z);
 
+/* Lotto 39 (compito 39): la chiave, tabella 0D18. */
+void sub_0cfd(struct z80 *z);
+void sub_0d38(struct z80 *z);
+void sub_0d3c(struct z80 *z);
+void sub_0d8e(struct z80 *z);
+void sub_0e1f(struct z80 *z);
+void sub_0eac(struct z80 *z);
+void sub_0edf(struct z80 *z);
+void sub_0f6b(struct z80 *z);
+void sub_0f75(struct z80 *z);
+void sub_0fa9(struct z80 *z);
+void sub_100e(struct z80 *z);
+void sub_109c(struct z80 *z);
+void sub_10cf(struct z80 *z);
+void sub_10d9(struct z80 *z);
+void sub_113c(struct z80 *z);
+void sub_1172(struct z80 *z);
+void sub_11d8(struct z80 *z);
+
 #endif
