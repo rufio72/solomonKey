@@ -65,7 +65,7 @@ YM2149 emulator and compared against the original's — has been passed.
   dead code, 6 are reachable under special conditions (5 with a proven
   wake-up recipe, two of them needing specific DIP-switch settings).
   **With this, the main Z80's reachable code is fully translated:**
-  the harness stands at **1,270 comparisons, 304 entries, 0 failures**.
+  the harness stands at **1,278 comparisons, 307 entries, 0 failures**.
 - **Audio Z80 — done: fully decompiled and verified end to end.** The whole
   sound driver is now C (`decomp/harness/audio_*.c`): command dispatch, the
   sequence interpreter (9 voices × 2 layers, glissando, envelopes) and the
@@ -113,10 +113,20 @@ YM2149 emulator and compared against the original's — has been passed.
   into an RGB framebuffer that is **pixel-for-pixel identical to MAME on
   all seven sample states**, with the graphics ROMs' pixel data shipped
   as generated C source (round-trip verified, see `NOTICE.md`).
-- **Next up:** H3-H7 of the hardware plan — the SDL2 window, the
-  free-running game loop, input, wiring the translated sound driver to
-  SDL audio, and packaging — then classifying the replay's mid-activity
-  NMI divergences, with the replay as the regression test throughout.
+- **Free-running game — boots and reaches the recorded match.** H3 added
+  the SDL2 window (`mostra_oracolo`, `mostra_replay`). H4a-H4b3 then cut
+  the game loose from the oracle: the C game now **cold-boots from the
+  reset vector**, runs its RAM tests, plays the whole attract mode and
+  title (bodies 1F, 06, 07, 08, 0C, 0B — ~1,450 instructions translated
+  across four batches), consumes the recorded match's inputs at the right
+  frames, and at frame 2410 its RAM is **byte-for-byte identical** to the
+  dump the historical replay starts from — boot and recorded match welded
+  into one continuous run, with zero dispatcher divergences.
+- **Next up:** H4c (the full 0-5499 run through the recorded match), then
+  H5-H7 — input, wiring the translated sound driver to SDL audio, and
+  packaging — then classifying the replay's mid-activity NMI divergences,
+  and finally the readability rewrite, module by module, with the harness
+  and replay as the safety net.
 
 ## Repository layout
 
