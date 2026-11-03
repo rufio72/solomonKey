@@ -113,20 +113,21 @@ YM2149 emulator and compared against the original's — has been passed.
   into an RGB framebuffer that is **pixel-for-pixel identical to MAME on
   all seven sample states**, with the graphics ROMs' pixel data shipped
   as generated C source (round-trip verified, see `NOTICE.md`).
-- **Free-running game — boots and reaches the recorded match.** H3 added
-  the SDL2 window (`mostra_oracolo`, `mostra_replay`). H4a-H4b3 then cut
-  the game loose from the oracle: the C game now **cold-boots from the
-  reset vector**, runs its RAM tests, plays the whole attract mode and
-  title (bodies 1F, 06, 07, 08, 0C, 0B — ~1,450 instructions translated
-  across four batches), consumes the recorded match's inputs at the right
-  frames, and at frame 2410 its RAM is **byte-for-byte identical** to the
-  dump the historical replay starts from — boot and recorded match welded
-  into one continuous run, with zero dispatcher divergences.
-- **Next up:** H4c (the full 0-5499 run through the recorded match), then
-  H5-H7 — input, wiring the translated sound driver to SDL audio, and
-  packaging — then classifying the replay's mid-activity NMI divergences,
-  and finally the readability rewrite, module by module, with the harness
-  and replay as the safety net.
+- **Free-running game — done: boots and plays the whole recorded match.**
+  H3 added the SDL2 window (`mostra_oracolo`, `mostra_replay`). H4a-H4c
+  then cut the game loose from the oracle: the C game **cold-boots from
+  the reset vector**, runs its RAM tests, plays the whole attract mode
+  and title (bodies 1F, 06, 07, 08, 0C, 0B — ~1,450 instructions
+  translated across four batches), consumes the recorded match's inputs
+  at the right frames, and plays it through to the end. The project's
+  single regression line now reads:
+  `GIRO COMPLETO 0-5499: saldatura 0 byte, spedidore 0 divergenze,
+  30 a metà attività (attese), 13 frame resi con hash coincidenti`
+  (`decomp/giro_completo.sh`).
+- **Next up:** H5-H7 — input, wiring the translated sound driver to SDL
+  audio, and packaging — then classifying the remaining mid-activity NMI
+  divergences, and finally the readability rewrite, module by module,
+  with the harness and the full run as the safety net.
 
 ## Repository layout
 
