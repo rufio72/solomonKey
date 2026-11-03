@@ -11,12 +11,12 @@ ogni ciclo nei brief in `compiti/`.
 | Destinazioni statiche nel Z80 principale | 299 |
 | Coperte dalle sessioni (lotto 12 compreso) | 235 (78,6%) |
 | Routine osservate nel callgraph | ~120 |
-| Voci con stato in `decomp/ROUTINE.md` | 350 (conteggio sulla colonna stato) |
-| …di cui `verificata` (doppia cattura MAME non forzata) | 250 |
-| …di cui `tradotta` con nota (senza cattura o cattura singola) | 57 |
+| Voci con stato in `decomp/ROUTINE.md` | 373 (conteggio sulla colonna stato) |
+| …di cui `verificata` (doppia cattura MAME non forzata) | 270 |
+| …di cui `tradotta` con nota (senza cattura o cattura singola) | 60 |
 | …di cui `tradotta (replay)` | 43 |
-| Banco di prova (`harness --tutte`) | 264 voci, 1110 catture, 0 fallite |
-| Catture `regs` in `decomp/out/` | 1111 |
+| Banco di prova (`harness --tutte`) | 287 voci, 1173 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 1173 |
 | Stub residui del motore nemici | 0 (motore completo, `nemici_stub.c` tolto) |
 | Destinazioni mai osservate | 64, tutte con sito di chiamata mai eseguito (probabile dato o codice raggiungibile solo da zone mai eseguite; 37 a `8000` o sopra) |
 
@@ -112,10 +112,17 @@ ogni ciclo nei brief in `compiti/`.
    corretto (`M()`→`leggi()` sulla tabella 9495). `nemici_stub.c` tolto:
    **IL MOTORE DEI NEMICI È COMPLETO**, 220/220 routine, gcov scoperto
    solo sui casi fuori tabella non forzabili.
-1. **Traduzione delle routine censite nel lotto 12**: 40 destinazioni in
-   25 blocchi contigui in `decomp/CENSIMENTO-12.md`, due catture pilota
-   già fatte (`0x3FCE porta`, `0x51FA finale`). Per i lotti futuri il
-   censimento va rigenerato a mano o lo script va aggiunto a `decomp/`.
+1. **Routine censite nel lotto 12: FATTE** (brief 38, 2026-11-03, che
+   rifà e supera il brief 28; schema economico, decimo ciclo al primo
+   colpo, ~1 $): delle 40 destinazioni di `decomp/CENSIMENTO-12.md`,
+   23 tradotte in questo lotto (03EE-7B9E, ~500 byte), 9 erano già
+   tradotte nei lotti N8-N12, 8 documentate e basta (etichette interne
+   e interni di corpi a passi); il destino di tutte e 40 è scritto a
+   mano in `CENSIMENTO-12.md`. Wrapper `banco_r_4302` nuovo; stati
+   `finale2`/`attNN` in `cattura.sh` e `SNAP_POKE_EXTRA` in
+   `cattura_oggetti.sh`. **Resta fuori, come lotto a parte da
+   pianificare: la chiave 0D18 (1278 byte, ~770 righe C stimate)** —
+   scelta ratificata dall'utente il 2026-11-03.
 2. **Altre zone mai eseguite**: restano 64 destinazioni, tutte con sito
    di chiamata mai eseguito (tabella SI/NO in coda al censimento);
    forzature mirate di RAM, una parte sarà codice morto da documentare e
