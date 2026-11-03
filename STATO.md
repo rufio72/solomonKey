@@ -11,12 +11,12 @@ ogni ciclo nei brief in `compiti/`.
 | Destinazioni statiche nel Z80 principale | 299 |
 | Coperte dalle sessioni (lotto 12 compreso) | 235 (78,6%) |
 | Routine osservate nel callgraph | ~120 |
-| Voci con stato in `decomp/ROUTINE.md` | 373 (conteggio sulla colonna stato) |
-| …di cui `verificata` (doppia cattura MAME non forzata) | 270 |
-| …di cui `tradotta` con nota (senza cattura o cattura singola) | 60 |
+| Voci con stato in `decomp/ROUTINE.md` | 390 (conteggio sulla colonna stato) |
+| …di cui `verificata` (doppia cattura MAME non forzata) | 286 |
+| …di cui `tradotta` con nota (senza cattura o cattura singola) | 61 |
 | …di cui `tradotta (replay)` | 43 |
-| Banco di prova (`harness --tutte`) | 287 voci, 1173 catture, 0 fallite |
-| Catture `regs` in `decomp/out/` | 1173 |
+| Banco di prova (`harness --tutte`) | 304 voci, 1270 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 1270 |
 | Stub residui del motore nemici | 0 (motore completo, `nemici_stub.c` tolto) |
 | Destinazioni mai osservate | 64, tutte con sito di chiamata mai eseguito (probabile dato o codice raggiungibile solo da zone mai eseguite; 37 a `8000` o sopra) |
 
@@ -120,9 +120,14 @@ ogni ciclo nei brief in `compiti/`.
    e interni di corpi a passi); il destino di tutte e 40 è scritto a
    mano in `CENSIMENTO-12.md`. Wrapper `banco_r_4302` nuovo; stati
    `finale2`/`attNN` in `cattura.sh` e `SNAP_POKE_EXTRA` in
-   `cattura_oggetti.sh`. **Resta fuori, come lotto a parte da
-   pianificare: la chiave 0D18 (1278 byte, ~770 righe C stimate)** —
-   scelta ratificata dall'utente il 2026-11-03.
+   `cattura_oggetti.sh`. **Lotto della chiave 0D18 FATTO** (brief 39,
+   2026-11-03, undicesimo ciclo economico al primo colpo, ~0,7 $):
+   dispatcher 0CFD e i 16 gestori della tabella 0D18 (0CFD-123B,
+   1279 byte) in `z80_chiave_a.c` e `z80_chiave_b.c`, `sub_0ce6`
+   completata (via l'avviso su stderr), 62 forzate per la copertura dei
+   rami (gcov pulito salvo 5 righe di sola etichetta), la scrittura in
+   ROM di 0D38 (`ld (0),a`) non tradotta per decisione; corretti i due
+   errori del censimento (11A5 cade in 1172, non in 113C).
 2. **Altre zone mai eseguite**: restano 64 destinazioni, tutte con sito
    di chiamata mai eseguito (tabella SI/NO in coda al censimento);
    forzature mirate di RAM, una parte sarà codice morto da documentare e
