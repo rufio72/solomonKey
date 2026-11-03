@@ -158,6 +158,8 @@ ogni ciclo nei brief in `compiti/`.
    giocabile il C, poi pulizia con il replay come regressione.
    Lotto H1 (brief 41) chiuso: oracolo video in `decomp/out/video/`,
    formato in `decomp/VIDEO.md`.
+   Lotto H2 (brief 42) chiuso: renderizzatore software `rendi_frame`
+   (`harness/video_rendi.c`), 7 stati su 7 identici (`sh rendi_video.sh`).
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

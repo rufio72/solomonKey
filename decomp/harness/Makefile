@@ -14,7 +14,7 @@ INTESTAZIONI_DATI = $(wildcard audio_dati*.h)
 SORGENTI_DRIVER = audio_piattaforma.c audio_ossatura.c audio_registri.c audio_interprete.c $(SORGENTI_DATI)
 SORGENTI_AUDIO = audio_banco.c $(SORGENTI_DRIVER)
 
-all: harness sched_proto replay audio_banco audio_immagine audio_suona audio_wav
+all: harness sched_proto replay audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine
 
 harness: $(SORGENTI) ram.h routine.h e603.h rst20_tables.h nemici.h rst38_tables.h sched.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI)
@@ -40,7 +40,17 @@ audio_suona: audio_suona.c $(SORGENTI_DRIVER) audio.h $(INTESTAZIONI_DATI)
 audio_wav: audio_wav.c emu2149/emu2149.c emu2149/emu2149.h
 	$(CC) $(CFLAGS) -o $@ audio_wav.c emu2149/emu2149.c
 
+# strato video (lotto H2): renderizzatore, grafica estratta da estrai_grafica.py
+SORGENTI_GRAFICA = $(wildcard video_dati_*.c)
+
+rendi_oracolo: rendi_oracolo.c video_rendi.c $(SORGENTI_GRAFICA) video.h
+	$(CC) $(CFLAGS) -o $@ rendi_oracolo.c video_rendi.c $(SORGENTI_GRAFICA)
+
+# andata e ritorno della grafica estratta
+video_immagine: video_immagine.c $(SORGENTI_GRAFICA) video.h
+	$(CC) $(CFLAGS) -o $@ video_immagine.c $(SORGENTI_GRAFICA)
+
 clean:
-	rm -f harness sched_proto replay audio_banco audio_immagine audio_suona audio_wav
+	rm -f harness sched_proto replay audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine
 
 .PHONY: all clean
