@@ -3,9 +3,11 @@
  * flusso dei cambi nello stesso formato di out/audio/<nome>_ay.txt.
  * Il flusso è un'interfaccia stabile: un lotto futuro lo darà a un
  * emulatore YM2149 per generare i .wav dei codici. */
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "audio.h"
 #include "audio_dati.h"
 
@@ -25,12 +27,29 @@ static unsigned ignote[256];
 static FILE *flusso;
 
 /* Carica 1.3jk da ../roms/ext/solomon/ o ../../roms/ext/solomon/ (da
- * decomp/ o da decomp/harness/); 16384 byte o exit(2). */
+ * decomp/ o da decomp/harness/) e, in coda, da <cartella dell'eseguibile>/
+ * ../../roms/ext/solomon/; 16384 byte o exit(2). */
+static const char *rom_vicino_exe(char *buf, size_t n)
+{
+    char exe[4096];
+    ssize_t k = readlink("/proc/self/exe", exe, sizeof exe - 1);
+    if (k <= 0) return NULL;
+    exe[k] = 0;
+    char *barra = strrchr(exe, '/');
+    if (!barra) return NULL;
+    *barra = 0;
+    if (snprintf(buf, n, "%s/../../roms/ext/solomon/1.3jk", exe) >= (int)n) return NULL;
+    return buf;
+}
+
 void aud_carica_rom(void)
 {
-    const char *nomi[] = { "../roms/ext/solomon/1.3jk",
-                           "../../roms/ext/solomon/1.3jk" };
-    for (unsigned i = 0; i < 2; i++) {
+    char esterno[4200];
+    const char *nomi[3] = { "../roms/ext/solomon/1.3jk",
+                            "../../roms/ext/solomon/1.3jk", NULL };
+    nomi[2] = rom_vicino_exe(esterno, sizeof esterno);
+    for (unsigned i = 0; i < 3; i++) {
+        if (!nomi[i]) continue;
         FILE *f = fopen(nomi[i], "rb");
         if (!f) continue;
         size_t n = fread(aud_rom, 1, sizeof aud_rom, f);
@@ -42,7 +61,8 @@ void aud_carica_rom(void)
         }
         return;
     }
-    fprintf(stderr, "1.3jk non trovato in ../roms/ext/solomon/ né in ../../roms/ext/solomon/\n");
+    fprintf(stderr, "1.3jk non trovato in ../roms/ext/solomon/ né in ../../roms/ext/solomon/\n"
+                    "Esegui: make -C decomp/harness gioco\n");
     exit(2);
 }
 

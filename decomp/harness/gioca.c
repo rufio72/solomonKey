@@ -19,17 +19,17 @@
 #include "macchina.h"
 #include "nemici.h"
 #include "scheda_audio.h"
+#include "gioca_joy.h"
+#include "gioca_opzioni.h"
 
 int gioca_audio_apri(void);
 void gioca_audio_spingi(const int16_t *buf, int n);
 void gioca_audio_chiudi(void);
+void gioca_audio_volume(int percento);
 
 int dsw_applica(const char *opzione, const char *valore, uint8_t *d1, uint8_t *d2);
 void tasti_stampa_mappa(void);
 void tasti_ingressi(const uint8_t *stato, uint8_t out[3]);
-void tasti_apri_joystick(void);
-void tasti_chiudi_joystick(void);
-void tasti_joystick(uint8_t out[3]);
 
 #define MAX_FRAME_FILE 65536
 #define MAX_HASH 64
@@ -56,7 +56,7 @@ static void finale(void)
     if (registra) { fclose(registra); registra = NULL; }
     scheda_audio_chiudi();
     if (audio_aperto) { gioca_audio_chiudi(); audio_aperto = 0; }
-    if (finestra) { tasti_chiudi_joystick(); vsdl_chiudi(); finestra = 0; }
+    if (finestra) { joy_chiudi(); vsdl_chiudi(); finestra = 0; }
     printf("FRAME rese %ld\n", rese);
     printf("HASH ultimo %016llx\n", (unsigned long long)hash_ultimo);
     if (orac_oracolo)
@@ -142,7 +142,7 @@ static int frame_libero(long frame, uint8_t v[3])
             memcpy(v, riprodotti[frame], 3);
     } else if (finestra) {
         tasti_ingressi(SDL_GetKeyboardState(NULL), v);
-        tasti_joystick(v);
+        joy_ingressi(v);
     }
     if (finestra && comandi())
         return 1;
@@ -182,6 +182,9 @@ int main(int argc, char **argv)
         if (!strncmp(a, "--", 2))
             for (int k = 0; dsw_opz[k]; k++)
                 if (!strcmp(a + 2, dsw_opz[k])) dsw = 1;
+        int extra = gioca_opzione_extra(argc, argv, &i);
+        if (extra < 0) return 2;
+        if (extra) continue;
         if (!strcmp(a, "--mappa")) mappa = 1;
         else if (!strcmp(a, "--muto")) muto = 1;
         else if (!strcmp(a, "--stampa-dsw")) stampa_dsw = 1;
@@ -233,12 +236,12 @@ int main(int argc, char **argv)
     if (dsw1_raw >= 0) d1 = (uint8_t)dsw1_raw;
     if (dsw2_raw >= 0) d2 = (uint8_t)dsw2_raw;
     if (stampa_dsw) { printf("DSW1 %02X DSW2 %02X\n", d1, d2); return 0; }
+    if (gioca_extra_valida() != 0) return 2;
+    if (gx.joystick) return joy_diagnostica(gx.tempo);
     int k = vsdl_leggi_opzioni(ac, av, &opz);
     if (k < 0) return 2;
     if (k != ac) {
-        fprintf(stderr, "uso: gioca [-s N] [-n N | -m N] [--registra F] [--riproduci F] "
-                "[--hash-frame F,..] [--oracolo ORACOLO DISP] [--muto] [--flusso-ay F]\n"
-                "[--registra-latch F] [--fase-audio 0|1|2] [DSW] [--stampa-dsw] [--mappa]\n");
+        fprintf(stderr, "uso: gioca [opzioni] — vedi gioca --aiuto\n");
         return 2;
     }
     if (orac_oracolo && !file_riproduci) {
@@ -252,9 +255,11 @@ int main(int argc, char **argv)
         if (!registra) { perror(file_registra); return 2; }
     }
     if (!opz.headless) {
+        vsdl_pieno(gx.pieno);
         if (vsdl_apri("Solomon's Key - gioca", opz.scala) != 0) return 2;
         finestra = 1;
-        tasti_apri_joystick();
+        if (!gx.senza_joy) joy_apri();
+        gioca_audio_volume(gx.volume);
         if (!muto && gioca_audio_apri() == 0) audio_aperto = 1;
     }
     scheda_audio_apri(file_flusso_ay, file_registra_latch);

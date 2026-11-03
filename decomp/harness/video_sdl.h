@@ -14,6 +14,9 @@ typedef struct { int scala; long headless; long massimo; } vsdl_opz;
  * Ritorna l'indice del primo argomento non opzione, -1 se errore (messaggio
  * in italiano su stderr). Azzerata = finestra, scala 3, nessun limite. */
 int vsdl_leggi_opzioni(int argc, char **argv, vsdl_opz *o);
+/* Da chiamare prima di vsdl_apri: schermo intero «desktop» con scala intera
+ * (proporzioni mantenute, bordi neri), cursore nascosto. Predefinito: spento. */
+void vsdl_pieno(int on);
 int vsdl_apri(const char *titolo, int scala);   /* 0 ok, -1 errore */
 /* Mostra il frame (SDL_UpdateTexture + RenderCopy + RenderPresent), smaltisce
  * gli eventi. 0 = continua; 1 = l'utente vuole uscire (ESC o chiusura finestra);

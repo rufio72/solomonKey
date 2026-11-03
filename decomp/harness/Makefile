@@ -77,12 +77,32 @@ mostra_replay: mostra_replay.c video_sdl.c video_sdl.h video_rendi.c $(SORGENTI_
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ mostra_replay.c video_sdl.c video_rendi.c $(SORGENTI_GRAFICA) replay_lib.o $(filter-out replay.c,$(SORGENTI_REPLAY)) $(SDL_LIBS)
 
 # il gioco si gioca (lotto H5): macchina libera o con oracolo, tastiera, DSW
-SORGENTI_GIOCA = $(filter-out gioco_libero.c,$(SORGENTI_LIBERO)) gioca.c gioca_tasti.c gioca_dsw.c macchina_libera.c video_sdl.c scheda_audio.c scheda_pcm.c gioca_audio.c $(SORGENTI_DRIVER) emu2149/emu2149.c
+SORGENTI_GIOCA = $(filter-out gioco_libero.c,$(SORGENTI_LIBERO)) gioca.c gioca_tasti.c gioca_joy.c gioca_diag.c gioca_opzioni.c gioca_aiuto.c gioca_dsw.c macchina_libera.c video_sdl.c scheda_audio.c scheda_pcm.c gioca_audio.c $(SORGENTI_DRIVER) emu2149/emu2149.c
 
-gioca: $(SORGENTI_GIOCA) macchina.h ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h video_sdl.h giro_video.h scheda_audio.h audio.h $(INTESTAZIONI_DATI) emu2149/emu2149.h
+gioca: $(SORGENTI_GIOCA) macchina.h ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h video_sdl.h giro_video.h scheda_audio.h audio.h gioca_joy.h gioca_opzioni.h $(INTESTAZIONI_DATI) emu2149/emu2149.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ $(SORGENTI_GIOCA) $(SDL_LIBS)
+
+# make gioco (lotto H7): prepara le ROM, compila gioca e dice come lanciarlo.
+# A runtime servono solo 6.3f, 7.3h, 8.3jk (-> out/main64.bin) e 1.3jk.
+ROM_DIR = ../../roms/ext/solomon
+ifeq ($(HA_SDL),)
+gioco:
+	@echo "ERRORE: SDL2 non trovato. Installa libsdl2-dev (sudo apt install libsdl2-dev) e riprova." >&2; exit 2
+else
+gioco: rom gioca
+	@echo "Pronto: lancia decomp/harness/gioca (gioca --aiuto per le opzioni)"
+endif
+
+rom:
+	@if [ ! -f $(ROM_DIR)/6.3f ] || [ ! -f $(ROM_DIR)/1.3jk ]; then \
+	  if [ -f ../../roms/solomon.zip ]; then \
+	    echo "estraggo roms/solomon.zip"; mkdir -p $(ROM_DIR) && \
+	    unzip -o -q -d $(ROM_DIR) ../../roms/solomon.zip || exit 2; \
+	  else echo "ERRORE: mancano le ROM: metti solomon.zip in roms/" >&2; exit 2; fi; \
+	fi; \
+	if [ ! -s ../out/main64.bin ]; then echo "costruisco out/main64.bin"; sh ../build_rom.sh >/dev/null || exit 2; fi
 
 clean:
 	rm -f harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine mostra_oracolo mostra_replay gioca replay_lib.o
 
-.PHONY: all clean
+.PHONY: all clean gioco rom

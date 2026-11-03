@@ -86,9 +86,10 @@ static const uint16_t rst20_62B9[] = {
     0x62E0, 0x62BE,
 };
 
-/* 646B: statico, 3 voci, indice massimo osservato - */
+/* 646B: statico, 10 voci, indice massimo osservato - */
 static const uint16_t rst20_646B[] = {
-    0x64D3, 0x64B4, 0x6539,
+    0x64D3, 0x64B4, 0x6539, 0x64C4, 0x657B, 0x65D0, 0x64C8, 0x6644,
+    0x64CC, 0x6655,
 };
 
 /* 6485: statico, 8 voci, indice massimo osservato - */

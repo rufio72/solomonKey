@@ -10,6 +10,7 @@
 
 static SDL_AudioDeviceID dispositivo;
 static int16_t anello[ANELLO];
+static int volume = 100;               /* percento, solo per il dispositivo */
 static int testa, pieni;               /* indice di lettura e campioni presenti */
 
 static void callback(void *ud, Uint8 *flusso, int byte)
@@ -23,6 +24,12 @@ static void callback(void *ud, Uint8 *flusso, int byte)
         pieni--;
     }
     if (i < n) memset(out + i, 0, (size_t)(n - i) * 2);
+}
+
+/* 0-100: moltiplica i campioni spinti al dispositivo (gli hash non cambiano). */
+void gioca_audio_volume(int percento)
+{
+    volume = percento < 0 ? 0 : percento > 100 ? 100 : percento;
 }
 
 int gioca_audio_apri(void)
@@ -59,7 +66,7 @@ void gioca_audio_spingi(const int16_t *buf, int n)
         pieni -= troppi;
     }
     for (int i = 0; i < n; i++)
-        anello[(testa + pieni + i) % ANELLO] = buf[i];
+        anello[(testa + pieni + i) % ANELLO] = (int16_t)(buf[i] * volume / 100);
     pieni += n;
     SDL_UnlockAudioDevice(dispositivo);
 }

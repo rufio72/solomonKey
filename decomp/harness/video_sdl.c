@@ -10,6 +10,7 @@ static SDL_Window *finestra;
 static SDL_Renderer *rend;
 static SDL_Texture *tex;
 static int con_vsync;
+static int a_schermo_pieno;   /* vsdl_pieno: finestra a schermo intero «desktop» */
 static uint64_t scadenza;   /* contatore SDL del prossimo present, ripiego */
 static uint64_t periodo;    /* 1/60 s in tick del contatore */
 
@@ -66,6 +67,11 @@ int vsdl_leggi_opzioni(int argc, char **argv, vsdl_opz *o)
     return i;
 }
 
+void vsdl_pieno(int on)
+{
+    a_schermo_pieno = on;
+}
+
 int vsdl_apri(const char *titolo, int scala)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -74,7 +80,8 @@ int vsdl_apri(const char *titolo, int scala)
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
     finestra = SDL_CreateWindow(titolo, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                VID_LARGO * scala, VID_ALTO * scala, SDL_WINDOW_SHOWN);
+                                VID_LARGO * scala, VID_ALTO * scala,
+                                SDL_WINDOW_SHOWN | (a_schermo_pieno ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
     if (!finestra) {
         fprintf(stderr, "ERRORE: finestra: %s\n", SDL_GetError());
         vsdl_chiudi();
@@ -88,6 +95,12 @@ int vsdl_apri(const char *titolo, int scala)
         fprintf(stderr, "ERRORE: renderer: %s\n", SDL_GetError());
         vsdl_chiudi();
         return -1;
+    }
+    if (a_schermo_pieno) {
+        /* proporzioni mantenute: scala intera, il resto è nero */
+        SDL_RenderSetLogicalSize(rend, VID_LARGO, VID_ALTO);
+        SDL_RenderSetIntegerScale(rend, SDL_TRUE);
+        SDL_ShowCursor(SDL_DISABLE);
     }
     SDL_RendererInfo info;
     /* il renderer software (driver dummy compreso) dichiara il vsync ma non

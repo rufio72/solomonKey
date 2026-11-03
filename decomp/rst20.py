@@ -19,6 +19,13 @@ import os
 import re
 
 INIZIO_DATI = 0x80a5          # da qui a bfff la ROM contiene dati
+# Eccezioni alla stima delle voci (lotto H7): l'euristica dà 3 voci alla
+# tabella di 646B, ma le parole vere sono 10 (646C-647F), tutte ingressi di
+# codice già eseguiti (ZONE-MAI-ESEGUITE.md, Note 3).
+VOCI_NOTE = {
+    0x646B: [0x64D3, 0x64B4, 0x6539, 0x64C4, 0x657B, 0x65D0, 0x64C8, 0x6644,
+             0x64CC, 0x6655],
+}
 RIGA_ISTR = re.compile(r'^\t(.+?)\t+;([0-9a-f]{4})$')
 RIGA_ETICHETTA = re.compile(r'^(l|sub_)([0-9a-f]{4})h:$')
 RIGA_TRACCIA = re.compile(r'^([0-9A-F]{4}): (.*)$')
@@ -158,6 +165,8 @@ def main():
                 euristica = voci_euristiche(rom, ind, ingressi)
                 lim = limite(istr, k, righe, salti)
                 voci = euristica if lim is None else euristica[:lim]
+                if ind in VOCI_NOTE:
+                    voci = list(VOCI_NOTE[ind])
                 siti[ind] = {'riga': i_riga, 'voci': voci, 'limite': lim}
         ingressi = frozenset(w for s, v in siti.items() if s < INIZIO_DATI
                              for w in v['voci'])

@@ -1,0 +1,47 @@
+/* Testo di gioca --aiuto (lotto H7, brief 51). */
+#include <stdio.h>
+#include "gioca_opzioni.h"
+
+void gioca_aiuto(void)
+{
+    fputs(
+"gioca: Solomon's Key, il gioco in C (emulazione della scheda Tecmo)\n"
+"uso: gioca [opzioni]\n"
+"\n"
+"Schermo\n"
+"  -s, --scala N        scala della finestra, da 1 a 8 (predefinita 3)\n"
+"  --pieno              schermo intero, proporzioni mantenute\n"
+"  -n, --headless N     senza finestra: N frame e poi esce (prove)\n"
+"  -m, --max N          con finestra: esce dopo N frame\n"
+"\n"
+"Audio\n"
+"  --muto               niente audio sul dispositivo\n"
+"  --volume N           volume da 0 a 100 (predefinito 100)\n"
+"  --flusso-ay F        scrive su F il flusso dei registri AY\n"
+"  --registra-latch F   scrive su F i comandi audio (latch e800)\n"
+"  --fase-audio 0|1|2   fase dell'audio rispetto ai frame\n"
+"\n"
+"Ingressi\n"
+"  --joystick           diagnostica: elenca i joystick e stampa gli eventi\n"
+"  -t SEC               con --joystick: esce dopo SEC secondi\n"
+"  --joy-mappa B1,B2,START,COIN\n"
+"                       indici dei pulsanti del joystick (predefinita 0,1,7,6)\n"
+"  --senza-joystick     ignora i joystick\n"
+"  --mappa              stampa la mappa dei tasti ed esce\n"
+"\n"
+"Partita (dip switch)\n"
+"  --vite N  --cabinet C  --demo D  --bonus B  --difficolta D\n"
+"  --timer T  --extra E  --dsw1 XX  --dsw2 XX   (XX = byte esadecimale)\n"
+"  --stampa-dsw         stampa i dip switch scelti ed esce\n"
+"\n"
+"Registrazione\n"
+"  --registra F         registra gli ingressi su F\n"
+"  --riproduci F        riproduce gli ingressi registrati\n"
+"  --hash-frame F,..    stampa l'hash dei frame indicati\n"
+"  --oracolo O D        riproduce un giro registrato con MAME (con --riproduci)\n"
+"\n"
+"Tasti in gioco\n"
+"  ESC esce, P pausa, F2 ricomincia (non con --riproduci)\n"
+"  gettone 5/C, start 1/Invio; il resto con gioca --mappa\n"
+"  --aiuto, -h          questo testo\n", stdout);
+}

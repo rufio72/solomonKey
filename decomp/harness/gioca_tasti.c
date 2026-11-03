@@ -1,4 +1,4 @@
-/* Tastiera e joystick di gioca (lotto H5, brief 49). Gli ingressi del gioco
+/* Tastiera di gioca (lotto H5, brief 49; il joystick sta in gioca_joy.c, H7). Gli ingressi del gioco
  * sono attivi alti (IP_ACTIVE_HIGH in solomon.cpp): premuto = 1. */
 #include <stdio.h>
 #include <SDL.h>
@@ -44,40 +44,4 @@ void tasti_ingressi(const uint8_t *stato, uint8_t out[3])
         if ((out[p] & 0x03) == 0x03) out[p] &= (uint8_t)~0x03;
         if ((out[p] & 0x0c) == 0x0c) out[p] &= (uint8_t)~0x0c;
     }
-}
-
-static SDL_Joystick *joy;
-
-void tasti_apri_joystick(void)
-{
-    if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0)
-        return;
-    if (SDL_NumJoysticks() > 0)
-        joy = SDL_JoystickOpen(0);
-}
-
-void tasti_chiudi_joystick(void)
-{
-    if (joy) SDL_JoystickClose(joy);
-    joy = NULL;
-}
-
-/* Aggiunge a out[] il primo joystick: assi oltre ±8000, cappello, pulsanti
- * 0 = BUTTON1, 1 = BUTTON2, 6 = COIN1, 7 = START1. */
-void tasti_joystick(uint8_t out[3])
-{
-    if (!joy) return;
-    int x = SDL_JoystickGetAxis(joy, 0), y = SDL_JoystickGetAxis(joy, 1);
-    uint8_t h = SDL_JoystickNumHats(joy) > 0 ? SDL_JoystickGetHat(joy, 0) : 0;
-    if (x > 8000 || (h & SDL_HAT_RIGHT)) out[0] |= 0x01;
-    if (x < -8000 || (h & SDL_HAT_LEFT)) out[0] |= 0x02;
-    if (y < -8000 || (h & SDL_HAT_UP)) out[0] |= 0x04;
-    if (y > 8000 || (h & SDL_HAT_DOWN)) out[0] |= 0x08;
-    if ((out[0] & 0x03) == 0x03) out[0] &= (uint8_t)~0x03;
-    if ((out[0] & 0x0c) == 0x0c) out[0] &= (uint8_t)~0x0c;
-    int nb = SDL_JoystickNumButtons(joy);
-    if (nb > 0 && SDL_JoystickGetButton(joy, 0)) out[0] |= 0x20;
-    if (nb > 1 && SDL_JoystickGetButton(joy, 1)) out[0] |= 0x10;
-    if (nb > 6 && SDL_JoystickGetButton(joy, 6)) out[2] |= 0x04;
-    if (nb > 7 && SDL_JoystickGetButton(joy, 7)) out[2] |= 0x01;
 }
