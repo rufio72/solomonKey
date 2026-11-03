@@ -1,6 +1,6 @@
 # Stato del progetto
 
-Aggiornato al 2026-10-30. Fotografia operativa per riprendere il
+Aggiornato al 2026-11-03. Fotografia operativa per riprendere il
 lavoro; la descrizione del metodo è nel [README](README.md), la storia di
 ogni ciclo nei brief in `compiti/`.
 
@@ -11,13 +11,13 @@ ogni ciclo nei brief in `compiti/`.
 | Destinazioni statiche nel Z80 principale | 299 |
 | Coperte dalle sessioni (lotto 12 compreso) | 235 (78,6%) |
 | Routine osservate nel callgraph | ~120 |
-| Voci con stato in `decomp/ROUTINE.md` | 295 (conteggio `grep` sulla colonna stato) |
-| …di cui `verificata` (doppia cattura MAME non forzata) | 219 |
-| …di cui `tradotta` con nota (senza cattura o cattura singola) | 28 |
-| …di cui `tradotta (replay)` | 48 |
-| Banco di prova (`harness --tutte`) | 228 voci, 796 catture, 0 fallite |
-| Catture `regs` in `decomp/out/` | 797 |
-| Stub residui del motore nemici | 16 |
+| Voci con stato in `decomp/ROUTINE.md` | 329 (conteggio sulla colonna stato) |
+| …di cui `verificata` (doppia cattura MAME non forzata) | 237 |
+| …di cui `tradotta` con nota (senza cattura o cattura singola) | 49 |
+| …di cui `tradotta (replay)` | 43 |
+| Banco di prova (`harness --tutte`) | 250 voci, 977 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 978 |
+| Stub residui del motore nemici | 5 |
 | Destinazioni mai osservate | 64, tutte con sito di chiamata mai eseguito (probabile dato o codice raggiungibile solo da zone mai eseguite; 37 a `8000` o sopra) |
 
 ## Fasi
@@ -97,8 +97,15 @@ ogni ciclo nei brief in `compiti/`.
    (toccano a N11, che completa il ramo 5D08-5D28 di 5CFB e le 27 righe
    gcov scoperte, tutte spiegate in `ROUTINE.md`). 5DDF e 5E09 del
    brief 28 sono già fatte qui (nota di coerenza in coda al brief 28).
-   Restano N9, N10 (parziale), N11 e N12 (2 routine, da accorpare):
-   stub a 16.
+   **Lotti N9 e N10 fatti** (brief 35 e 36, 2026-11-03, stesso schema,
+   entrambi al primo colpo, ~1 $ l'uno): N9 = tipi 15-17 (16 routine,
+   6B43-809C) in `nemici_tipi_15_17.c`, con 7F68 (N1) nel banco e 6
+   forzate in più per coprire la tabella 7F39; N10 = tipo 06 prima metà
+   (19 routine, 4FD4 e 5005-51D7) in `nemici_tipo06a.c`, wrapper
+   `banco_r_4fd4` e `banco_r_50df` nuovi, 8 routine N10 erano già
+   anticipate in N3/N6/N8. Restano N11 (5FC8, 610C, 627F: completa il
+   ramo 5D08-5D28 di 5CFB) e N12 (2474, 4ADA, da accorpare): stub a 5,
+   ~193/220 routine del motore tradotte.
 1. **Traduzione delle routine censite nel lotto 12**: 40 destinazioni in
    25 blocchi contigui in `decomp/CENSIMENTO-12.md`, due catture pilota
    già fatte (`0x3FCE porta`, `0x51FA finale`). Per i lotti futuri il
