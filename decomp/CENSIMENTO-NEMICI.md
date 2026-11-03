@@ -455,6 +455,13 @@ banco, 35 catture. Vedi `ROUTINE.md`, sezione «Motore dei nemici (lotto N7)».
 16 a 6 (tolti 10). 12 voci nuove nel banco (11 del lotto più 7F68), 90
 catture. Vedi `ROUTINE.md`, sezione «Motore dei nemici (lotto N9)».
 
+**Lotto N10 fatto** (brief 36, 2026-11-03): tipo 6 prima metà, 19 routine
+(4FD4, 5005, 5023, 5035, 5066, 5092, 50BA, 50DF, 5115, 5124, 513A, 513E,
+514C, 516B, 5186, 51A4, 51B1, 51B5, 51D3) in `nemici_tipo06a.c`. Gli stub di
+`nemici_stub.c` scendono da 6 a 5 (tolto 4fd4). 10 voci nuove nel banco, 91
+catture. Con N10 il tipo 6 è completo. Vedi `ROUTINE.md`, sezione «Motore
+dei nemici (lotto N10)».
+
 **Lotti N2-N12**: le routine non coperte, un lotto per modulo. Sono in
 ordine di utilità, cioè di byte eseguiti nell'unione storica delle sessioni.
 Ingressi completi in `out/censimento_nemici_lotti.txt`.

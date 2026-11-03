@@ -626,3 +626,51 @@ forzate e 52 forzate).
 tre `switch` (indici fuori tabella, non forzati); in 6B9B il ramo dopo
 7379 (6BB3-6BC1), che dipende dalle celle di 57AA e 7379; in 6C8E il
 ramo 6CC7 (cella davanti con il bit 1 acceso) e l'uscita 6E8B che ne segue.
+
+## Motore dei nemici (lotto N10)
+
+Tipo 6 prima metà (brief 36): le 19 routine di 4FD4 e 5005-51D3 in
+`harness/nemici_tipo06a.c`. Tolto lo stub 4fd4: restano 2474, 4ada, 5fc8,
+610c e 627f. Già fatte e non rifatte: 24DF, 51D7, 5068, 51FA, 5224, 523C,
+5254, 4FEF. Wrapper `banco_r_4fd4` e `banco_r_50df` per il registro R (via
+51FA). 5092, 5115, 513A, 5186, 51A4, 51B1 e 51B5 non hanno ingresso
+catturabile da MAME: sono coperte dalle forzate di 4FD4, 50DF e 5124; 5035 e
+5066 sono ingressi interni. Le quattro voci con una sola cattura non forzata
+(513E, 514C, 516B, 51D3) sono `tradotte`.
+
+| ingresso | funzione | file | byte | descrizione | stato | catture OK | stati | note |
+|---|---|---|---:|---|---|---|---|---|
+| 0x4FD4 | sub_4fd4 | nemici_tipo06a.c | 13 | tipo 6: 52FD, 4FEF, `rst 38` a 4FE0 su (IY+1D) | verificata | 17 | finale, stanza50 | 4 non forzate e 13 forzate; wrapper `banco_r_4fd4` |
+| 0x5005 | sub_5005 | nemici_tipo06a.c | 30 | destinazione 0: passo con bit 2 di (IX+0) e attesa (IX+0D) >= 3 | verificata | 5 | finale | 2 non forzate e 3 forzate |
+| 0x5023 | sub_5023 | nemici_tipo06a.c | 18 | destinazione 1: c2b6 = ff, B = (IY+15), 5035 o 5066 | verificata | 8 | finale, stanza50 | 4 non forzate e 4 forzate |
+| 0x5035 | sub_5035 | nemici_tipo06a.c | 49 | riallineamento di (IY+0D/0E/14/15) se nibble di B+3 < 6; altrimenti 5066 | tradotta | 0 | - | ingresso interno; coperta dalle forzate di 4FD4 e 5023 |
+| 0x5066 | sub_5066 | nemici_tipo06a.c | 2 | B = 3 e coda 5068 | tradotta | 0 | - | ingresso interno |
+| 0x5092 | sub_5092 | nemici_tipo06a.c | 40 | destinazione 2: c2b6 = ff, ramo su (IY+0C), 5035 o 5068 con B = 6/9 | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 4FD4 (forza07-10) |
+| 0x50BA | sub_50ba | nemici_tipo06a.c | 37 | destinazione 6: (IY+13)+1 < 2, 531C o riallineamento di (IY+15) | verificata | 7 | finale, stanza50 | 4 non forzate e 3 forzate; non coperta l'uscita anomala di 531C |
+| 0x50DF | sub_50df | nemici_tipo06a.c | 54 | destinazione 5: 531C, `sbc hl,bc`, 5345, shift su BC, 5124 o 5115, 51FA | verificata | 7 | finale, stanza50 | 4 non forzate e 3 forzate; wrapper `banco_r_50df`; non coperta l'uscita anomala di 531C |
+| 0x5115 | sub_5115 | nemici_tipo06a.c | 15 | B &= 11, C &= a3; se nulli BC = 0081 | tradotta | 0 | - | nessun ingresso catturabile; il ramo BC = 0081 non è raggiunto (B, C dipendono da 5345) |
+| 0x5124 | sub_5124 | nemici_tipo06a.c | 4 | E = (IX+7), `rst 38` a 5127 su 9 voci | verificata | 33 | finale, stanza50 | 4 non forzate e 29 forzate |
+| 0x513A | sub_513a | nemici_tipo06a.c | 4 | BC = 0040 | tradotta | 0 | - | coperta da 5124 forza00 |
+| 0x513E | sub_513e | nemici_tipo06a.c | 14 | C &= 21, B = 0; se nullo bit 7 di (IX+1) e C = 1 | tradotta | 3 | stanza50 | 1 non forzata e 2 forzate |
+| 0x514C | sub_514c | nemici_tipo06a.c | 31 | L = C & 21, H = B & 20; scelta di BC in tre rami | tradotta | 5 | finale | 1 non forzata e 4 forzate |
+| 0x516B | sub_516b | nemici_tipo06a.c | 27 | B & 20, altrimenti B &= 11, C &= a3 | tradotta | 4 | finale | 1 non forzata e 3 forzate |
+| 0x5186 | sub_5186 | nemici_tipo06a.c | 30 | L = B & 30, H = C & 80; scelta di BC in tre rami | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 5124 |
+| 0x51A4 | sub_51a4 | nemici_tipo06a.c | 13 | B &= 10, C &= 80; se nulli bit 7 di (IX+1) e 51B1 | tradotta | 0 | - | nessun ingresso catturabile; coperta dalle forzate di 5124 |
+| 0x51B1 | sub_51b1 | nemici_tipo06a.c | 4 | BC = 0080 | tradotta | 0 | - | coperta da 5124 forza06 e da 51A4 |
+| 0x51B5 | sub_51b5 | nemici_tipo06a.c | 30 | 4FEF, (IX+0B/0C) = BC - 3, c2b6 = ff, B = 3c, coda 5068 | tradotta | 0 | - | nessun ingresso catturabile; coperta da 5124 forza07 |
+| 0x51D3 | sub_51d3 | nemici_tipo06a.c | 4 | BC = 0001 | tradotta | 2 | finale | 1 non forzata e 1 forzata |
+
+**Catture forzate** (`SNAP_FORZA`, suffisso `forzaNN`, N=1). 4FD4 (finale):
+`forza00-12` (00-06 una per indice di `rst 38`, 07-10 rami di 5092, 11-12
+50DF con 5124 o 5115); 5005 `forza01-03`; 5023 `forza01-04`; 50BA
+`forza01-03`; 50DF `forza01-03`; 513E (stanza50) `forza01-02`; 514C
+`forza01-04`; 516B `forza01-03`; 51D3 `forza01`; 5124 (finale) 29 forzate:
+`forza00-08`, `forza10-18`, `forza20-28`, `forza30-31`. Totale lotto: 91
+catture (26 non forzate e 65 forzate).
+
+**Non coperte da gcov** (`nemici_tipo06a.c`): i casi `0` e `default` dei tre
+`switch` (indici fuori tabella, non forzati); in 5115 il ramo BC = 0081 (B e
+C vengono da 5345 e non sono forzabili da fuori); in 50DF il ritorno
+anticipato sul riporto di 531C (cella piena: uscita anomala non catturabile,
+vale anche per 50BA, dove la chiamata è in coda e il ramo non ha righe
+proprie).
