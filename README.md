@@ -1,5 +1,7 @@
 # solomonKey — reverse engineering Solomon's Key (Tecmo, 1986)
 
+![Solomon's Key running in the decompiled C port](docs/cover.png)
+
 A from-scratch **decompilation** of the arcade game **Solomon's Key** — the
 classic Tecmo puzzle-platformer where the wizard Dana creates and destroys
 blocks to reach the key in every room — reconstructed in **readable C** from
