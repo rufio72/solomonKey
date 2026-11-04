@@ -267,6 +267,10 @@ void sub_3097(struct z80 *z)
     z->e = e;
     SET_HL(z, centro);
     z->ix = ix;
+    /* nell'originale 3097 dura circa un frame: in MAME 305F gira una volta per
+     * frame (sched_log, frame 1773-1835); il gioco libero chiude qui il frame
+     * (NULL altrove, brief 53) */
+    MACCHINA_FRAME_PIENO();
 }
 
 /* 0x31E9: barra di avanzamento a df80: B = min(A, 6) colonne di tile

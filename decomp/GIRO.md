@@ -421,4 +421,41 @@ fermava («FERMO corpo XX non tradotto»): 04 05 09 0F 17 19 1A 1B 1D 23
   è modellato (decisione utente, lotto dedicato) e quando un oggetto
   soddisfa le condizioni del 12 il gioco si ferma su «lettura del registro R
   non modellata».
-- Restano non tradotti: 1C 22 25 26 (lotto 53), 15 16 24 27 (lotto 54).
+- Restano non tradotti: 1C 22 25 26 (lotto 54), 15 16 24 27 (lotto 55; i
+  lotti slittano di uno per il brief 53).
+
+## Brief 53: stelline d'inizio quadro nel gioco libero
+
+Il cerchio di 16 stelline che a inizio quadro si stringe sulla chiave (corpo
+07 fase 13, voce 1 305F: `sub_3097`, poi 237E e due 23A1) avanza di un passo
+per **chiamata** di 305F, ma dura 64 **frame** (c463 da 00 a 3F, contato
+dalla NMI). In MAME (`out/sched_log.txt`) 305F gira una volta per frame
+(frame 1773-1835: 1 spedizione di 07 su 2): 3097 dura circa un frame. Il
+gioco libero chiudeva il frame solo a 22 corpi, quindi 11 passi per frame: in
+7 frame il raggio passava lo zero (00 -> FE) e per i 57 frame restanti le
+stelline giravano su un cerchio enorme lontano dalla chiave.
+
+- Correzione: gancio `macchina_frame_pieno` / `MACCHINA_FRAME_PIENO()`
+  (`ram.h`, `comune.c`, NULL altrove), chiamato in fondo a `sub_3097`; la
+  macchina libera lo aggancia dopo il boot (`frame_pieno_libero`: corpi =
+  `CORPI_PER_FRAME`, la NMI entra al confine seguente). Banco (1310 OK, 322
+  riepiloghi, 0 FALLITO), giro, `sched_proto`, replay e `gioca --oracolo`
+  identici a prima.
+- Cadenza misurata con gdb su `sub_3097` (stampa frame, c463, c2c5, c2c6,
+  c2c2, c2c4), partita `ricette/partita_1a.reg -n 4000`: prima 1402 chiamate
+  (frame 1381 -> 8, 1382-1444 -> 11, idem 2737-2800), ultima `C 1444 3f 3c
+  c9 c4 6b`; dopo 128 chiamate, una per frame (1381-1444 e 2737-2800),
+  ultima del primo quadro `C 1444 3f 3f 0d 41 48` (raggio 0D sulla chiave).
+- Partita 1A dopo la correzione: arriva ancora al corpo 1A al frame 3320
+  (gdb su `attivita_1a_411d`); `FRAME rese 4000`, `HASH ultimo
+  3f25ba053eeb56b9` (invariato), `AUDIO hash 2b2b3e7c4ca136fc` (era
+  79f9a550028a41b9), nessun FERMO. Seme 10 (6000 frame, passo 8): `FRAME
+  rese 6000`, `HASH ultimo 923cbefe0efb5a9f`, invariato.
+- Fondale (322A, corpo 07 fase 6 e 7CD3 nell'attract): misurato, difetto di
+  natura diversa, rimandato. In MAME la chiamata è una sola e copre circa sei
+  frame con NMI interne (frame 1188 inizio, 1189-1193 zero spedizioni, 1194
+  ripresa); nel gioco libero inizio e consegna della palette (`sub_33ba`)
+  cadono nello stesso frame (gdb: 1178, 2377, 2534). Non è un passo ripetuto
+  per frame: il frame pieno in coda non basta, servirebbero le NMI dentro la
+  routine prima di `sub_33ba` (come `PUNTO_LARGO` in modo oracolo). Effetto:
+  il libero resta avanti di ~5 frame dopo ogni fondale; da giudicare a vista.

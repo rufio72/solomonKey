@@ -50,6 +50,15 @@ ogni ciclo nei brief in `compiti/`.
   La trappola dei provider di input (MAME legge tastiera e joystick
   dell'host anche senza finestra) è sistemata ovunque: dal brief 27 anche
   `cattura.sh` e `sessioni.sh` passano i quattro provider a `none`.
+- **Cadenza del gioco libero (decisione utente 2026-11-04: «ci
+  ritorniamo»).** Il modo libero chiude il frame con un'euristica (oggi ~22
+  corpi per frame, `macchina_libera.c`), non con il costo vero delle
+  istruzioni. La correzione del brief 53 è mirata alla sola animazione
+  d'inizio quadro (3097); altri difetti di cadenza possono esistere altrove
+  e vanno rivisti: già noto il fondale 322A (in MAME ~6 frame con NMI
+  interne, nel libero uno solo; vedi `decomp/GIRO.md`, brief 53). Ogni nuovo
+  difetto visivo o di ritmo nel gioco libero va sospettato prima come
+  cadenza, poi come traduzione.
 
 ## Prossimi passi, in ordine
 
@@ -209,8 +218,13 @@ ogni ciclo nei brief in `compiti/`.
    modellato (lotto dedicato). Nota: la continuazione 12AB di 1288
    (raccolta di certi oggetti) non è tradotta e nel gioco libero non ha
    effetto. Vedi `decomp/GIRO.md`.
-   [ ] Lotto 53: corpi 1C, 25, 26, 22 (con 12F0 e il suo `rst 38`).
-   [ ] Lotto 54: corpi 15, 16, 24 (finale), 27 (passo 0 per composizione).
+   [x] Brief 53 (2026-11-04): stelline d'inizio quadro nel gioco libero,
+   un passo del cerchio per frame come in MAME (3097 dichiara il frame pieno,
+   gancio `MACCHINA_FRAME_PIENO`); oracolo, banco, replay e giro identici.
+   Il fondale (322A) ha un difetto di cadenza diverso, misurato e rimandato.
+   Vedi `decomp/GIRO.md`.
+   [ ] Lotto 54: corpi 1C, 25, 26, 22 (con 12F0 e il suo `rst 38`).
+   [ ] Lotto 55: corpi 15, 16, 24 (finale), 27 (passo 0 per composizione).
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

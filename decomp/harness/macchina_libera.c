@@ -3,7 +3,9 @@
  * (boot_2833); dopo, lo spedidore gira in un ciclo e la NMI entra ai confini
  * (scansione dello spedidore, prima del corpo). Non c'è un modello dei cicli
  * del Z80: l'istante vero delle NMI dentro i corpi viene solo dall'oracolo
- * (modo --oracolo di gioca), qui la cadenza è un'approssimazione. */
+ * (modo --oracolo di gioca), qui la cadenza è un'approssimazione: 22 corpi
+ * per frame, salvo le routine che dichiarano il frame pieno con
+ * MACCHINA_FRAME_PIENO() (oggi 3097, cerchio di stelline; brief 53). */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -84,6 +86,14 @@ static void r_letto_libero(void)
     fermo("lettura del registro R non modellata");
 }
 
+/* Frame pieno (brief 53): la routine chiamante occupa nell'originale il resto
+ * del frame; al confine seguente scansione_libera (o involucro_libero) vede
+ * corpi >= CORPI_PER_FRAME e chiama nmi_libera. */
+static void frame_pieno_libero(void)
+{
+    corpi = CORPI_PER_FRAME;
+}
+
 static void involucro_libero(uint8_t slot)
 {
     uint8_t codice = tabella[slot];
@@ -114,6 +124,7 @@ int macchina_libera_esegui(void)
     nemici_punto = NULL;
     sched_gancio_scansione = scansione_libera;
     nemici_r_gancio = r_letto_libero;
+    macchina_frame_pieno = frame_pieno_libero;  /* non durante il boot */
     for (int i = 0; i < SCHED_CODICI; i++)
         corpo_attivita[i] = involucro_libero;
     punti = corpi = letture = 0;

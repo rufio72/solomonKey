@@ -70,4 +70,12 @@ extern void (*macchina_punto)(uint16_t da, uint16_t a);
 #define MACCHINA_PUNTO(da, a) \
     do { if (macchina_punto) macchina_punto((da), (a)); } while (0)
 
+/* Frame pieno (gioco libero, brief 53): una routine che nell'originale occupa
+ * da sola il resto del frame lo dichiara con MACCHINA_FRAME_PIENO(); la
+ * macchina libera chiude il frame al confine seguente. Altrove è NULL e non
+ * cambia nulla (definito in comune.c). */
+extern void (*macchina_frame_pieno)(void);
+#define MACCHINA_FRAME_PIENO() \
+    do { if (macchina_frame_pieno) macchina_frame_pieno(); } while (0)
+
 #endif

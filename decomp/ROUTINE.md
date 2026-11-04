@@ -79,7 +79,7 @@ i frame sono quelli della cattura riuscita.
 | 0x2FF3 | sub_2ff3 | z80_2xxx.c | 13 | HL e DE = differenze di coordinate ×4 col segno (prestito a sub_3000) | verificata | 2 | titolo, gioco | titolo f1305, gioco f1774; solo registri |
 | 0x3000 | sub_3000 | z80_3xxx.c | 9 | HL = A·4 con segno dal riporto in ingresso | verificata | 2 | titolo, gioco | titolo f1305, gioco f1774; solo registri; usa il riporto in ingresso |
 | 0x3045 | sub_3045 | z80_3xxx.c | 26 | inizializza i 16 oggetti c46e con sub_4af6 (A=45, E=40, B=4, C=0) | verificata | 2 | titolo, gioco | titolo f1399, gioco f1774 (scrivono) |
-| 0x3097 | sub_3097 | z80_3xxx.c | 88 | 16 oggetti c46e su un cerchio (sub_30ef + sub_3101, centro c2c2/c2c4, raggio c2c6) | verificata | 2 | titolo, gioco | titolo f1399, gioco f1774 (scrivono) |
+| 0x3097 | sub_3097 | z80_3xxx.c | 88 | 16 oggetti c46e su un cerchio (sub_30ef + sub_3101, centro c2c2/c2c4, raggio c2c6); nel gioco libero dichiara il frame pieno | verificata | 2 | titolo, gioco | titolo f1399, gioco f1774 (scrivono) |
 | 0x30EF | sub_30ef | z80_3xxx.c | 18 | A = tabella ROM 3111 a specchio su 64 passi | verificata | 2 | titolo, gioco | titolo f1399 (A=00), gioco f1775 (occorrenza 2, A=20); solo registri |
 | 0x3101 | sub_3101 | z80_3xxx.c | 16 | byte alto di H·L (moltiplicazione seriale), bit bassi in L | verificata | 2 | titolo, gioco | titolo f1399, gioco f1774; solo registri |
 | 0x31CE | sub_31ce | z80_3xxx.c | 19 | scritta fissa 31E1 a dfa7 via sub_6771, poi cifra c238 in ASCII a dfac | verificata | 2 | titolo, gioco | titolo f1189, gioco f1564 (scrivono) |

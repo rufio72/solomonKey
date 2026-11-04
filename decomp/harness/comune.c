@@ -12,6 +12,8 @@ uint8_t rom[0x10000];
 
 /* Punti di sincronia per la NMI del giro dal boot (ram.h); NULL = spento. */
 void (*macchina_punto)(uint16_t da, uint16_t a) = NULL;
+/* Frame pieno del gioco libero (ram.h); NULL = spento. */
+void (*macchina_frame_pieno)(void) = NULL;
 
 /* Percorso `relativo` rispetto alla cartella dell'eseguibile (Linux:
  * /proc/self/exe), scritto in buf. NULL se non si può calcolare. */
