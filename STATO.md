@@ -223,8 +223,13 @@ ogni ciclo nei brief in `compiti/`.
    gancio `MACCHINA_FRAME_PIENO`); oracolo, banco, replay e giro identici.
    Il fondale (322A) ha un difetto di cadenza diverso, misurato e rimandato.
    Vedi `decomp/GIRO.md`.
-   [ ] Lotto 54: corpi 1C, 25, 26, 22 (con 12F0 e il suo `rst 38`).
+   [x] Lotto 54 (brief 54, 2026-11-04): corpi 1C, 25, 26, 22 (con 12F0, il
+   suo `rst 38` e 11 gestori di raccolta nuovi), raccolta 12AB di 1288 e
+   rami 352E/353B/351E della fase 1 del 07; 5 voci e 61 catture nuove
+   (modo `stato` di `cattura_corpi.sh`). Semi 4 e 67 arrivano a 6000 frame;
+   partita 1A: nuovo `AUDIO hash c097308a8678392e`. Vedi `decomp/GIRO.md`.
    [ ] Lotto 55: corpi 15, 16, 24 (finale), 27 (passo 0 per composizione).
+   Resta il registro R (corpo 12, 4302) non modellato nel gioco libero.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

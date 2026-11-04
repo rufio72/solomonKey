@@ -13,6 +13,9 @@
  * attivita_attract07*.c (brief 46, fasi 0-12). Lotto 52 (brief 52, gioco
  * libero): 04 05 09 0F 17 19 1A 1B 1D 23 in attivita_piccoli.c, 12 e 13 in
  * attivita_12_13.c, 18 in attivita_18.c (prototipi in attivita_libera.h).
+ * Lotto 54 (brief 54): 1C in attivita_1c.c, 22 in attivita_22.c (con i
+ * gestori di raccolta di raccolta_13xx.c), 25 in attivita_25.c, 26 in
+ * attivita_26.c.
  * Nella finestra del replay nessun codice spedito resta NULL in
  * corpo_attivita_replay. */
 #include <stddef.h>
@@ -378,8 +381,12 @@ attivita_fn corpo_attivita_replay[SCHED_CODICI] = {
     [0x19] = attivita_19_3792,
     [0x1a] = attivita_1a_411d,
     [0x1b] = attivita_1b_4111,
+    [0x1c] = attivita_1c_3f40,
     [0x1d] = attivita_1d_3f39,
     [0x1f] = attivita_1f_43c8,
     [0x20] = attivita_20_3e90,
+    [0x22] = attivita_22_12d6,
     [0x23] = attivita_23_3e4e,
+    [0x25] = attivita_25_3b77,
+    [0x26] = attivita_26_3b63,
 };

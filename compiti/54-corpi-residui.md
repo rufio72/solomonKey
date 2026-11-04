@@ -370,3 +370,46 @@ nuovi hash della partita 1A e le deviazioni. Rapporto finale: massimo trenta rig
 5. Modo «stato» in cattura_corpi.sh per le catture di 0x1288: preferenza
    ACCETTATA.
 6. Nomi di moduli, funzioni e tag: preferenze ACCETTATE.
+
+## Esito (sviluppatore, Opus 5.5, 2026-11-04)
+
+Lotto unico, nessun rinvio al 55. Uscite delle verifiche:
+1. `make 0`, `0` warning/errori.
+2. `CATTURE OK 93 su 93` (prima le 61 nuove da sole: 61 su 61). I `.log`
+   delle 32 catture vecchie, rigenerati, ripristinati con `git checkout`.
+3. `exit 0`, `0` FALLITO, `327` RIEPILOGO; `cattura` 1371, `OK` 1371.
+4. `0x12D6` 23/23, `0x2CCD` 5/5, `0x3B63` 6/6, `0x3B77` 9/9, `0x3F40` 7/7,
+   `0x1288` 13/13 (tutte come dedotto).
+5. `80` «registri non confrontati»; `RIEPILOGO 0x4302: 3 catture, 3 OK`.
+6. `GIRO COMPLETO 0-5499: saldatura 0 byte, spedidore 0 divergenze, 30 a
+   metà attività (attese), 13 frame resi con hash coincidenti`; sched_proto,
+   replay e `gioca --oracolo` identici alle «Misure di oggi» (`AUDIO hash
+   c4b40fea06623a96`).
+7. Partita 1A, due misure identiche: `FRAME rese 4000`, `HASH ultimo
+   3f25ba053eeb56b9` (uguale a prima), `AUDIO campioni 2988510`, `AUDIO hash
+   c097308a8678392e` (prima `2b2b3e7c4ca136fc`); 0 righe 12AB, 0 FERMO su
+   stderr e stdout. Con `--hash-frame` ogni 100 frame, confrontato con il
+   binario di HEAD: i frame 1900-2600 diversi, gli altri uguali (la partita
+   riconverge). Nuovo riferimento annotato in `decomp/GIRO.md`.
+8. Semi 4 e 67: `FRAME rese 6000`, nessun FERMO (nessuna nuova sosta).
+9. Seme 10: `FRAME rese 6000`, nessun FERMO.
+10. Nessun file sopra 800 righe; moduli nuovi: 1c 205, 22 82, 25 265, 26
+    121, raccolta_13xx 219; z80_1xxx 181, attract07a 259, attivita.c 392.
+11. `git status`: solo `decomp/`, `STATO.md` e questo file, 244 file
+    `out/snap_*` nuovi, niente binari; `pgrep -c mame` → `0`.
+
+Deviazioni dal brief:
+- I gestori 139C, 13AB, 13B9, 1413, 14D4 e la coda 13FC/14FC esistevano già
+  in `nemici_comparsa.c` (con voci nel banco): riusati, non riscritti;
+  `raccolta_13xx.c` contiene solo gli 11 mancanti (135B 13C3 13CD 13D1 13D5
+  13E6 13F7 1424 1436 1491 14AA).
+- Il passo 3 del 1C (405F) non è di 6 istruzioni senza chiamate: dopo
+  `ret z` prosegue (4067-40A6) con 3097 e 2425 (già tradotte); tradotto
+  per intero, verificato dalla cattura k3.
+- La verifica 6 va lanciata da `decomp/` (`sh giro_completo.sh`): dalla
+  radice lo script non trova l'oracolo (lo dice la sua intestazione).
+- La voce `0x3B63`/`0x3B77` di `routine_tab.c` sta prima di `0x3F10`, che
+  era già fuori ordine.
+- Righe dubbie del passo 3BAC (25, non catturabile): nessuna individuata
+  alla rilettura; da notare che con c237 = 0 il ciclo 3D20 fa 256 giri,
+  come sul Z80.

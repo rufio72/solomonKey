@@ -1,16 +1,65 @@
 /* Routine del Z80 principale fra 0x1000 e 0x1fff, tradotte in C leggibile.
  * Si riproducono l'effetto sulla RAM e i registri A, BC, DE, HL, IX, IY
  * all'uscita (le bandiere F no). */
-#include <stdio.h>
 #include "routine.h"
+
+/* 0x12AB (lotto 54): continuazione di 1288 con la classe (< 0x37) della
+ * cella HL, E = spiazzo della cella. Classe 0, 1, 3, 4: niente (ret, A =
+ * classe). Classe 2 (1332): bit 6 di c82e spento, suono 25, posta il corpo
+ * 1C. Classi 5-7 (1340): cella vuota (37), suono 11, posta il corpo 18.
+ * Classi da 8 (12BD): cella vuota, la coppia (classe, E) nel primo posto
+ * libero della coda c05b/c05d (con la coda piena nel terzo, c05f) e posta
+ * il corpo 22. Uscita come il Z80: A = codice postato, DE = slot, HL = c04e
+ * (sub_0493), C = suono (12BD: l'ultimo byte di coda ruotato), B come
+ * all'ingresso (12BD: posti non esaminati). */
+static void raccolta_12ab(struct z80 *z, uint8_t classe)
+{
+    z->a = classe;                             /* 12AB add a,37h */
+    if (classe == 0)
+        return;                                /* 12AD ret z */
+    if (classe >= 0x08) {                      /* 12AE-12B0 */
+        M(HL(z)) = 0x37;                       /* 12BD */
+        uint16_t hl = 0xc05b;                  /* 12BF */
+        z->b = 0x02;                           /* 12C2 */
+        for (;;) {
+            uint8_t c = M(hl);                 /* 12C4 */
+            z->c = (uint8_t)((c << 1) | (c >> 7));   /* 12C5 rlc c */
+            if (z->c == 0)
+                break;                         /* 12C7 jr z */
+            hl = (uint16_t)(hl + 2);           /* 12C9-12CA */
+            if (--z->b == 0)
+                break;                         /* 12CB djnz */
+        }
+        M(hl) = classe;                        /* 12CD */
+        M((uint16_t)(hl + 1)) = z->e;          /* 12CE-12CF */
+        z->a = 0x22;                           /* 12D0 */
+        sub_0493(z);                           /* 12D2 */
+        return;
+    }
+    if (classe >= 0x05) {                      /* 12B2-12B4 */
+        M(HL(z)) = 0x37;                       /* 1340 */
+        z->c = 0x11;                           /* 1342 */
+        sub_0028(z);                           /* 1344 rst 28h */
+        z->a = 0x18;                           /* 1345 */
+        sub_0493(z);                           /* 1347 */
+        return;
+    }
+    if (classe == 0x02) {                      /* 12B7-12B9 */
+        SET_HL(z, 0xc82e);                     /* 1332 */
+        M(0xc82e) &= (uint8_t)~0x40;           /* 1335 res 6,(hl) */
+        z->c = 0x25;                           /* 1337 */
+        sub_0028(z);                           /* 1339 rst 28h */
+        z->a = 0x1c;                           /* 133A */
+        sub_0493(z);                           /* 133C */
+    }
+}                                              /* 12BC ret (1, 3, 4) */
 
 /* 0x1288 (dalla NMI, 0117): raccolta sotto Dana. IX = c82e; esce se Dana
  * è spento o sulla scala (posa 7). Calcola la cella della griglia al
  * centro di Dana ((ix+0e)+8, (ix+15)+8) con sub_36f0 e ne legge la
- * classe: se è almeno 0x37 esce (sempre, nelle tracce). La continuazione
- * 12AB (raccolta vera, zona mai eseguita fino a 2349) non è tradotta:
- * avviso su stderr, stato invariato. Uscita del ramo eseguito:
- * A = classe − 0x37, HL = cella (c0bd + spiazzo), DE = spiazzo, IX = c82e. */
+ * classe: se è almeno 0x37 esce con A = classe − 0x37, HL = cella (c0bd +
+ * spiazzo), DE = spiazzo, IX = c82e. Altrimenti la continuazione 12AB
+ * (raccolta_12ab, lotto 54) secondo la classe. */
 void sub_1288(struct z80 *z)
 {
     z->ix = 0xc82e;
@@ -27,8 +76,7 @@ void sub_1288(struct z80 *z)
     z->a = (uint8_t)(M(HL(z)) - 0x37);
     if (M(HL(z)) >= 0x37)
         return;                            /* ret nc: niente da raccogliere */
-    fprintf(stderr,
-            "1288: continuazione 12AB (raccolta) non tradotta: nessun effetto\n");
+    raccolta_12ab(z, M(HL(z)));
 }
 
 /* ------------------------------------------------------------------ */

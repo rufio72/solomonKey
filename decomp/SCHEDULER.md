@@ -92,17 +92,19 @@ Le voci «tradotta (lotto 52)» sono state verificate nel banco dei corpi
 | 11 | 456E | 55 | resta o azzerata (457A ×2) |
 | 12, 13 | 426A, 6480 | 0 | tradotte (lotto 52): 12 azzerata (42FF), arriva a 4302 (registro R, non modellato nel gioco libero); 13 a passi su c19d (8 voci, tabella 6486) |
 | 14 | 44B5 | 32395 | resta (sempre presente dal frame 610) |
-| 15, 16 | 6466, 6496 | 0 | fine partita/attract: non nella misura a 5500 frame (lotto 54) |
+| 15, 16 | 6466, 6496 | 0 | fine partita/attract: non nella misura a 5500 frame (lotto 55); 16 è postata anche dal passo 9 del 25 e da 6655 del 26 |
 | 17 | 6429 | 0 | tradotta (lotto 52): diventa 06, 08, 07 o 24 (6464) |
 | 18 | 4124 | 0 | tradotta (lotto 52): a passi su c19e (10 voci, tabella 4171), poi azzerata (413B) |
 | 19, 1A, 1B, 1D | 3792, 411D, 4111, 3F39 | 0 | tradotte (lotto 52): 19 azzerata (37B1), 1A diventa 1B (4121), 1B diventa 02 (411A), 1D diventa 05 (3F3D) |
-| 1C | 3F40 | 0 | a passi, non tradotta (lotto 53) |
+| 1C | 3F40 | 0 | tradotta (lotto 54): a passi su c19d (9 voci, tabella 3F45); posta dalla raccolta della classe 2 (1332) |
 | 1E, 21 | 3B61 | 0 | `pop hl; ret` (voci vuote) |
 | 1F | 43C8 | 2 | diventa 14 (43E4 ×2) |
 | 20 | 3E90 | 17410 | resta (3E98) |
-| 22, 24, 25 | 12D6, 2C72, 3B77 | 0 | non tradotte (lotti 53-54) |
+| 22 | 12D6 | 0 | tradotta (lotto 54): svuota la coda di raccolta c05b (12F0, `rst 38` 130A), poi azzerata (12ED) |
+| 24 | 2C72 | 0 | non tradotta (lotto 55) |
+| 25 | 3B77 | 0 | tradotta (lotto 54): a passi su c19d (10 voci, tabella 3B7C); il passo 9 la fa diventare 16 (3BA2) |
 | 23 | 3E4E | 0 | tradotta (lotto 52): resta |
-| 26 | 3B63 | 0 | a passi, stesso schema di 07 |
+| 26 | 3B63 | 0 | tradotta (lotto 54): a passi su c19d (7 voci, tabella 3B68), stesso schema di 07 |
 | 27 | 62B6 | 0 | postata solo da 017B (NMI con e603 bit 0 = 1) |
 
 ## Attività a passi

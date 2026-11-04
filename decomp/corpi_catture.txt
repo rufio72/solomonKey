@@ -1,10 +1,14 @@
-# Catture dei corpi di attività del lotto 52 (brief 52), lette da cattura_corpi.sh.
+# Catture dei corpi di attività dei lotti 52 e 54 (brief 52 e 54), lette da cattura_corpi.sh.
 # Una riga per cattura: modo cod entry tag N poke
-#   modo  corpo (SNAP_CORPO=1: il ritorno sta in [SP+2]) o sub (ritorno normale)
-#   cod   codice dell'attività: stato attNN di cattura.sh (posta al frame 2300)
-#   tag   suffisso del tag (file out/snap_<entry>_att<cod>_<tag>_*)
+#   modo  corpo (SNAP_CORPO=1: il ritorno sta in [SP+2]), sub (ritorno normale)
+#         o stato (brief 54: cod è uno stato di cattura.sh, senza poke predefiniti)
+#   cod   codice dell'attività: stato attNN di cattura.sh (posta al frame 2300);
+#         con modo stato il nome dello stato (gioco)
+#   tag   suffisso del tag (file out/snap_<entry>_att<cod>_<tag>_*, con modo stato
+#         out/snap_<entry>_<cod>_<tag>_*)
 #   N     occorrenza
-#   poke  frame:addr:val separati da virgola, aggiunti a 2250:0xc19d:0,2250:0xc19e:0; - = nessuno
+#   poke  frame:addr:val separati da virgola, aggiunti a 2250:0xc19d:0,2250:0xc19e:0
+#         (con modo stato da soli); - = nessuno
 # Per i corpi a passi il tag kK è il valore del contatore (c19d per il 13,
 # c19e per il 18) in _prima.bin. Il passo 7 del 13 (670F: 75AA, 3569, 673F)
 # dura più di un frame: ogni occorrenza è scartata (NMI), si verifica per
@@ -41,3 +45,68 @@ corpo 18 0x4124 k8 1 2300:0xc19e:8
 corpo 18 0x4124 k9 1 2300:0xc19e:9
 corpo 18 0x4124 k10 1 2300:0xc19e:10
 sub   18 0x6735 base 1 -
+# Lotto 54 (brief 54): corpi 1C 26 25 22, rami 352E/353B/351E della fase 1
+# del 07 (2CCD, contatore c19d) e raccolta 1288 nello stato gioco (modo
+# stato). Passi con 75AA non catturabili (NMI dentro): 1C k4 e k8, 25 k7,
+# 26 k6; per 1C k4 e 25 k7 la cattura cadrebbe sul passo seguente.
+corpo 1C 0x3F40 k0 1 -
+corpo 1C 0x3F40 k1 1 2300:0xc19d:1
+corpo 1C 0x3F40 k2 1 2300:0xc19d:2
+corpo 1C 0x3F40 k3 1 2300:0xc19d:3
+corpo 1C 0x3F40 k5 1 2300:0xc19d:5
+corpo 1C 0x3F40 k6 1 2300:0xc19d:6
+corpo 1C 0x3F40 k7 1 2300:0xc19d:7
+corpo 26 0x3B63 k0 1 -
+corpo 26 0x3B63 k1 1 2300:0xc19d:1
+corpo 26 0x3B63 k2 1 2300:0xc19d:2
+corpo 26 0x3B63 k3 1 2300:0xc19d:3
+corpo 26 0x3B63 k4 1 2300:0xc19d:4
+corpo 26 0x3B63 k5 1 2300:0xc19d:5
+corpo 25 0x3B77 k0 1 -
+corpo 25 0x3B77 k1 1 2300:0xc19d:1
+corpo 25 0x3B77 k2 1 2300:0xc19d:2
+corpo 25 0x3B77 k3 1 2300:0xc19d:3
+corpo 25 0x3B77 k4 1 2300:0xc19d:4
+corpo 25 0x3B77 k5 1 2300:0xc19d:5
+corpo 25 0x3B77 k6 1 2300:0xc19d:6
+corpo 25 0x3B77 k8 1 2300:0xc19d:8
+corpo 25 0x3B77 k9 1 2300:0xc19d:9
+corpo 22 0x12D6 c08 1 2300:0xc05b:0x08,2300:0xc05c:0x95
+corpo 22 0x12D6 c09 1 2300:0xc05b:0x09,2300:0xc05c:0x95
+corpo 22 0x12D6 c0A 1 2300:0xc05b:0x0A,2300:0xc05c:0x95
+corpo 22 0x12D6 c0B 1 2300:0xc05b:0x0B,2300:0xc05c:0x95
+corpo 22 0x12D6 c0C 1 2300:0xc05b:0x0C,2300:0xc05c:0x95
+corpo 22 0x12D6 c0D 1 2300:0xc05b:0x0D,2300:0xc05c:0x95
+corpo 22 0x12D6 c0E 1 2300:0xc05b:0x0E,2300:0xc05c:0x95
+corpo 22 0x12D6 c0F 1 2300:0xc05b:0x0F,2300:0xc05c:0x95
+corpo 22 0x12D6 c10 1 2300:0xc05b:0x10,2300:0xc05c:0x95
+corpo 22 0x12D6 c11 1 2300:0xc05b:0x11,2300:0xc05c:0x95
+corpo 22 0x12D6 c12 1 2300:0xc05b:0x12,2300:0xc05c:0x95
+corpo 22 0x12D6 c13 1 2300:0xc05b:0x13,2300:0xc05c:0x95
+corpo 22 0x12D6 c14 1 2300:0xc05b:0x14,2300:0xc05c:0x95
+corpo 22 0x12D6 c15 1 2300:0xc05b:0x15,2300:0xc05c:0x95
+corpo 22 0x12D6 c16 1 2300:0xc05b:0x16,2300:0xc05c:0x95
+corpo 22 0x12D6 c17 1 2300:0xc05b:0x17,2300:0xc05c:0x95
+corpo 22 0x12D6 c18 1 2300:0xc05b:0x18,2300:0xc05c:0x95
+corpo 22 0x12D6 c19 1 2300:0xc05b:0x19,2300:0xc05c:0x95
+corpo 22 0x12D6 c1A 1 2300:0xc05b:0x1A,2300:0xc05c:0x95
+corpo 22 0x12D6 c1B 1 2300:0xc05b:0x1B,2300:0xc05c:0x95
+corpo 22 0x12D6 c29 1 2300:0xc05b:0x29,2300:0xc05c:0x95
+corpo 22 0x12D6 c36 1 2300:0xc05b:0x36,2300:0xc05c:0x95
+corpo 22 0x12D6 tre 1 2300:0xc05b:0x08,2300:0xc05c:0x95,2300:0xc05d:0x1A,2300:0xc05e:0x95,2300:0xc05f:0x10,2300:0xc060:0x95
+corpo 07 0x2CCD f1d 1 2300:0xc19d:1
+corpo 07 0x2CCD f1b 1 2300:0xc19d:1,2300:0xc24e:1,2300:0xc24a:0,2300:0xc24b:0xFF,2300:0xc24c:0xFF,2300:0xc24d:3
+corpo 07 0x2CCD f1c 1 2300:0xc19d:1,2300:0xc24e:0,2300:0xc251:5
+corpo 07 0x2CCD f1e 1 2300:0xc19d:1,2300:0xc24e:0
+corpo 07 0x2CCD f1f 1 2300:0xc19d:1,2300:0xc24e:0,2300:0xc251:1
+stato gioco 0x1288 r00 1 2400:0xc152:0x00
+stato gioco 0x1288 r01 1 2400:0xc152:0x01
+stato gioco 0x1288 r02 1 2400:0xc152:0x02
+stato gioco 0x1288 r03 1 2400:0xc152:0x03
+stato gioco 0x1288 r04 1 2400:0xc152:0x04
+stato gioco 0x1288 r05 1 2400:0xc152:0x05
+stato gioco 0x1288 r07 1 2400:0xc152:0x07
+stato gioco 0x1288 r08 1 2400:0xc152:0x08
+stato gioco 0x1288 r1B 1 2400:0xc152:0x1B
+stato gioco 0x1288 r36 1 2400:0xc152:0x36
+stato gioco 0x1288 rQ08 1 2400:0xc152:0x08,2400:0xc05b:1,2400:0xc05d:1

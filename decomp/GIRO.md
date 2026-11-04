@@ -132,7 +132,7 @@ spedidore; 9 a metà attività, tutte nel primo corpo 06 (frame 603-611).
 - Istruzioni tradotte: ingresso e fasi 0-12 come da brief (501 stimate). I rami
   mai eseguiti nei frame 0-2410 chiamano `nemici_manca(indirizzo)` (386A, 3874,
   38BA, 38CA, 38D9, 3901, 3903, 3960, 398B, 3986, 39B9, 351E, 353B, 352E,
-  365F, 366C, 2D0F, 2E04); il bit 4 di c045 in 2D07 passa da
+  365F, 366C, 2D0F, 2E04; 351E, 353B e 352E tradotti nel lotto 54); il bit 4 di c045 in 2D07 passa da
   `nemici_r_somma()` (sentinella) e poi `nemici_manca(0x2d1f)`.
 - Punti `NEMICI_PUNTO`: uno per scrittura in RAM o chiamata, secondo la regola
   di `nemici.h`; nei cicli (fase 0 d840 e c251, fase 2, fase 3, fase 4
@@ -410,19 +410,20 @@ fermava («FERMO corpo XX non tradotto»): 04 05 09 0F 17 19 1A 1B 1D 23
   Dopo: `FRAME rese 4000`, `HASH ultimo 3f25ba053eeb56b9`, `AUDIO hash
   79f9a550028a41b9`, uscita 0. Durante la stessa partita il log ripete
   «1288: continuazione 12AB (raccolta) non tradotta: nessun effetto»: la
-  raccolta di certi oggetti nel gioco libero non ha ancora effetto (zona
-  12xx, lotto del corpo 22).
+  raccolta di certi oggetti nel gioco libero non aveva ancora effetto
+  (tradotta nel lotto 54, vedi sotto).
 - Regressione a ingressi casuali: `python3 ricette/genera_ingressi.py SEME
   FILE FINE [PASSO]`, poi `harness/gioca -n FINE --muto --riproduci FILE`.
   Seme 10 (passo 8, 6000 frame): prima «FERMO corpo 04 ... al frame 3733»,
   ora `FRAME rese 6000`. Seme 4: prima «FERMO corpo 13 ... al frame 5475»,
-  ora «FERMO routine 352E mancante al frame 5602».
+  ora «FERMO routine 352E mancante al frame 5602»; dopo il lotto 54
+  `FRAME rese 6000`.
 - Registro R: il corpo 12 arriva a 4302 (`ld a,r`); nel gioco libero R non
   è modellato (decisione utente, lotto dedicato) e quando un oggetto
   soddisfa le condizioni del 12 il gioco si ferma su «lettura del registro R
   non modellata».
-- Restano non tradotti: 1C 22 25 26 (lotto 54), 15 16 24 27 (lotto 55; i
-  lotti slittano di uno per il brief 53).
+- Restavano non tradotti: 1C 22 25 26 (fatti nel lotto 54), 15 16 24 27
+  (lotto 55; i lotti slittano di uno per il brief 53).
 
 ## Brief 53: stelline d'inizio quadro nel gioco libero
 
@@ -459,3 +460,30 @@ stelline giravano su un cerchio enorme lontano dalla chiave.
   per frame: il frame pieno in coda non basta, servirebbero le NMI dentro la
   routine prima di `sub_33ba` (come `PUNTO_LARGO` in modo oracolo). Effetto:
   il libero resta avanti di ~5 frame dopo ogni fondale; da giudicare a vista.
+
+## Lotto 54: corpi 1C 22 25 26, routine 352E e raccolta 12AB (brief 54)
+
+Tradotti i corpi 1C (`attivita_1c.c`), 22 (`attivita_22.c`, con 12F0 e il
+salto `rst 38` alla tabella 130A), 25 (`attivita_25.c`) e 26
+(`attivita_26.c`, con 6502 e la voce 3D59 condivisa con il 25), gli 11
+gestori di raccolta mancanti (`raccolta_13xx.c`; 139C 13AB 13B9 1413 14D4 e
+13FC esistevano già in `nemici_comparsa.c`), la continuazione 12AB di 1288
+(`raccolta_12ab` in `z80_1xxx.c`: classe 2 posta 1C, classi 5-7 vuotano la
+cella e postano 18, classi da 8 accodano in c05b e postano 22) e i rami
+352E, 353B, 351E della fase 1 del corpo 07 (`attivita_attract07a.c`).
+Banco, replay, giro e `gioca --oracolo` invariati.
+
+- Catture: 61 nuove in `corpi_catture.txt` (93 in tutto), con il modo
+  `stato` di `cattura_corpi.sh` per le 11 di 1288 nello stato `gioco`. I
+  passi con 75AA (1C 3F58 e 3FF7, 25 3BAC, 26 6655) non si catturano e
+  sono verificati per composizione.
+- Partita 1A, nuovo riferimento (da `decomp/harness`, due misure uguali):
+  `./gioca --riproduci ../ricette/partita_1a.reg -n 4000 --muto` →
+  `FRAME rese 4000`, `HASH ultimo 3f25ba053eeb56b9`, `AUDIO campioni
+  2988510`, `AUDIO hash c097308a8678392e` (prima `2b2b3e7c4ca136fc`),
+  nessuna riga 12AB né FERMO. L'hash dell'ultimo frame resta uguale: con
+  `--hash-frame` ogni 100 frame la partita diverge fra i frame 1900 e 2600
+  (la raccolta ora ha effetto) e poi torna sugli stessi frame.
+- Semi 4 e 67 (6000 frame, passo 8): `FRAME rese 6000`, nessun FERMO
+  (prima «FERMO routine 352E» ai frame 5602 e 4866); seme 10 invariato
+  (`FRAME rese 6000`).

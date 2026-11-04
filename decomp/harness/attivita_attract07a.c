@@ -161,15 +161,38 @@ void fase_07_3861(void)
         nemici_manca(0x39b9);
 }
 
+/* Rami 352E-3547 della fase 1 (lotto 54, mai eseguiti nel giro, quindi
+ * senza punti): se il byte c24b + c24a è FF, c24a diventa l'indice del
+ * primo byte diverso da FF da c24b (353B); poi il record della stanza
+ * (354B). */
+static void fase_07_352e(struct z80 *z)
+{
+    uint16_t de = 0xc24b;                      /* 352E-3532 */
+    if (M((uint16_t)(de + M(0xc24a))) == 0xff) {   /* 3533-3539 */
+        uint8_t b = 0xff;                      /* 353B */
+        uint8_t a;
+        do {                                   /* 353D-3541 */
+            a = M(de);
+            de++;
+            b++;
+        } while (a == 0xff);
+        M(0xc24a) = b;                         /* 3543-3544 */
+    }
+    sub_354b(z);                               /* 3547 */
+}
+
 /* Fase 1, 34FA: se c24e ha il bit 0 spento copia i 4 byte della tabella ROM
- * 8DD4 (indice c243) in c24a-c24d; con c251 = FF (o dopo la copia) e un
- * byte diverso da FF alla posizione c24b + c24a carica il record della
- * stanza-bonus (354B). Gli altri rami non sono mai eseguiti. */
+ * 8DD4 (indice c243) in c24a-c24d e cancella (FF) in c24b-c24d ogni byte
+ * della lista c251 (fino a FF) che vi compare (351E, cpir su 3 byte); con
+ * un byte diverso da FF alla posizione c24b + c24a carica il record della
+ * stanza-bonus (354B), altrimenti prima sposta c24a (353B). Con c24e bit 0
+ * acceso salta direttamente a 352E. I rami 352E-con-salto, 351E e 353B
+ * sono del lotto 54 (mai eseguiti nel giro). */
 void fase_07_34fa(void)
 {
     struct z80 z = {0};
     if (M(0xc24e) & 0x01) {                    /* 34FB-3500 */
-        nemici_manca(0x352e);                  /* salto diretto mai eseguito */
+        fase_07_352e(&z);                      /* jr nz,352e */
         return;
     }
     uint16_t src = (uint16_t)(0x8dd4 + 4 * M(0xc243));   /* 3502-350D */
@@ -182,12 +205,22 @@ void fase_07_34fa(void)
     }
     NEMICI_PUNTO(0x3516, 0x3547);
     if (M(0xc251) != 0xff) {                   /* 3516-351C */
-        nemici_manca(0x351e);
+        uint16_t de = 0xc251;
+        uint8_t a;
+        while ((a = M(de++)) != 0xff) {        /* 3519-351C */
+            for (uint16_t hl = 0xc24b; hl < 0xc24e; hl++) {   /* 351F-3527 cpir */
+                if (M(hl) == a) {
+                    M(hl) = 0xff;              /* 3529-352A */
+                    break;
+                }
+            }
+        }
+        fase_07_352e(&z);
         return;
     }
     uint16_t p = (uint16_t)(0xc24b + M(0xc24a));   /* 352E-3536 */
     if (M(p) == 0xff) {                        /* 3537-3539 */
-        nemici_manca(0x353b);
+        fase_07_352e(&z);                      /* 353B, poi 3547 */
         return;
     }
     sub_354b(&z);                              /* 3547 */

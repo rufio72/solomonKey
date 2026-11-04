@@ -1,0 +1,4 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+POKE 2400 C152 04
+SNAP: catturata occorrenza 1 di 0x1288 [gioco_r04] al frame 2402, scartate 0
+Average speed: 716.15% (39 seconds)
