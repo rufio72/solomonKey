@@ -5,7 +5,8 @@
  * ED e un `ld` in mezzo), e usano solo la somma R1 + R2. Le catture di
  * MAME non registrano R, quindi il valore non si può ricavare dal «prima».
  * nemici_r_somma() lo prende da una piccola tabella (r_valori) che il
- * banco riempie con la ricerca qui sotto; fuori dal banco (replay) vale 0.
+ * banco riempie con la ricerca qui sotto; fuori dal banco (replay, oracolo)
+ * vale 0, nel gioco libero lo dà la sorgente nemici_r_valore (brief 56).
  *
  * Ricerca (solo banco, nelle voci che arrivano a un `ld a,r`): il
  * wrapper riconosce la cattura confrontando RAM e registri con i file
@@ -27,13 +28,15 @@ static uint8_t r_valori[2];
 static unsigned r_usati;
 
 void (*nemici_r_gancio)(void) = NULL;
+uint8_t (*nemici_r_valore)(void) = NULL;
 
 /* Come nemici_r_somma, ma scrive anche R1 (5DDF lascia C = R1). */
 uint8_t nemici_r_somma_r1(uint8_t *r1)
 {
     if (nemici_r_gancio)
         nemici_r_gancio();
-    uint8_t v = r_valori[r_usati < 2 ? r_usati : 1];
+    uint8_t v = nemici_r_valore ? (uint8_t)(nemici_r_valore() & 0x7f)
+                                : r_valori[r_usati < 2 ? r_usati : 1];
     r_usati++;
     uint8_t r2 = (uint8_t)((v & 0x80) | ((v + 3) & 0x7f));
     *r1 = v;

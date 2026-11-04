@@ -234,9 +234,14 @@ ogni ciclo nei brief in `compiti/`.
    arrivava poi a rami mancanti del corpo 06 dell'attract: tradotte le fasi
    5 (7A0B), 8 (7B3B), 10 e 11 (7604; la tabella 75EC ha 12 voci). I semi
    10, 4, 67 passano fine partita e attract e si fermano solo sul registro R.
-   Resta il registro R (corpo 12, 4302) non modellato nel gioco libero;
-   nessun altro ramo «routine mancante» incontrato dal fine partita. Vedi
+   Il registro R (corpo 12, 4302) è poi modellato nel lotto 56; nessun
+   altro ramo «routine mancante» incontrato dal fine partita. Vedi
    `decomp/GIRO.md`.
+   [x] Lotto 56 (brief 56, 2026-11-04): registro R surrogato (LCG a 32 bit)
+   nel solo gioco libero, banco/replay/oracolo identici. I semi 10, 4, 67
+   superano il corpo 12 e si fermano su «routine 386A mancante» (fase 0 del
+   corpo 07 dell'attract con c243 >= 24) ai frame 27938, 25954, 25218: resta
+   da tradurre in un lotto di coda. Vedi `decomp/GIRO.md`.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

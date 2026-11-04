@@ -5,7 +5,8 @@
  * del Z80: l'istante vero delle NMI dentro i corpi viene solo dall'oracolo
  * (modo --oracolo di gioca), qui la cadenza è un'approssimazione: 22 corpi
  * per frame, salvo le routine che dichiarano il frame pieno con
- * MACCHINA_FRAME_PIENO() (oggi 3097, cerchio di stelline; brief 53). */
+ * MACCHINA_FRAME_PIENO() (oggi 3097, cerchio di stelline; brief 53).
+ * R: surrogato deterministico, vedi r_libero (brief 56). */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,6 +46,15 @@ static void fermo(const char *motivo)
     longjmp(uscita, 3);
 }
 
+/* Registro R surrogato (brief 56): nessun conteggio delle istruzioni. Lo
+ * stato avanza di un passo a ogni NMI (il tempo passa) e di uno a ogni
+ * lettura (due letture nello stesso frame danno valori diversi); R1 sono
+ * i 7 bit alti. Deterministico a parità di ingressi. */
+#define R_SEME 0x4302u
+static uint32_t r_stato;
+static void r_avanza(void) { r_stato = r_stato * 1103515245u + 12345u; }
+static uint8_t r_libero(void) { r_avanza(); return (uint8_t)(r_stato >> 25); }
+
 /* NMI libera: ingressi dal chiamante, poi sub_0066. Solo se la maschera la
  * consente e mai dentro un'altra NMI. */
 static void nmi_libera(void)
@@ -64,6 +74,7 @@ static void nmi_libera(void)
     sub_0066(&z);
     in_nmi = 0;
     frame_corr++;
+    r_avanza();
     punti = corpi = letture = 0;
 }
 
@@ -79,11 +90,6 @@ static void scansione_libera(int lettura)
     (void)lettura;
     if (++letture >= LETTURE_PER_FRAME || corpi >= CORPI_PER_FRAME)
         nmi_libera();
-}
-
-static void r_letto_libero(void)
-{
-    fermo("lettura del registro R non modellata");
 }
 
 /* Frame pieno (brief 53): la routine chiamante occupa nell'originale il resto
@@ -112,6 +118,7 @@ int macchina_libera_esegui(void)
     int rc = setjmp(uscita);
     if (rc)
         return rc == 1 ? 0 : rc;
+    r_stato = R_SEME;
     carica_rom();
     /* f000-ffff è ROM ma leggi() la cerca in ram[] (come macchina_esegui) */
     memcpy(&ram[0xf000 - 0xc000], &rom[0xf000], 0x1000);
@@ -123,7 +130,8 @@ int macchina_libera_esegui(void)
     macchina_punto = NULL;
     nemici_punto = NULL;
     sched_gancio_scansione = scansione_libera;
-    nemici_r_gancio = r_letto_libero;
+    nemici_r_gancio = NULL;
+    nemici_r_valore = r_libero;
     macchina_frame_pieno = frame_pieno_libero;  /* non durante il boot */
     for (int i = 0; i < SCHED_CODICI; i++)
         corpo_attivita[i] = involucro_libero;

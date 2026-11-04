@@ -356,8 +356,12 @@ uint8_t nemici_r_somma_r1(uint8_t *r1);   /* somma e R1 */
 /* Sentinella del registro R (brief 45): se non NULL, nemici_r_somma_r1 la
  * chiama prima di leggere R. macchina.c ci aggancia r_letto, che ferma il
  * giro: la partita registrata non legge R (registra_r.sh), un percorso
- * diverso sì. NULL nel banco e nel replay: nessun effetto. */
+ * diverso sì. NULL nel banco, nel replay e nel gioco libero: nessun effetto. */
 extern void (*nemici_r_gancio)(void);
+/* Sorgente di R1 nel gioco libero (brief 56): se non NULL,
+ * nemici_r_somma_r1 prende R1 da qui invece che da r_valori.
+ * NULL nel banco, nel replay e nel modo oracolo. */
+extern uint8_t (*nemici_r_valore)(void);
 
 void banco_r_54c5(struct z80 *z);
 void banco_r_51d7(struct z80 *z);

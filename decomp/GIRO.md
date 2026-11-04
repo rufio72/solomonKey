@@ -418,10 +418,11 @@ fermava («FERMO corpo XX non tradotto»): 04 05 09 0F 17 19 1A 1B 1D 23
   ora `FRAME rese 6000`. Seme 4: prima «FERMO corpo 13 ... al frame 5475»,
   ora «FERMO routine 352E mancante al frame 5602»; dopo il lotto 54
   `FRAME rese 6000`.
-- Registro R: il corpo 12 arriva a 4302 (`ld a,r`); nel gioco libero R non
-  è modellato (decisione utente, lotto dedicato) e quando un oggetto
-  soddisfa le condizioni del 12 il gioco si ferma su «lettura del registro R
-  non modellata».
+- Registro R: il corpo 12 arriva a 4302 (`ld a,r`). Dal lotto 56 il solo
+  gioco libero ha un R surrogato: generatore pseudo-casuale (LCG a 32 bit) in
+  `macchina_libera.c`, avanzato a ogni NMI e a ogni lettura, R1 = 7 bit alti,
+  dato a `nemici_r_somma_r1` tramite `nemici_r_valore`. Banco, replay e modo
+  oracolo non lo vedono (puntatore NULL, sentinella `r_letto` invariata).
 - Restavano non tradotti: 1C 22 25 26 (fatti nel lotto 54), 15 16 24 27
   (tradotti nel lotto 55; i lotti slittano di uno per il brief 53).
 
@@ -518,3 +519,24 @@ e `attesa_13`, rinominata `attesa_64ce`.
 - Invarianti: giro completo, `gioca --oracolo` (`AUDIO hash
   c4b40fea06623a96`), partita 1A (`HASH ultimo 3f25ba053eeb56b9`, `AUDIO
   hash c097308a8678392e`) e semi 4, 67, 10 a 6000 frame identici.
+
+## Lotto 56: registro R surrogato nel solo gioco libero
+
+Il gioco libero non si ferma più su «lettura del registro R non modellata»:
+`nemici_r_valore` (nuovo, `nemici_r.c`/`nemici.h`) è NULL ovunque tranne in
+`macchina_libera.c`, che vi aggancia `r_libero` (LCG 1103515245/12345, seme
+4302, un passo a ogni NMI e uno a ogni lettura; nessun conteggio di
+istruzioni). Il gancio `nemici_r_gancio` nel gioco libero è NULL.
+
+- Semi 10, 4, 67 a 40000 frame (passo 8): nessun FERMO sul registro R; la
+  partita prosegue e si ferma su «FERMO routine 386A mancante» ai frame
+  27938, 25954, 25218 (`FRAME rese` 27872, 25888, 25152, stesso `HASH ultimo
+  16ea230eea591d30`; `AUDIO hash` 46b2da66631444cb, e7d412a36e88f8cc,
+  f447b05e997e0553). Il ramo è nella fase 0 del corpo 07 dell'attract
+  (`fase_07_3861`, `attivita_attract07a.c`): con c243 >= 24 il codice fa
+  `inc c` a 386A e c09a vale 1B invece di 1A. Non tradotto (lotto di coda).
+  Il sito 2D1F (`fase_2d07`) non è comparso.
+- Seme 10 ripetuto: uscite identiche (deterministico).
+- Invarianti identici: banco (335 voci, 1412 catture, 0 FALLITO), giro
+  completo, `gioca --oracolo` (`AUDIO hash c4b40fea06623a96`), partita 1A
+  (`HASH ultimo 3f25ba053eeb56b9`, `AUDIO hash c097308a8678392e`).

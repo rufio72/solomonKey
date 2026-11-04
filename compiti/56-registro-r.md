@@ -221,3 +221,34 @@ uscite di 1-8 e le deviazioni. Rapporto finale: massimo trenta righe.
 3. Puntatore nuovo nemici_r_valore invece di cambiare la firma del gancio:
    preferenza ACCETTATA.
 4. Nomi e costanti: preferenze ACCETTATE.
+
+## Esito (sviluppatore, Opus 5.5, 2026-11-04)
+
+1. Compilazione: `make 0`, `0` warning/errori. Nota: `sched_proto` non linka
+   `nemici_r.c` (Makefile r. 31, solo `SORGENTI_SCHED`), quindi non si
+   ricompila ed è invariato per costruzione; il brief diceva il contrario.
+2. Banco: `exit 0`, `0`, `335`, `1412`, `1412`.
+3. Invarianti: `GIRO COMPLETO 0-5499: saldatura 0 byte, spedidore 0
+   divergenze, 30 a metà attività (attese), 13 frame resi con hash
+   coincidenti`; oracolo `AUDIO campioni 4042500` / `AUDIO hash
+   c4b40fea06623a96`; partita 1A `FRAME rese 4000`, `HASH ultimo
+   3f25ba053eeb56b9`, `AUDIO hash c097308a8678392e`, 0 FERMO.
+4. Semi a 40000 frame, nessun `FERMO lettura del registro R`. Atteso
+   `FRAME rese 40000` NON raggiunto: fermata nuova comune ai tre semi,
+   «FERMO routine 386A mancante» (`fase_07_3861`, `attivita_attract07a.c:29`,
+   ramo c243 >= 24 della fase 0 del corpo 07 dell'attract: `inc c` a 386A,
+   c09a = 1B). Non tradotta, fuori perimetro.
+   - seme 10: frame 27938, `FRAME rese 27872`, `HASH ultimo 16ea230eea591d30`, `AUDIO hash 46b2da66631444cb`;
+   - seme 4: frame 25954, `FRAME rese 25888`, `HASH ultimo 16ea230eea591d30`, `AUDIO hash e7d412a36e88f8cc`;
+   - seme 67: frame 25218, `FRAME rese 25152`, `HASH ultimo 16ea230eea591d30`, `AUDIO hash f447b05e997e0553`.
+   Il sito 2D1F non è comparso.
+5. Determinismo: seme 10 ripetuto, uscite identiche (diff vuoto).
+6. `nemici_r_valore`: solo `macchina_libera.c:1`, `nemici_r.c:3`, `nemici.h:1`.
+7. Dimensioni: uscita vuota.
+8. Ambito: solo i sei file previsti; `pgrep -c mame` → `0`; nessun `.o` né
+   binario; `nemici_r.c` +5/-2 righe (r. 8, 31, 38), nessuna nelle r. 140-176.
+
+Deviazioni: il blocco del surrogato in `macchina_libera.c` sta prima di
+`nmi_libera` (che chiama `r_avanza`) e non al posto di `r_letto_libero`;
+aggiornato anche il commento di `nemici_r_gancio` («NULL ... nel gioco
+libero»), dato che ora il gioco libero lo lascia NULL.
