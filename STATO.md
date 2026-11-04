@@ -240,8 +240,15 @@ ogni ciclo nei brief in `compiti/`.
    [x] Lotto 56 (brief 56, 2026-11-04): registro R surrogato (LCG a 32 bit)
    nel solo gioco libero, banco/replay/oracolo identici. I semi 10, 4, 67
    superano il corpo 12 e si fermano su «routine 386A mancante» (fase 0 del
-   corpo 07 dell'attract con c243 >= 24) ai frame 27938, 25954, 25218: resta
-   da tradurre in un lotto di coda. Vedi `decomp/GIRO.md`.
+   corpo 07 dell'attract con c243 >= 24) ai frame 27938, 25954, 25218:
+   tradotta nel lotto 57.
+   [x] Lotto 57A (brief 57, 2026-11-04): 386A (`inc c`, c09a = 1B con
+   c243 >= 24) in `fase_07_3861`. I semi 10, 4, 67 passano 386A e, nello
+   stesso frame (27938, 25954, 25218) e nella stessa fase, si fermano su
+   «routine 3901 mancante»: il giro 38FB-3901 sulla tabella 82D3 con c243
+   oltre la prima voce (`jr l38fbh`), NON tradotto (perimetro chiuso, da
+   decidere dopo il test dell'utente). FRAME rese 27872/25888/25152, HASH
+   ultimo 16ea230eea591d30, AUDIO hash invariati rispetto al lotto 56.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

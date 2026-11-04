@@ -13,8 +13,8 @@
 #include "nemici.h"
 #include "attivita_attract07.h"
 
-/* Fase 0, 3861: quadro di presentazione. c09a = 1A (le sette coppie di
- * 3A0E non scattano mai), barra (31E9), tabellone (349F), scritta (31CE),
+/* Fase 0, 3861: quadro di presentazione. c09a = 1A, 1B con c243 >= 24
+ * (386A inc c; le sette coppie di 3A0E non scattano mai), barra (31E9), tabellone (349F), scritta (31CE),
  * suono 3F, palette (3F88 con HL = 80B3), spegne il bit 0 di c044, riempie
  * d840-d85f con 50, due stringhe a dc40 e dc4d (6771 con HL = 39C0), spegne
  * i bit 4-5 di c045, due tile 60 a d840, poi dalla tabella ROM 85EC il
@@ -25,17 +25,14 @@ void fase_07_3861(void)
 {
     struct z80 z = {0};
     uint8_t a = M(0xc243);                     /* 3861 */
-    if (a >= 0x24) {                           /* 3866-3868 */
-        nemici_manca(0x386a);
-        return;
-    }
+    uint8_t c = (a >= 0x24) ? 0x1b : 0x1a;     /* 3864-386A (inc c) */
     for (int i = 0; i < 7; i++)                /* 386D-3876 */
         if (a == leggi((uint16_t)(0x3a0e + 2 * i))) {
             nemici_manca(0x3874);
             return;
         }
     NEMICI_PUNTO(0x3861, 0x3879);
-    M(0xc09a) = 0x1a;                          /* 3879 */
+    M(0xc09a) = c;                             /* 3879 (ld a,c) */
     NEMICI_PUNTO(0x387c, 0x387f);
     z.a = M(0xc237);
     sub_31e9(&z);                              /* 387F */
