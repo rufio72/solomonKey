@@ -9,6 +9,7 @@ struct voce_routine {
     const char *entry;                 /* "0x05B3", maiuscolo come nei file */
     void (*fn)(struct z80 *);
     uint16_t blocco_ini, blocco_fine;  /* 0, 0 = nessun blocco esplicito */
+    uint8_t solo_ram;                  /* 1 = corpo di attività (brief 52): registri non confrontati */
 };
 extern const struct voce_routine tabella_routine[];
 extern const unsigned num_routine;

@@ -1,0 +1,43 @@
+# Catture dei corpi di attività del lotto 52 (brief 52), lette da cattura_corpi.sh.
+# Una riga per cattura: modo cod entry tag N poke
+#   modo  corpo (SNAP_CORPO=1: il ritorno sta in [SP+2]) o sub (ritorno normale)
+#   cod   codice dell'attività: stato attNN di cattura.sh (posta al frame 2300)
+#   tag   suffisso del tag (file out/snap_<entry>_att<cod>_<tag>_*)
+#   N     occorrenza
+#   poke  frame:addr:val separati da virgola, aggiunti a 2250:0xc19d:0,2250:0xc19e:0; - = nessuno
+# Per i corpi a passi il tag kK è il valore del contatore (c19d per il 13,
+# c19e per il 18) in _prima.bin. Il passo 7 del 13 (670F: 75AA, 3569, 673F)
+# dura più di un frame: ogni occorrenza è scartata (NMI), si verifica per
+# composizione di routine già nel banco.
+corpo 05 0x4C42 c1aa 1 2300:0xc1aa:0x01
+sub   05 0x4C89 c1aa 1 2300:0xc1aa:0x01
+corpo 04 0x4C30 base 1 -
+corpo 05 0x4C42 base 1 -
+corpo 09 0x4D29 base 1 -
+corpo 0F 0x640E base 1 -
+corpo 12 0x426A base 1 -
+corpo 17 0x6429 base 1 -
+corpo 19 0x3792 base 1 -
+corpo 1A 0x411D base 1 -
+corpo 1B 0x4111 base 1 -
+corpo 1D 0x3F39 base 1 -
+corpo 23 0x3E4E base 1 -
+corpo 13 0x6480 k0 1 -
+corpo 13 0x6480 k1 1 2300:0xc19d:1
+corpo 13 0x6480 k2 1 2300:0xc19d:2
+corpo 13 0x6480 k3 1 2300:0xc19d:3
+corpo 13 0x6480 k4 1 2300:0xc19d:4
+corpo 13 0x6480 k5 1 2300:0xc19d:5
+corpo 13 0x6480 k6 1 2300:0xc19d:6
+corpo 18 0x4124 k0 1 -
+corpo 18 0x4124 k1 1 2300:0xc19e:1
+corpo 18 0x4124 k2 1 2300:0xc19e:2
+corpo 18 0x4124 k3 1 2300:0xc19e:3
+corpo 18 0x4124 k4 1 2300:0xc19e:4
+corpo 18 0x4124 k5 1 2300:0xc19e:5
+corpo 18 0x4124 k6 1 2300:0xc19e:6
+corpo 18 0x4124 k7 1 2300:0xc19e:7
+corpo 18 0x4124 k8 1 2300:0xc19e:8
+corpo 18 0x4124 k9 1 2300:0xc19e:9
+corpo 18 0x4124 k10 1 2300:0xc19e:10
+sub   18 0x6735 base 1 -

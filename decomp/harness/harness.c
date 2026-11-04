@@ -84,6 +84,7 @@ static int prova(const struct voce_routine *v, const char *prefisso, const char 
     /* Pila libera sotto lo SP di ingresso: i push/call interni della routine
      * vi lasciano residui che il C non riproduce, quindi non si confronta. */
     unsigned pila_ini = (unsigned)z.sp - 0x40, pila_fine = z.sp;
+    if (v->solo_ram) pila_fine += 2;   /* corpo: [SP] (slot) liberato dal pop hl */
     /* c000-e5ff: escluse le porte e la ROM f000 */
     for (unsigned i = 0; i < 0x2600; i++) {
         if (0xc000 + i >= pila_ini && 0xc000 + i < pila_fine) {
@@ -109,14 +110,18 @@ static int prova(const struct voce_routine *v, const char *prefisso, const char 
         if (blocco != attesi) errori++;
     }
 
-    errori += confronta_reg("A", z.a, atteso.a);
-    errori += confronta_reg("BC", BC(&z), BC(&atteso));
-    errori += confronta_reg("DE", DE(&z), DE(&atteso));
-    errori += confronta_reg("HL", HL(&z), HL(&atteso));
-    errori += confronta_reg("IX", z.ix, atteso.ix);
-    errori += confronta_reg("IY", z.iy, atteso.iy);
-    printf("registri C: A=%02X BC=%04X DE=%04X HL=%04X IX=%04X IY=%04X\n",
-           z.a, BC(&z), DE(&z), HL(&z), z.ix, z.iy);
+    if (v->solo_ram) {                 /* corpo: registri inutili allo spedidore */
+        printf("registri non confrontati (corpo)\n");
+    } else {
+        errori += confronta_reg("A", z.a, atteso.a);
+        errori += confronta_reg("BC", BC(&z), BC(&atteso));
+        errori += confronta_reg("DE", DE(&z), DE(&atteso));
+        errori += confronta_reg("HL", HL(&z), HL(&atteso));
+        errori += confronta_reg("IX", z.ix, atteso.ix);
+        errori += confronta_reg("IY", z.iy, atteso.iy);
+        printf("registri C: A=%02X BC=%04X DE=%04X HL=%04X IX=%04X IY=%04X\n",
+               z.a, BC(&z), DE(&z), HL(&z), z.ix, z.iy);
+    }
 
     printf("%s %s %s\n", errori ? "FALLITO" : "OK", v->entry, tag);
     return !errori;

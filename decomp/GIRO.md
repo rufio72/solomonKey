@@ -388,3 +388,37 @@ uscite identiche byte per byte a quelle del commit a293344 (prima del lotto) per
   «eseguito/indice osservato» delle tabelle viste in traccia.
 - Resta all'utente la prova manuale con il DAIJA collegato (`gioca --joystick`
   e una partita vera): quale pulsante salta e quale lancia la magia.
+
+## Lotto 52: corpi del gioco libero e ricetta 1A (brief 52)
+
+Tradotti 13 corpi della tabella 3B11 che il gioco libero spediva e su cui si
+fermava («FERMO corpo XX non tradotto»): 04 05 09 0F 17 19 1A 1B 1D 23
+(`attivita_piccoli.c`, con 4C89), 12 e 13 (`attivita_12_13.c`), 18
+(`attivita_18.c`, con 6735 e la voce 2E79). Banco, replay, giro e `gioca
+--oracolo` invariati (le voci nuove non sono mai spedite nei frame 0-5499).
+
+- Banco dei corpi: `SNAP_CORPO=1` fa aspettare a `snap.lua` il ritorno in
+  [SP+2] (in [SP] c'è lo slot); `sh cattura_corpi.sh` rifà le catture di
+  `corpi_catture.txt`; le voci dei corpi (`banco_corpi.c`, campo `solo_ram`)
+  confrontano la sola RAM, con la parola dello slot in [SP] contata nella
+  pila libera. Il passo 7 del 13 (670F) dura più di un frame e non si cattura:
+  è verificato per composizione.
+- Ricetta 1A (magia sulla chiave): `decomp/ricette/partita_1a.reg`,
+  registrata dall'utente con `gioca --registra`. Da `decomp/`:
+  `harness/gioca --riproduci ricette/partita_1a.reg -n 4000 --muto`.
+  Prima del lotto: `FERMO corpo 1A non tradotto al frame 3320`, uscita 3.
+  Dopo: `FRAME rese 4000`, `HASH ultimo 3f25ba053eeb56b9`, `AUDIO hash
+  79f9a550028a41b9`, uscita 0. Durante la stessa partita il log ripete
+  «1288: continuazione 12AB (raccolta) non tradotta: nessun effetto»: la
+  raccolta di certi oggetti nel gioco libero non ha ancora effetto (zona
+  12xx, lotto del corpo 22).
+- Regressione a ingressi casuali: `python3 ricette/genera_ingressi.py SEME
+  FILE FINE [PASSO]`, poi `harness/gioca -n FINE --muto --riproduci FILE`.
+  Seme 10 (passo 8, 6000 frame): prima «FERMO corpo 04 ... al frame 3733»,
+  ora `FRAME rese 6000`. Seme 4: prima «FERMO corpo 13 ... al frame 5475»,
+  ora «FERMO routine 352E mancante al frame 5602».
+- Registro R: il corpo 12 arriva a 4302 (`ld a,r`); nel gioco libero R non
+  è modellato (decisione utente, lotto dedicato) e quando un oggetto
+  soddisfa le condizioni del 12 il gioco si ferma su «lettura del registro R
+  non modellata».
+- Restano non tradotti: 1C 22 25 26 (lotto 53), 15 16 24 27 (lotto 54).

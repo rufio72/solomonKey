@@ -66,6 +66,9 @@ della scansione sono già avvenute, e il prototipo le inietta nello stesso punto
 Uscite: `pop hl; ret` = resta nello slot; `pop hl; ld (hl),n; ret` = cambia il
 proprio codice; azzerata = qualcun altro scrive 0 nello slot. Spedizioni e
 scritture sul proprio slot durante il corpo, da `out/sched_log.txt`.
+Le voci «tradotta (lotto 52)» sono state verificate nel banco dei corpi
+(brief 52): catture con `SNAP_CORPO=1` (`cattura_corpi.sh`, elenco in
+`corpi_catture.txt`), confronto della sola RAM (voci con `solo_ram`).
 
 | cod | ingresso | spedizioni | uscita osservata |
 |----|------|------:|------------------|
@@ -73,28 +76,32 @@ scritture sul proprio slot durante il corpo, da `out/sched_log.txt`.
 | 01 | 48D1 | 45 | diventa 02 (4925 ×14, 4937 ×31) |
 | 02 | 4B84 | 2647 | resta (4B8B) o diventa 03 (4B95/4B97 ×45) |
 | 03 | 4BC6 | 3689 | resta (4BCD) o azzerata (4C10 ×104) |
-| 04 | 4C30 | 0 | diventa 03 (4C3F), dal disassemblato |
-| 05 | 4C42 | 0 | diventa 09 (4C48), dal disassemblato |
+| 04 | 4C30 | 0 | diventa 03 (4C3F), dal disassemblato; tradotta (lotto 52) |
+| 05 | 4C42 | 0 | diventa 09 (4C48), dal disassemblato; tradotta (lotto 52, con 4C89) |
 | 06 | 75E7 | 8203 | resta; diventa 07 (7619 ×1); azzerata (6746) |
 | 07 | 2CCD | 6593 | a passi su c19d; azzerata (2E58 ×2) |
 | 08 | 7C98 | 1 | azzerata (6746): moneta |
-| 09 | 4D29 | 0 | non osservata |
+| 09 | 4D29 | 0 | tradotta (lotto 52): resta o azzerata (4D35) |
 | 0A | 4DA2 | 17411 | resta (legge c2b8) |
 | 0B | 2C27 | 1 | azzera la tabella (6742 via 673F) |
 | 0C | 7BF6 | 192 | resta; azzerata (6746) |
 | 0D | 5C8E | 17410 | resta (legge c29a) |
 | 0E | 63A4 | 59 | diventa 03 (63C2 ×59) |
-| 0F | 640E | 0 | non osservata |
+| 0F | 640E | 0 | tradotta (lotto 52): resta o diventa 03 (6426) |
 | 10 | 457B | 11 | diventa 11 (4591 ×2) o azzerata (4591 ×9) |
 | 11 | 456E | 55 | resta o azzerata (457A ×2) |
-| 12, 13 | 426A, 6480 | 0 | non osservate |
+| 12, 13 | 426A, 6480 | 0 | tradotte (lotto 52): 12 azzerata (42FF), arriva a 4302 (registro R, non modellato nel gioco libero); 13 a passi su c19d (8 voci, tabella 6486) |
 | 14 | 44B5 | 32395 | resta (sempre presente dal frame 610) |
-| 15, 16, 17 | 6466, 6496, 6429 | 0 | fine partita/attract: non nella misura a 5500 frame |
-| 18-1D | 4124, 3792, 411D, 4111, 3F40, 3F39 | 0 | non osservate |
+| 15, 16 | 6466, 6496 | 0 | fine partita/attract: non nella misura a 5500 frame (lotto 54) |
+| 17 | 6429 | 0 | tradotta (lotto 52): diventa 06, 08, 07 o 24 (6464) |
+| 18 | 4124 | 0 | tradotta (lotto 52): a passi su c19e (10 voci, tabella 4171), poi azzerata (413B) |
+| 19, 1A, 1B, 1D | 3792, 411D, 4111, 3F39 | 0 | tradotte (lotto 52): 19 azzerata (37B1), 1A diventa 1B (4121), 1B diventa 02 (411A), 1D diventa 05 (3F3D) |
+| 1C | 3F40 | 0 | a passi, non tradotta (lotto 53) |
 | 1E, 21 | 3B61 | 0 | `pop hl; ret` (voci vuote) |
 | 1F | 43C8 | 2 | diventa 14 (43E4 ×2) |
 | 20 | 3E90 | 17410 | resta (3E98) |
-| 22-25 | 12D6, 3E4E, 2C72, 3B77 | 0 | non osservate |
+| 22, 24, 25 | 12D6, 2C72, 3B77 | 0 | non tradotte (lotti 53-54) |
+| 23 | 3E4E | 0 | tradotta (lotto 52): resta |
 | 26 | 3B63 | 0 | a passi, stesso schema di 07 |
 | 27 | 62B6 | 0 | postata solo da 017B (NMI con e603 bit 0 = 1) |
 

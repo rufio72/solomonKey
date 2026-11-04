@@ -10,12 +10,16 @@
  * nemici.c (lotto N1, brief 25); i corpi 01 (48D1) e 10 (457B) in
  * attivita_01_10.c (brief 26); i corpi 06 (75E7) e 1F (43C8) dell'avvio in
  * attivita_attract.c (brief 45); il corpo 07 (2CCD) in
- * attivita_attract07*.c (brief 46, fasi 0-12). Nella finestra del replay nessun codice
- * spedito resta NULL in corpo_attivita_replay. */
+ * attivita_attract07*.c (brief 46, fasi 0-12). Lotto 52 (brief 52, gioco
+ * libero): 04 05 09 0F 17 19 1A 1B 1D 23 in attivita_piccoli.c, 12 e 13 in
+ * attivita_12_13.c, 18 in attivita_18.c (prototipi in attivita_libera.h).
+ * Nella finestra del replay nessun codice spedito resta NULL in
+ * corpo_attivita_replay. */
 #include <stddef.h>
 #include "routine.h"
 #include "sched.h"
 #include "nemici.h"
+#include "attivita_libera.h"
 
 /* Lettura di una parola in RAM (byte basso al primo indirizzo). */
 static uint16_t parola(uint16_t a)
@@ -352,17 +356,30 @@ attivita_fn corpo_attivita_replay[SCHED_CODICI] = {
     [0x01] = attivita_01_48d1,
     [0x02] = attivita_02_4b84,
     [0x03] = attivita_03_4bc6,
+    [0x04] = attivita_04_4c30,
+    [0x05] = attivita_05_4c42,
     [0x06] = attivita_06_75e7,
     [0x07] = attivita_07_2ccd,
     [0x08] = attivita_08_7c98,
+    [0x09] = attivita_09_4d29,
     [0x0a] = attivita_0a_4da2,
     [0x0b] = attivita_0b_2c27,
     [0x0c] = attivita_0c_7bf6,
     [0x0d] = attivita_0d_5c8e,
     [0x0e] = attivita_0e_63a4,
+    [0x0f] = attivita_0f_640e,
     [0x10] = attivita_10_457b,
     [0x11] = attivita_11_456e,
+    [0x12] = attivita_12_426a,
+    [0x13] = attivita_13_6480,
     [0x14] = attivita_14_44b5,
+    [0x17] = attivita_17_6429,
+    [0x18] = attivita_18_4124,
+    [0x19] = attivita_19_3792,
+    [0x1a] = attivita_1a_411d,
+    [0x1b] = attivita_1b_4111,
+    [0x1d] = attivita_1d_3f39,
     [0x1f] = attivita_1f_43c8,
     [0x20] = attivita_20_3e90,
+    [0x23] = attivita_23_3e4e,
 };

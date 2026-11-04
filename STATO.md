@@ -15,8 +15,8 @@ ogni ciclo nei brief in `compiti/`.
 | …di cui `verificata` (doppia cattura MAME non forzata) | 286 |
 | …di cui `tradotta` con nota (senza cattura o cattura singola) | 61 |
 | …di cui `tradotta (replay)` | 43 |
-| Banco di prova (`harness --tutte`) | 307 voci, 1278 catture, 0 fallite |
-| Catture `regs` in `decomp/out/` | 1278 |
+| Banco di prova (`harness --tutte`) | 322 voci, 1310 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 1310 |
 | Stub residui del motore nemici | 0 (motore completo, `nemici_stub.c` tolto) |
 | Destinazioni mai osservate | 59 documentate in `decomp/ZONE-MAI-ESEGUITE.md`: 53 `DATO`, 0 `MORTO`, 6 `RAGGIUNGIBILE` (5 con ricetta di sveglia provata); le altre 5 delle 64 originali sono ormai tradotte |
 
@@ -201,6 +201,16 @@ ogni ciclo nei brief in `compiti/`.
    0,1,7,6), `--volume`, `--pieno`, `--aiuto`; `rst20_646B` a 10 voci. Banco,
    replay, giro e audio identici byte per byte a prima. Piano hardware chiuso;
    resta la prova manuale sul DAIJA. Vedi `decomp/GIRO.md`.
+   [x] Lotto 52 (brief 52, 2026-11-04): banco dei corpi (`SNAP_CORPO`,
+   `solo_ram`, `cattura_corpi.sh`) e 13 corpi del gioco libero (04 05 09 0F
+   12 13 17 18 19 1A 1B 1D 23, 15 voci e 32 catture nuove); la partita
+   registrata `decomp/ricette/partita_1a.reg` (magia sulla chiave) non si
+   ferma più al frame 3320. Il corpo 12 si ferma sul registro R, non
+   modellato (lotto dedicato). Nota: la continuazione 12AB di 1288
+   (raccolta di certi oggetti) non è tradotta e nel gioco libero non ha
+   effetto. Vedi `decomp/GIRO.md`.
+   [ ] Lotto 53: corpi 1C, 25, 26, 22 (con 12F0 e il suo `rst 38`).
+   [ ] Lotto 54: corpi 15, 16, 24 (finale), 27 (passo 0 per composizione).
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

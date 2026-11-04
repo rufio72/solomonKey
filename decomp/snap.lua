@@ -23,6 +23,8 @@
 -- ix+HH:VV e iy+HH:VV (byte in RAM a IX/IY + HH esadecimale), r:VV con r in
 -- a, b, c, d, e, h, l (registro a 8 bit); VV esadecimale (0x ammesso). La
 -- cattura resta originale: MAME esegue il codice vero dallo stato forzato.
+-- SNAP_CORPO: se presente l'ingresso è un corpo di attività (brief 52): [SP] è
+-- lo slot (lo toglie il `pop hl`) e il ritorno a 3AF3 sta in [SP+2].
 local testo_entry = os.getenv("SNAP_ENTRY") or "0x05B3"
 local entry = tonumber(testo_entry)
 local voluta = tonumber(os.getenv("SNAP_N") or "1")
@@ -188,8 +190,9 @@ emu.register_periodic(function()
     riga_prima = registri("prima")
     scarica(base .. "_prima.bin")
     local sp = cpu.state["SP"].value
-    ritorno = mem:read_u16(sp)
-    sp_ritorno = (sp + 2) & 0xffff
+    local d = os.getenv('SNAP_CORPO') and 2 or 0
+    ritorno = mem:read_u16(sp + d)
+    sp_ritorno = (sp + d + 2) & 0xffff
     dbg:command("bpclear")
     dbg:command(string.format("bpset %X,sp==%X", ritorno, sp_ritorno))
     dbg:command("bpset 66")
