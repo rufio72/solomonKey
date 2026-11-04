@@ -309,3 +309,13 @@ Banco e giro non rieseguiti: non compilano `video_sdl.c`.
 Hash partita 1A (verifica 8) senza opzione, `--scanlines`, `--scanlines 1`,
 `--scanlines 2 -s 4`, `--scanlines 3 -s 4`, `--scanlines 3 --pieno -s 2`:
 tutte 4000 / 3f25ba053eeb56b9 / 2988510 / c097308a8678392e.
+
+## Esito del ciclo 57C (chat principale, 2026-11-04)
+
+Verificatore (Sonnet, ~25k token): tutte le prove dell'addendum rifatte e
+PASSATE anche dopo make clean (pixel su scale 1-8 e --pieno, hash della
+partita 1A identici con ogni S, errori CLI, banco 1412/335/0). Sviluppatore
+~75k nei due giri (82a34ba + ff35dd8). GIUDIZIO UTENTE dal test visivo:
+--scanlines 3 va bene, «può essere migliorato ma è decente» — eventuale
+raffinamento estetico (p.es. linee sfumate) rimandato a richiesta.
+Il lotto 57 è CHIUSO in tutte le sue parti.
