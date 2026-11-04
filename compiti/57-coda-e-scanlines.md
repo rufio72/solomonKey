@@ -239,3 +239,14 @@ Due commit: «Lotto 57A» (386A) e «Lotto 57B» (--scanlines). Verifiche:
 Deviazioni: STATO.md è nella radice del repository, non in `decomp/STATO.md`
 come scritto nel brief: aggiornato quello. A scala 3 l'effetto scurisce una
 sotto-riga su tre, non «la metà inferiore» (geometria 448 righe, atteso).
+
+## Esito del ciclo (chat principale, 2026-11-04)
+
+Verificatore (Sonnet, ~22k token): verifiche 1-9, 11, 12 TUTTE PASSATE;
+la 10 (pixel) non rieseguibile (programma di prova nello scratchpad
+sparito) ma coperta dalla 8 (hash invariati con --scanlines). Fermata
+nuova attesa: «routine 3901 mancante» (ciclo 38FB-3901 sulla tabella
+82D3, stessa fase dell'attract post-game-over), censita e NON tradotta
+per decisione — si valuta dopo il test dell'utente. Analista Sonnet ~49k,
+sviluppatore ~49k. Lotto 57 CHIUSO con d8b8c33 (386A) e c7c6838
+(scanlines). LA CODA DEL MANDATO È COMPLETA: si passa al test utente.
