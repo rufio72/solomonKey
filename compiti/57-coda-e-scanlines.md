@@ -250,3 +250,31 @@ nuova attesa: «routine 3901 mancante» (ciclo 38FB-3901 sulla tabella
 per decisione — si valuta dopo il test dell'utente. Analista Sonnet ~49k,
 sviluppatore ~49k. Lotto 57 CHIUSO con d8b8c33 (386A) e c7c6838
 (scanlines). LA CODA DEL MANDATO È COMPLETA: si passa al test utente.
+
+## Addendum 57C: scanlines rifatte (feedback utente dal test, 2026-11-04)
+
+Giudizio dell'utente sulla 57B: le linee sono TROPPE/troppo presenti e
+sono agganciate alla griglia sbagliata. Specifica nuova:
+
+1. Le linee vivono TRA le file di pixel DEL GIOCO (griglia nativa
+   256x224), non sulle righe fisiche dello schermo. A scala N ogni fila
+   di pixel del gioco è alta N pixel fisici: la linea scura va al
+   CONFINE tra una fila e la successiva.
+2. Lo spessore è PROPORZIONALE alla scala: max(1, round(N/4)) pixel
+   fisici (a scala 4 → 1 px scuro ogni 4, a scala 8 → 2 ogni 8). Se il
+   gioco si rimpicciolisce, le linee si stringono con lui.
+3. Intensità più leggera della 57B: alpha ~64 (≈25%) invece di 80.
+4. A scala 1 non c'è spazio «tra i pixel»: effetto DISATTIVATO (con
+   --scanlines attivo ma scala 1, nessun overlay), senza avvisi.
+5. Con --pieno la scala intera effettiva decide spessore e posizione
+   come sopra.
+6. Invarianti come 57B: hash video e audio INVARIATI con e senza
+   --scanlines (verifica 8 del brief, stessa uscita); nessun effetto su
+   oracolo/riproduzione; banco e giro completo intatti.
+
+Verifica dei pixel (script nello scratchpad, salvarne il sorgente in
+decomp/harness/prova_scanlines.c o simile COMMITTATO stavolta, così la
+verifica resta rieseguibile): a scala 4, per ogni blocco di 4 righe
+fisiche dentro l'area di gioco, 3 righe intatte e 1 scurita di ~25%;
+a scala 2, 1 ogni 2 scurita; a scala 1 tutte intatte; senza opzione
+tutte intatte.
