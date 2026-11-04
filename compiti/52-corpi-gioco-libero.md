@@ -437,3 +437,14 @@ parola dello slot in [SP] (le call dopo il `pop hl` la riscrivono in MAME);
 `routine_tab.c` ha il quinto campo esplicito in tutte le voci (senza, `-Wextra`
 dava 1236 avvisi `missing-field-initializers`); `chiave_1a.txt/.sh` non
 prodotti, sostituiti da `partita_1a.reg` come da risoluzione 5.
+
+## Esito del ciclo (chat principale, 2026-11-04)
+
+Verificatore (Sonnet, ~28k token): le 10 verifiche rifatte, TUTTE PASSATE.
+Note: le righe «1288: continuazione 12AB non tradotta» nella ricetta 1A sono
+il fatto osservato già annotato sopra (fuori perimetro); i 33 snap_*.log
+rigenerati dalla ripetizione di cattura_corpi.sh differivano solo nella riga
+«Average speed» di MAME (rumore) e sono stati ripristinati alla versione
+committata. Sviluppatore ~110k token (stima). Lotto 52 CHIUSO con c83e4a3.
+Scoperta per i lotti 53/54: nel gioco libero i semi 4 e 67 si fermano su
+«routine 352E mancante al frame 5602» — da mettere nel censimento.
