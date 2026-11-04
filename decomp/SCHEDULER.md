@@ -72,13 +72,13 @@ Le voci «tradotta (lotto 52)» sono state verificate nel banco dei corpi
 
 | cod | ingresso | spedizioni | uscita osservata |
 |----|------|------:|------------------|
-| 00 | 3B61 | 0 | `pop hl; ret` (voce vuota) |
+| 00 | 3B61 | 0 | `pop hl; ret` (voce vuota); 0 non è un codice: `spedisci_una` salta gli slot a 0, nessun corpo da tradurre |
 | 01 | 48D1 | 45 | diventa 02 (4925 ×14, 4937 ×31) |
 | 02 | 4B84 | 2647 | resta (4B8B) o diventa 03 (4B95/4B97 ×45) |
 | 03 | 4BC6 | 3689 | resta (4BCD) o azzerata (4C10 ×104) |
 | 04 | 4C30 | 0 | diventa 03 (4C3F), dal disassemblato; tradotta (lotto 52) |
 | 05 | 4C42 | 0 | diventa 09 (4C48), dal disassemblato; tradotta (lotto 52, con 4C89) |
-| 06 | 75E7 | 8203 | resta; diventa 07 (7619 ×1); azzerata (6746) |
+| 06 | 75E7 | 8203 | resta; diventa 07 (7619 ×1); azzerata (6746); la tabella 75EC ha 12 voci (non 10): fasi 5 (7A0B), 8 (7B3B), 10 (760B) e 11 (7604) tradotte nel lotto 55 |
 | 07 | 2CCD | 6593 | a passi su c19d; azzerata (2E58 ×2) |
 | 08 | 7C98 | 1 | azzerata (6746): moneta |
 | 09 | 4D29 | 0 | tradotta (lotto 52): resta o azzerata (4D35) |
@@ -92,20 +92,22 @@ Le voci «tradotta (lotto 52)» sono state verificate nel banco dei corpi
 | 11 | 456E | 55 | resta o azzerata (457A ×2) |
 | 12, 13 | 426A, 6480 | 0 | tradotte (lotto 52): 12 azzerata (42FF), arriva a 4302 (registro R, non modellato nel gioco libero); 13 a passi su c19d (8 voci, tabella 6486) |
 | 14 | 44B5 | 32395 | resta (sempre presente dal frame 610) |
-| 15, 16 | 6466, 6496 | 0 | fine partita/attract: non nella misura a 5500 frame (lotto 55); 16 è postata anche dal passo 9 del 25 e da 6655 del 26 |
+| 15, 16 | 6466, 6496 | 0 | tradotte (lotto 55): a passi su c19d (10 voci ciascuna, tabelle 646B e 649B); 15 è la fine della vita (passo 9 = 6655, posta 16 o 17), 16 la fine partita con la classifica (6842, 7A56) e il proseguimento, il passo 8 la fa diventare 17 (6A40); 16 è postata anche dal passo 9 del 25 e da 6655 del 26 |
 | 17 | 6429 | 0 | tradotta (lotto 52): diventa 06, 08, 07 o 24 (6464) |
 | 18 | 4124 | 0 | tradotta (lotto 52): a passi su c19e (10 voci, tabella 4171), poi azzerata (413B) |
 | 19, 1A, 1B, 1D | 3792, 411D, 4111, 3F39 | 0 | tradotte (lotto 52): 19 azzerata (37B1), 1A diventa 1B (4121), 1B diventa 02 (411A), 1D diventa 05 (3F3D) |
 | 1C | 3F40 | 0 | tradotta (lotto 54): a passi su c19d (9 voci, tabella 3F45); posta dalla raccolta della classe 2 (1332) |
-| 1E, 21 | 3B61 | 0 | `pop hl; ret` (voci vuote) |
+| 1E, 21 | 3B61 | 0 | `pop hl; ret` (voci vuote); tradotte (lotto 55, `attivita_vuota_3b61`) |
 | 1F | 43C8 | 2 | diventa 14 (43E4 ×2) |
 | 20 | 3E90 | 17410 | resta (3E98) |
 | 22 | 12D6 | 0 | tradotta (lotto 54): svuota la coda di raccolta c05b (12F0, `rst 38` 130A), poi azzerata (12ED) |
-| 24 | 2C72 | 0 | non tradotta (lotto 55) |
+| 24 | 2C72 | 0 | tradotta (lotto 55): il finale, a passi su c19d (19 voci, tabella 2C77), fasi del 07 più la voce 2C9E; posta da 6464 (17) e 4032 |
 | 25 | 3B77 | 0 | tradotta (lotto 54): a passi su c19d (10 voci, tabella 3B7C); il passo 9 la fa diventare 16 (3BA2) |
 | 23 | 3E4E | 0 | tradotta (lotto 52): resta |
 | 26 | 3B63 | 0 | tradotta (lotto 54): a passi su c19d (7 voci, tabella 3B68), stesso schema di 07 |
-| 27 | 62B6 | 0 | postata solo da 017B (NMI con e603 bit 0 = 1) |
+| 27 | 62B6 | 0 | tradotta (lotto 55): postata solo da 017B (NMI con e603 bit 0 = 1); 2 voci (tabella 62B9) sull'indice c1ae, che l'ingresso non avanza; il passo 0 la fa restare 27 (6376), il passo 1 diventare 06 (62D0) |
+
+Tutti i 40 codici della tabella 3B11 sono tradotti (lotto 55).
 
 ## Attività a passi
 

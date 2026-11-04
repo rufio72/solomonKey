@@ -42,7 +42,7 @@ void attesa_07(uint16_t hl, uint8_t c, uint16_t sito)
 }
 
 /* Fase 2, 2DEE: azzera le 224 celle di c0bd-c19c. */
-static void fase_2dee(void)
+void fase_2dee(void)
 {
     for (int i = 0; i < 0xe0; i++) {           /* 2DF4-2DF6 */
         NEMICI_PUNTO(i == 0 ? 0x2dee : 0x2df4, 0x2df6);
@@ -104,7 +104,7 @@ void fondale_322a(struct z80 *z)
 }
 
 /* Fase 6, 3225: fondale della stanza c243 (322A). */
-static void fase_3225(void)
+void fase_3225(void)
 {
     struct z80 z = {0};
     NEMICI_PUNTO(0x3225, 0x3225);

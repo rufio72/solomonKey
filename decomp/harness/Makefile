@@ -4,7 +4,7 @@ SORGENTI_BASE = harness.c comune.c routine.c fondale.c porte.c nmi.c nmi_oggetti
 # i moduli del motore dei nemici (nemici*.c, brief 25) entrano anche nel banco
 # (brief 27), con i corpi delle attività da cui dipendono (sub_4b98 e altri);
 # lo spedidore sched.c non serve al banco
-SORGENTI_NEMICI = $(wildcard nemici*.c) attivita.c attivita_01_10.c attivita_attract.c attivita_attract07.c attivita_attract07a.c attivita_attract07b.c attivita_attract07c.c attivita_attract07d.c attivita_attract08.c attivita_piccoli.c attivita_12_13.c attivita_18.c attivita_1c.c attivita_22.c attivita_25.c attivita_26.c raccolta_13xx.c banco_corpi.c
+SORGENTI_NEMICI = $(wildcard nemici*.c) attivita.c attivita_01_10.c attivita_attract.c attivita_attract07.c attivita_attract07a.c attivita_attract07b.c attivita_attract07c.c attivita_attract07d.c attivita_attract08.c attivita_piccoli.c attivita_12_13.c attivita_18.c attivita_1c.c attivita_22.c attivita_25.c attivita_26.c attivita_15.c attivita_16.c attivita_16b.c attivita_24.c attivita_27.c attivita_06b.c raccolta_13xx.c banco_corpi.c
 SORGENTI = $(SORGENTI_BASE) $(SORGENTI_NEMICI)
 SORGENTI_SCHED = sched.c sched_proto.c
 # giro di gioco del replay (brief 23): il banco senza harness.c, più spedidore e replay.c

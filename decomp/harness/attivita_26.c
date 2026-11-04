@@ -89,7 +89,7 @@ void passo_3d59(void)
 /* Passo 6, 6655: azzeramenti di cambio quadro (75AA), tabella delle
  * attività vuota (673F), posta 14, suono 3F; c237 scende di uno e si posta
  * 17 (16 se arriva a zero); c19d = 0. */
-static void passo_6655(void)
+void passo_6655(void)
 {
     struct z80 z = {0};
     sub_75aa(&z);                              /* 6655 */

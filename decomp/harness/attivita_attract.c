@@ -18,6 +18,7 @@
 #include "routine.h"
 #include "sched.h"
 #include "nemici.h"
+#include "attivita_libera.h"
 
 /* 0493 con A = codice. */
 static void posta(uint8_t codice)
@@ -194,7 +195,10 @@ static void fase_78e0(void)
 
 /* 06, ingresso 75E7: salto con `rst 20h` alla tabella 75EC sulla fase
  * c1ae (10 voci: 78E0 763E 760B 760B 760B 7A0B 763E 760B 7B3B 763E). Le
- * fasi 5 (7A0B) e 8 (7B3B) non sono tradotte: nemici_manca ferma il giro. */
+ * fasi 5 (7A0B) e 8 (7B3B), mai eseguite nel giro dal boot, sono del
+ * lotto 55 (attivita_06b.c, senza punti di sincronia). La tabella ha in
+ * realtà 12 voci (rst20_tables.h ne dichiara 10): 10 è 760B e 11 è 7604,
+ * la chiusura del ciclo subito dopo la tabella (lotto 55). */
 void attivita_06_75e7(uint8_t slot)
 {
     NEMICI_PUNTO(0x75e7, 0x75eb);              /* prima del rst 20h */
@@ -211,10 +215,16 @@ void attivita_06_75e7(uint8_t slot)
         fase_760b(slot);
         break;
     case 5:
-        nemici_manca(0x7a0b);
+        fase_06_7a0b();
         break;
     case 8:
-        nemici_manca(0x7b3b);
+        fase_06_7b3b();
+        break;
+    case 10:
+        fase_760b(slot);
+        break;
+    case 11:
+        fase_06_7604();
         break;
     default:
         nemici_fuori_tabella(0x75eb, fase);

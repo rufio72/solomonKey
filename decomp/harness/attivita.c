@@ -16,6 +16,10 @@
  * Lotto 54 (brief 54): 1C in attivita_1c.c, 22 in attivita_22.c (con i
  * gestori di raccolta di raccolta_13xx.c), 25 in attivita_25.c, 26 in
  * attivita_26.c.
+ * Lotto 55 (brief 55): 15 in attivita_15.c, 16 in attivita_16.c e
+ * attivita_16b.c (classifica), 24 in attivita_24.c, 27 e la voce vuota
+ * 3B61 (codici 1E e 21) in attivita_27.c: tutti i codici 01-27 hanno un
+ * corpo (0 non è mai spedito).
  * Nella finestra del replay nessun codice spedito resta NULL in
  * corpo_attivita_replay. */
 #include <stddef.h>
@@ -376,6 +380,8 @@ attivita_fn corpo_attivita_replay[SCHED_CODICI] = {
     [0x12] = attivita_12_426a,
     [0x13] = attivita_13_6480,
     [0x14] = attivita_14_44b5,
+    [0x15] = attivita_15_6466,
+    [0x16] = attivita_16_6496,
     [0x17] = attivita_17_6429,
     [0x18] = attivita_18_4124,
     [0x19] = attivita_19_3792,
@@ -383,10 +389,14 @@ attivita_fn corpo_attivita_replay[SCHED_CODICI] = {
     [0x1b] = attivita_1b_4111,
     [0x1c] = attivita_1c_3f40,
     [0x1d] = attivita_1d_3f39,
+    [0x1e] = attivita_vuota_3b61,
     [0x1f] = attivita_1f_43c8,
     [0x20] = attivita_20_3e90,
+    [0x21] = attivita_vuota_3b61,
     [0x22] = attivita_22_12d6,
     [0x23] = attivita_23_3e4e,
+    [0x24] = attivita_24_2c72,
     [0x25] = attivita_25_3b77,
     [0x26] = attivita_26_3b63,
+    [0x27] = attivita_27_62b6,
 };

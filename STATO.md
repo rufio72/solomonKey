@@ -228,8 +228,15 @@ ogni ciclo nei brief in `compiti/`.
    rami 352E/353B/351E della fase 1 del 07; 5 voci e 61 catture nuove
    (modo `stato` di `cattura_corpi.sh`). Semi 4 e 67 arrivano a 6000 frame;
    partita 1A: nuovo `AUDIO hash c097308a8678392e`. Vedi `decomp/GIRO.md`.
-   [ ] Lotto 55: corpi 15, 16, 24 (finale), 27 (passo 0 per composizione).
-   Resta il registro R (corpo 12, 4302) non modellato nel gioco libero.
+   [x] Lotto 55 (brief 55, 2026-11-04): corpi 15, 16 (classifica 6842 e
+   7A56), 24 (finale), 27 e le voci vuote 1E 21: tutti i 40 codici della
+   tabella 3B11 sono tradotti; 8 voci e 41 catture nuove. Il fine partita
+   arrivava poi a rami mancanti del corpo 06 dell'attract: tradotte le fasi
+   5 (7A0B), 8 (7B3B), 10 e 11 (7604; la tabella 75EC ha 12 voci). I semi
+   10, 4, 67 passano fine partita e attract e si fermano solo sul registro R.
+   Resta il registro R (corpo 12, 4302) non modellato nel gioco libero;
+   nessun altro ramo «routine mancante» incontrato dal fine partita. Vedi
+   `decomp/GIRO.md`.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

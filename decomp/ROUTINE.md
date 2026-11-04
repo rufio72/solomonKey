@@ -839,3 +839,5 @@ assegna codice all'etichetta, le istruzioni che la seguono sono coperte).
 Lotto H4b2 (brief 46): `sub_3adf` (2 catture, titolo f1196 e f1197); banco a 305 voci e 1272 catture.
 
 Lotto H4b3 (brief 47): `sub_2d8a` (2 catture, una banale) e `sub_37b4` (4 catture); banco a 307 voci e 1278 catture.
+
+Lotto 55 (brief 55): `sub_251d`, `sub_2529`, `sub_2533` (`z80_25xx.c`, 1, 2 e 1 catture), `sub_6379` (`attivita_27.c`, 1 cattura), `sub_7a56` (`attivita_16b.c`, per composizione: dura più di un frame) e i corpi 15 16 24 1E/21 nel banco (6466 6496 2C72 3B61); banco a 335 voci e 1412 catture.

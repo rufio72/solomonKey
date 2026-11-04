@@ -18,8 +18,10 @@
 
 void fase_07_3861(void);   /* fase 0 */
 void fase_07_34fa(void);   /* fase 1 */
+void fase_2dee(void);      /* fase 2 (anche passo 1 del 24, lotto 55) */
 void fase_07_37d7(void);   /* fase 3 */
 void fase_07_358f(void);   /* fase 4 */
+void fase_3225(void);      /* fase 6 (anche passo 4 del 24, lotto 55) */
 void fase_07_3a7d(void);   /* fase 7 */
 void fase_07_2dce(void);   /* fase 13 (07c) */
 void fase_07_31c5(void);   /* fase 14 */

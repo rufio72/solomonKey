@@ -278,3 +278,46 @@ dei passi non catturabili (6842, 7A56, 6A43, 69A7 coda, 6ADE, 62E0, 62BE) e le d
 4. Rinomina attesa_13→attesa_64ce ed esportazioni: preferenze ACCETTATE.
 5. Ordine di priorità 15, 16, 24, 27 se serve spezzare: ACCETTATO.
 6. Nomi di moduli, funzioni e tag: preferenze ACCETTATE.
+
+## Esito (sviluppatore, Opus 5.5, 2026-11-04)
+
+Uscite delle verifiche:
+1. `make 0`, `0` warning/error.
+2. `CATTURE OK 134 su 134` (i 93 `.log` vecchi riscritti da MAME ripristinati con `git checkout`).
+3. `exit 0`, `0`, `335`, `1412`, `1412`.
+4. `0x6466: 9 catture, 9 OK`, `0x6496: 7/7`, `0x2C72: 18/18`, `0x3B61: 2/2`, `0x6379: 1/1`,
+   `0x251D: 1/1`, `0x2529: 2/2`, `0x2533: 1/1`.
+5. `116`.
+6. `GIRO COMPLETO 0-5499: saldatura 0 byte, spedidore 0 divergenze, 30 a metà attività (attese), 13 frame
+   resi con hash coincidenti`; oracolo `AUDIO hash c4b40fea06623a96`; partita 1A `FRAME rese 4000`,
+   `HASH ultimo 3f25ba053eeb56b9`, `AUDIO hash c097308a8678392e`, nessun FERMO.
+7. Nessun `FERMO corpo`. Non si arriva a 40000: seme 10 «FERMO lettura del registro R non modellata al
+   frame 24396» (`FRAME rese 24330`), seme 4 al 22412 (22346), seme 67 al 21676 (21610), sempre corpo 12 →
+   4302 (backtrace in gdb), stesso `HASH ultimo a964cd9375d7a827`. Seme 10 due volte: `HASH ultimo
+   a964cd9375d7a827`, `AUDIO hash c185e0fb15e096d1` entrambe le volte.
+8. Semi 4, 67, 10 a 6000 frame: `FRAME rese 6000`, nessun FERMO.
+9. Nessun file sopra 800 righe; moduli nuovi tra 37 e 334 righe.
+10. Solo `decomp/` (164 `out/snap_*` nuovi), questo brief e `STATO.md`; `pgrep -c mame` → `0`; nessun `.o`.
+
+Rami extra tradotti (domanda 1, tre siti, tutti del corpo 06 dell'attract, non del 07): dopo i corpi il
+fine partita si fermava su «FERMO routine 7A0B mancante» (fase 5, classifica, 17 istr. + 7A56), poi su
+«indice 0A fuori dalla tabella rst del sito 75EB». Fatto contrario al codice: la tabella 75EC ha 12 voci,
+non 10 come dichiara `rst20_tables.h` (non toccato): la 10 è 760B, la 11 è 7604 (4 istr., c467 = c1ae = 0).
+Tradotte in `attivita_06b.c` le fasi 5 (7A0B), 8 (7B3B, 37 istr. con 7B95 e 7B9E) e 11 (7604); la 10
+riusa `fase_760b`. Il `switch` di `attivita_06_75e7` ha 4 `case` cambiati o aggiunti (deviazione dal
+vincolo «nessuna riscrittura»: solo i rami mancanti).
+
+Righe dubbie dei passi non catturabili (verificati per composizione):
+- 6842: la sottrazione 685A-685E (record vinto con punteggio uguale: `jr nc`, quindi pari = sopra);
+  l'`ex de,hl` di 6875 lascia HL = FFFC nel ramo con 2533 (ininfluente); 68E9 `jp m` su A = 0A - E.
+- 7A56: lettura del nome con `leggi` da (c1b2); `rst 8` = HL + 2·A con A = 3·(B-1) (6 byte per voce).
+- 6A43: `pop hl` di 6A54 rende HL = c19d (il `push hl` d'ingresso).
+- 69A7 coda: `pop hl; ld (hl),17` = `tabella[slot] = 0x17`; il C della 3A1C resta c04c.
+- 6ADE: `and 6; jr nz,6B16` salta all'istruzione seguente (nessun effetto).
+- 62E0/62BE: `leggi_e603(0x62be)` non misurato (avviso e 0, come gli altri PC non in tabella).
+- 6785 (catturato al k5) e 65C7: scrivono a indirizzi calcolati che con un riquadro non impostato
+  cadono sotto c000 (ROM, scrittura persa): aggiunto `scrivi_mem` in `attivita_libera.h` (deviazione:
+  senza, il banco andava in segmentation fault sul k5 del 15).
+
+Altre deviazioni: `attivita_attract.c` include `attivita_libera.h`; nuovo modulo `attivita_06b.c` in
+`SORGENTI_NEMICI`; `ROUTINE.md` con una riga di riepilogo del lotto.

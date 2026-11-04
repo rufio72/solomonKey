@@ -423,7 +423,7 @@ fermava («FERMO corpo XX non tradotto»): 04 05 09 0F 17 19 1A 1B 1D 23
   soddisfa le condizioni del 12 il gioco si ferma su «lettura del registro R
   non modellata».
 - Restavano non tradotti: 1C 22 25 26 (fatti nel lotto 54), 15 16 24 27
-  (lotto 55; i lotti slittano di uno per il brief 53).
+  (tradotti nel lotto 55; i lotti slittano di uno per il brief 53).
 
 ## Brief 53: stelline d'inizio quadro nel gioco libero
 
@@ -487,3 +487,34 @@ Banco, replay, giro e `gioca --oracolo` invariati.
 - Semi 4 e 67 (6000 frame, passo 8): `FRAME rese 6000`, nessun FERMO
   (prima «FERMO routine 352E» ai frame 5602 e 4866); seme 10 invariato
   (`FRAME rese 6000`).
+
+## Lotto 55: corpi 15 16 24 27, voci vuote 1E 21 (brief 55)
+
+Tradotti i corpi 15 (`attivita_15.c`, fine vita), 16 (`attivita_16.c` e
+`attivita_16b.c`: fine partita, classifica 6842 con 7A56, immissione del
+nome, proseguimento), 24 (`attivita_24.c`, il finale: fasi del 07 più
+2C9E), 27 (`attivita_27.c`, contatori di partita, indice c1ae, con 6379) e
+la voce vuota 3B61 dei codici 1E e 21; helper 251D 2529 2533
+(`z80_25xx.c`). Tutti i 40 codici della tabella 3B11 hanno un corpo.
+Esportate senza cambiarne il corpo `fase_2dee`, `fase_3225`, `passo_6655`
+e `attesa_13`, rinominata `attesa_64ce`.
+
+- Catture: 41 nuove in `corpi_catture.txt` (134 in tutto); banco a 335
+  voci e 1412 catture. Non catturabili (75AA o più di un frame) e
+  verificati per composizione: 15 passo 9, 16 passi 4 (6842 e 7A56), 7, 9
+  e coda dell'8, 24 passo 4 (3225), 27 entrambi i passi.
+- Fine partita: dopo i corpi il gioco libero si fermava su «FERMO routine
+  7A0B mancante» (fase 5 del corpo 06 dell'attract, la classifica) e poi su
+  «indice 0A fuori dalla tabella rst del sito 75EB»: la tabella 75EC ha 12
+  voci, non 10 come in `rst20_tables.h` (la 10 è 760B, la 11 è 7604 che
+  chiude il ciclo). Tradotte in `attivita_06b.c` le fasi 5 (7A0B), 8
+  (7B3B) e 11 (7604), aggiunta la 10 su `fase_760b`.
+- Semi 10, 4, 67 a 40000 frame: nessun «FERMO corpo»; la partita arriva al
+  fine partita, passa la classifica e il ciclo dell'attract, e si ferma
+  sulla sentinella del registro R (corpo 12, 4302, lotto a parte) ai frame
+  24396, 22412, 21676 (`FRAME rese` 24330, 22346, 21610, stesso `HASH
+  ultimo a964cd9375d7a827`). Prima: «FERMO corpo 15» ai frame 7329, 11370,
+  10634.
+- Invarianti: giro completo, `gioca --oracolo` (`AUDIO hash
+  c4b40fea06623a96`), partita 1A (`HASH ultimo 3f25ba053eeb56b9`, `AUDIO
+  hash c097308a8678392e`) e semi 4, 67, 10 a 6000 frame identici.

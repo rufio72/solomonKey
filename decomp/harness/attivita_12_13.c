@@ -84,8 +84,9 @@ void attivita_12_426a(uint8_t slot)
     tabella[slot] = 0x00;                      /* 42FE-4301 */
 }
 
-/* Passi 0, 4 e 6 (64B0, 64B8): attesa su c19d con soglia C (2E90). */
-static void attesa_13(uint8_t c)
+/* Passi 0, 4 e 6 (64B0, 64B8): attesa su c19d con soglia C (2E90). Voce
+ * comune 64CE delle attese dei corpi 13, 15 e 16 (esportata nel lotto 55). */
+void attesa_64ce(uint8_t c)
 {
     struct z80 z = {0};
     SET_HL(&z, 0xc19d);
@@ -189,13 +190,13 @@ void attivita_13_6480(uint8_t slot)
     uint8_t passo = M(0xc19d);                 /* 6480-6483 */
     M(0xc19d) = (uint8_t)(passo + 1);          /* 6484 */
     switch (passo) {                           /* 6485 rst 20h */
-    case 0: attesa_13(0x18); break;            /* 64B0 */
+    case 0: attesa_64ce(0x18); break;          /* 64B0 */
     case 1: passo_6676(); break;
     case 2: passo_66d4(); break;
     case 3: passo_66f3(); break;
-    case 4: attesa_13(0x30); break;            /* 64B8 */
+    case 4: attesa_64ce(0x30); break;          /* 64B8 */
     case 5: passo_6702(); break;
-    case 6: attesa_13(0x30); break;            /* 64B8 */
+    case 6: attesa_64ce(0x30); break;          /* 64B8 */
     case 7: passo_670f(); break;
     default: nemici_fuori_tabella(0x6485, passo); break;
     }
