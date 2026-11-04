@@ -321,3 +321,15 @@ Righe dubbie dei passi non catturabili (verificati per composizione):
 
 Altre deviazioni: `attivita_attract.c` include `attivita_libera.h`; nuovo modulo `attivita_06b.c` in
 `SORGENTI_NEMICI`; `ROUTINE.md` con una riga di riepilogo del lotto.
+
+## Esito del ciclo (chat principale, 2026-11-04)
+
+Verificatore (Sonnet, ~22k token): le 10 verifiche rifatte, TUTTE PASSATE
+(la 7 con la riserva attesa: i semi si fermano SOLO sulla sentinella del
+registro R ai frame 21676-24396, determinismo confermato sul seme 10; la
+10 segnava solo i 134 snap_*.log rigenerati con rumore MAME, ripristinati).
+Analista Sonnet ~135k, sviluppatore Opus ~182k. Lotto 55 CHIUSO con
+a043c62. TUTTI I 40 CODICI DELLA TABELLA 3B11 SONO TRADOTTI. Decisione
+chat sotto mandato utente (criterio «se in partita non cambia nulla si
+salta»): il registro R SI MODELLA in forma minima, perché ogni partita
+libera si ferma su di esso dopo ~6 minuti — lotto dedicato a seguire.
