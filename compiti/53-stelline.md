@@ -258,3 +258,13 @@ d'inizio quadro. Altri difetti di cadenza possono esistere altrove e
 VANNO RIVISTI in futuro (decisione utente: «ci ritorniamo») — ogni nuovo
 difetto visivo o di ritmo nel gioco libero va prima sospettato come
 cadenza, poi come traduzione.
+
+## Esito del ciclo (chat principale, 2026-11-04)
+
+Verificatore (Sonnet, ~18k token): le 9 verifiche rifatte, TUTTE PASSATE.
+Nota: l'hash video della partita 1A è rimasto 3f25ba053eeb56b9 (il brief
+si aspettava che cambiasse; è cambiato solo l'audio, 2b2b3e7c4ca136fc,
+come annotato in GIRO.md). Analista Opus ~88k, sviluppatore ~47k.
+Lotto 53 CHIUSO con a459806. Fondale: difetto diverso (chiamata lunga
+~6 frame con NMI interne), annotato in STATO.md/GIRO.md sotto «Cadenza
+del gioco libero», si giudica a vista nel test utente.
