@@ -413,3 +413,14 @@ Deviazioni dal brief:
 - Righe dubbie del passo 3BAC (25, non catturabile): nessuna individuata
   alla rilettura; da notare che con c237 = 0 il ciclo 3D20 fa 256 giri,
   come sul Z80.
+
+## Esito del ciclo (chat principale, 2026-11-04)
+
+Verificatore (Sonnet, ~20k token): le 11 verifiche rifatte, TUTTE PASSATE.
+Determinismo della partita 1A confermato con due riproduzioni identiche
+(video 3f25ba053eeb56b9, audio c097308a8678392e, 2988510 campioni). I 93
+snap_*.log rigenerati differivano solo per la riga «Error parsing XML
+configuration file default.cfg» di MAME (rumore), ripristinati alla
+versione committata. Analista Sonnet ~141k, sviluppatore ~186k.
+Lotto 54 CHIUSO con 4d427c1: tutto il perimetro in un ciclo (corpi 1C 22
+25 26, raccolta 12F0/12AB con 11 gestori nuovi, famiglia 352E/353B/351E).
