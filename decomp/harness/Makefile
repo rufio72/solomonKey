@@ -82,6 +82,11 @@ SORGENTI_GIOCA = $(filter-out gioco_libero.c,$(SORGENTI_LIBERO)) gioca.c gioca_t
 gioca: $(SORGENTI_GIOCA) macchina.h ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h video_sdl.h giro_video.h scheda_audio.h audio.h gioca_joy.h gioca_opzioni.h $(INTESTAZIONI_DATI) emu2149/emu2149.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ $(SORGENTI_GIOCA) $(SDL_LIBS)
 
+# prova dei pixel delle scanlines (addendum 57C): fuori da all, si lancia
+# con SDL_VIDEODRIVER=dummy ./prova_scanlines
+prova_scanlines: prova_scanlines.c video_sdl.c video_sdl.h
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ prova_scanlines.c $(SDL_LIBS)
+
 # make gioco (lotto H7): prepara le ROM, compila gioca e dice come lanciarlo.
 # A runtime servono solo 6.3f, 7.3h, 8.3jk (-> out/main64.bin) e 1.3jk.
 ROM_DIR = ../../roms/ext/solomon
@@ -103,6 +108,6 @@ rom:
 	if [ ! -s ../out/main64.bin ]; then echo "costruisco out/main64.bin"; sh ../build_rom.sh >/dev/null || exit 2; fi
 
 clean:
-	rm -f harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine mostra_oracolo mostra_replay gioca replay_lib.o
+	rm -f harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine mostra_oracolo mostra_replay gioca prova_scanlines replay_lib.o
 
 .PHONY: all clean gioco rom

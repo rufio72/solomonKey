@@ -12,7 +12,7 @@ static SDL_Texture *tex;
 static int con_vsync;
 static int a_schermo_pieno;   /* vsdl_pieno: finestra a schermo intero «desktop» */
 static int con_scanlines;     /* vsdl_scanlines: righe scure alla CRT */
-static SDL_Texture *overlay;  /* 1 x 2*VID_ALTO, righe dispari semitrasparenti */
+static SDL_Texture *overlay;  /* 1 x N*VID_ALTO, linee tra le file del gioco */
 static uint64_t scadenza;   /* contatore SDL del prossimo present, ripiego */
 static uint64_t periodo;    /* 1/60 s in tick del contatore */
 
@@ -79,24 +79,60 @@ void vsdl_scanlines(int on)
     con_scanlines = on;
 }
 
-/* Overlay delle scanlines: riga pari trasparente, riga dispari nera con
- * alpha 80; con SDL_BLENDMODE_BLEND il pixel sotto diventa v*(1-80/255).
- * Se non si crea: avviso e si continua senza effetto. */
-static void crea_overlay(void)
+/* Overlay delle scanlines (addendum 57C): le linee stanno sulla griglia
+ * nativa del gioco, al confine tra una fila di pixel del gioco e la
+ * successiva. A scala intera N ogni fila è alta N pixel fisici: le ultime
+ * max(1, round(N/4)) righe fisiche di ogni fila sono nere con alpha 64
+ * (con SDL_BLENDMODE_BLEND il pixel sotto diventa v*(1-64/255), circa -25%).
+ * La texture è 1 x VID_ALTO*N e si copia sull'area di gioco: a scala N
+ * ogni sua riga cade su una riga fisica. A scala 1 non c'è spazio tra i
+ * pixel: nessun overlay. Se non si crea: avviso e si continua senza. */
+#define SCANLINE_ALPHA 64
+static int scala_overlay;     /* scala per cui è costruito l'overlay, 0 = nessuno */
+static int overlay_fallito;   /* avviso già dato: non si riprova */
+
+/* Spessore in righe fisiche della linea a scala n: max(1, round(n/4)). */
+static int spessore(int n)
 {
-    static uint8_t px[VID_ALTO * 2][4];
-    for (int y = 0; y < VID_ALTO * 2; y++) {
+    int t = (n + 2) / 4;
+    return t < 1 ? 1 : t;
+}
+
+static void crea_overlay(int n)
+{
+    static uint8_t px[VID_ALTO * 8][4];
+    if (overlay) SDL_DestroyTexture(overlay);
+    overlay = NULL;
+    scala_overlay = n;
+    if (n < 2 || n > 8 || overlay_fallito) return;
+    int t = spessore(n);
+    for (int y = 0; y < VID_ALTO * n; y++) {
         px[y][0] = px[y][1] = px[y][2] = 0;
-        px[y][3] = (y & 1) ? 80 : 0;
+        px[y][3] = (y % n) >= n - t ? SCANLINE_ALPHA : 0;
     }
     overlay = SDL_CreateTexture(rend, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC,
-                                1, VID_ALTO * 2);
+                                1, VID_ALTO * n);
     if (!overlay || SDL_UpdateTexture(overlay, NULL, px, 4) != 0 ||
         SDL_SetTextureBlendMode(overlay, SDL_BLENDMODE_BLEND) != 0) {
         fprintf(stderr, "AVVISO: scanlines non disponibili: %s\n", SDL_GetError());
         if (overlay) SDL_DestroyTexture(overlay);
         overlay = NULL;
+        overlay_fallito = 1;
     }
+}
+
+/* Scala intera effettiva dell'area di gioco: con --pieno quella scelta da
+ * SDL_RenderSetIntegerScale, in finestra l'altezza d'uscita / VID_ALTO. */
+static int scala_effettiva(void)
+{
+    if (a_schermo_pieno) {
+        float sx, sy;
+        SDL_RenderGetScale(rend, &sx, &sy);
+        return (int)(sy + 0.5f);
+    }
+    int w, h;
+    if (SDL_GetRendererOutputSize(rend, &w, &h) != 0) return 0;
+    return h / VID_ALTO;
 }
 
 int vsdl_apri(const char *titolo, int scala)
@@ -142,7 +178,8 @@ int vsdl_apri(const char *titolo, int scala)
         vsdl_chiudi();
         return -1;
     }
-    if (con_scanlines) crea_overlay();
+    scala_overlay = 0;
+    overlay_fallito = 0;
     periodo = SDL_GetPerformanceFrequency() / 60;
     scadenza = 0;
     return 0;
@@ -161,6 +198,10 @@ int vsdl_presenta(const uint8_t fb[VID_ALTO][VID_LARGO][3])
         SDL_RenderCopy(rend, tex, NULL, NULL) != 0) {
         fprintf(stderr, "ERRORE: SDL: %s\n", SDL_GetError());
         return -1;
+    }
+    if (con_scanlines) {
+        int n = scala_effettiva();
+        if (n != scala_overlay) crea_overlay(n);
     }
     if (overlay && SDL_RenderCopy(rend, overlay, NULL, NULL) != 0) {
         fprintf(stderr, "ERRORE: SDL: %s\n", SDL_GetError());

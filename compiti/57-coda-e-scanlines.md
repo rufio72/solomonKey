@@ -278,3 +278,20 @@ verifica resta rieseguibile): a scala 4, per ogni blocco di 4 righe
 fisiche dentro l'area di gioco, 3 righe intatte e 1 scurita di ~25%;
 a scala 2, 1 ogni 2 scurita; a scala 1 tutte intatte; senza opzione
 tutte intatte.
+
+## Esito 57C (sviluppatore Opus 5.5, 2026-11-04)
+
+Overlay rifatto in `video_sdl.c`: texture 1 x 224*N costruita per la scala
+intera effettiva (in finestra altezza d'uscita/224, con `--pieno` la scala di
+`SDL_RenderSetIntegerScale`), ricostruita se la scala cambia; ultime
+max(1, round(N/4)) righe fisiche di ogni fila del gioco nere con alpha 64;
+a scala 1 nessun overlay. Prova dei pixel committata:
+`make prova_scanlines && SDL_VIDEODRIVER=dummy ./prova_scanlines 1 2 3 4 5 6 8`
+→ pixel (200,100,50), righe scure 149,74,37; scure 224 su 448/672/896/1120
+(scale 2-5), 448 su 1344/1792 (scale 6, 8); scala 1 e senza opzione 0 scure;
+`--pieno` (dummy 1024x768 → scala 3) 224 su 672; 0 fuori tolleranza ±2;
+«PROVA SCANLINES PASSATA», uscita 0.
+Hash (verifica 8) senza opzione, `--scanlines`, `--scanlines --pieno -s 2`,
+`-s 1`, `-s 4`: tutte 4000 / 3f25ba053eeb56b9 / 2988510 / c097308a8678392e.
+Verifica 9: `DSW1 02 DSW2 00` uscita 0, aiuto 1, README 2. `make`: 0 warning.
+Banco e giro non rieseguiti: non compilano `video_sdl.c`.

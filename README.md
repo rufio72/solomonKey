@@ -188,9 +188,12 @@ decomp/harness/gioca --muto       # no sound
 decomp/harness/gioca --aiuto      # every option (in Italian)
 ```
 
-`--scanlines` works with `-s N` and `--pieno` and looks best at scale 2 or
-more; it is display only and never changes the video hash, replays or the
-oracle mode.
+`--scanlines` draws a thin dark line (about 25% darker) at the border between
+consecutive rows of game pixels, max(1, round(N/4)) screen pixels thick at
+scale N, so the lines follow the game grid with `-s N` and `--pieno`. At
+scale 1 there is no room between the pixels and the option has no effect.
+It is display only and never changes the video hash, replays or the oracle
+mode.
 
 **Keys** (from `gioca --mappa`): arrows or WASD move; Z, Space or Left Ctrl
 is BUTTON1; X or Left Alt is BUTTON2 (which of the two is jump and which is
