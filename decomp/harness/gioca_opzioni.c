@@ -24,7 +24,22 @@ int gioca_opzione_extra(int argc, char **argv, int *i)
         exit(0);
     }
     if (!strcmp(a, "--pieno")) { gx.pieno = 1; return 1; }
-    if (!strcmp(a, "--scanlines")) { gx.scanlines = 1; return 1; }
+    if (!strcmp(a, "--scanlines")) {
+        /* argomento facoltativo S (quarti di fila, 1-3, predefinito 2): gioca
+         * non ha argomenti posizionali, quindi una parola che segue e non
+         * comincia con '-' è sempre lo spessore */
+        gx.scanlines = 2;
+        if (*i + 1 < argc && argv[*i + 1][0] != '-') {
+            if (intero(argv[*i + 1], &v) != 0 || v < 1 || v > 3) {
+                fprintf(stderr, "ERRORE: --scanlines vuole uno spessore da 1 a 3 "
+                        "(quarti di fila di pixel del gioco)\n");
+                return -1;
+            }
+            gx.scanlines = (int)v;
+            ++*i;
+        }
+        return 1;
+    }
     if (!strcmp(a, "--joystick")) { gx.joystick = 1; return 1; }
     if (!strcmp(a, "--senza-joystick")) { gx.senza_joy = 1; return 1; }
     if (!strcmp(a, "--volume") || !strcmp(a, "--joy-mappa") || !strcmp(a, "-t")) {

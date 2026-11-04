@@ -182,15 +182,18 @@ decomp/harness/gioca              # play (works from any directory)
 decomp/harness/gioca -s 4         # window at 4x scale
 decomp/harness/gioca --pieno      # fullscreen, integer scaling, 8:7 kept
 decomp/harness/gioca --scanlines  # CRT-style dark horizontal lines (display only, default off)
+decomp/harness/gioca --scanlines 1  # thinner lines (1, 2 or 3 quarters of a game pixel row)
 decomp/harness/gioca --vite 5     # DIP switch: 5 lives
 decomp/harness/gioca --volume 50  # half volume
 decomp/harness/gioca --muto       # no sound
 decomp/harness/gioca --aiuto      # every option (in Italian)
 ```
 
-`--scanlines` draws a thin dark line (about 25% darker) at the border between
-consecutive rows of game pixels, max(1, round(N/4)) screen pixels thick at
-scale N, so the lines follow the game grid with `-s N` and `--pieno`. At
+`--scanlines [S]` draws a dark line (about 25% darker) at the border between
+consecutive rows of game pixels. S is the thickness in quarters of a game
+pixel row, from 1 to 3 (default 2): at scale N the line is
+max(1, round(N*S/4)) screen pixels thick, at most N-1, so the lines follow
+the game grid with `-s N` and `--pieno`. At
 scale 1 there is no room between the pixels and the option has no effect.
 It is display only and never changes the video hash, replays or the oracle
 mode.

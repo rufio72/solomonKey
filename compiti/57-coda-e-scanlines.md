@@ -281,17 +281,31 @@ tutte intatte.
 
 ## Esito 57C (sviluppatore Opus 5.5, 2026-11-04)
 
-Overlay rifatto in `video_sdl.c`: texture 1 x 224*N costruita per la scala
-intera effettiva (in finestra altezza d'uscita/224, con `--pieno` la scala di
-`SDL_RenderSetIntegerScale`), ricostruita se la scala cambia; ultime
-max(1, round(N/4)) righe fisiche di ogni fila del gioco nere con alpha 64;
-a scala 1 nessun overlay. Prova dei pixel committata:
+Prima consegna (82a34ba): overlay sulla griglia del gioco, spessore
+max(1, round(N/4)), alpha 64. Su richiesta dell'utente dopo il test visivo,
+secondo commit: spessore parametrico. `--scanlines [S]`, S in quarti di fila
+di pixel del gioco da 1 a 3, predefinito 2 (il doppio della prima versione);
+spessore fisico max(1, round(N*S/4)) limitato a N-1 (deviazione: senza il
+limite a scala 2 con S=3 la fila sarebbe tutta scura, nessuna linea; lì S=3
+vale come S=2). Sintassi: argomento facoltativo nella stessa opzione; gioca
+non ha argomenti posizionali, quindi la parola che segue `--scanlines` e non
+comincia con `-` è sempre lo spessore: nessuna ambiguità, niente opzione
+separata. 0, 4, testo → «ERRORE: --scanlines vuole uno spessore da 1 a 3
+(quarti di fila di pixel del gioco)», uscita 2.
+
+Overlay: texture 1 x 224*N per la scala intera effettiva (in finestra
+altezza d'uscita/224, con `--pieno` la scala di `SDL_RenderSetIntegerScale`),
+rifatta se la scala cambia; a scala 1 nessun overlay. Prova dei pixel
+committata, attese calcolate in modo indipendente da `video_sdl.c`:
 `make prova_scanlines && SDL_VIDEODRIVER=dummy ./prova_scanlines 1 2 3 4 5 6 8`
-→ pixel (200,100,50), righe scure 149,74,37; scure 224 su 448/672/896/1120
-(scale 2-5), 448 su 1344/1792 (scale 6, 8); scala 1 e senza opzione 0 scure;
-`--pieno` (dummy 1024x768 → scala 3) 224 su 672; 0 fuori tolleranza ±2;
-«PROVA SCANLINES PASSATA», uscita 0.
-Hash (verifica 8) senza opzione, `--scanlines`, `--scanlines --pieno -s 2`,
-`-s 1`, `-s 4`: tutte 4000 / 3f25ba053eeb56b9 / 2988510 / c097308a8678392e.
-Verifica 9: `DSW1 02 DSW2 00` uscita 0, aiuto 1, README 2. `make`: 0 warning.
+→ righe scure (S=1/2/3): scala 2 224/224/224 su 448; scala 3 224/448/448 su
+672; scala 4 224/448/672 su 896; scala 5 224/672/896; scala 6 448/672/1120;
+scala 8 448/896/1344 su 1792; `--pieno` (dummy 1024x768, scala 3) come scala
+3; scala 1 e senza opzione 0; pixel 200,100,50 → 149,74,37; 0 fuori
+tolleranza ±2; «PROVA SCANLINES PASSATA», uscita 0.
+Verifica 9: `--scanlines [3] --stampa-dsw` → `DSW1 02 DSW2 00` uscita 0;
+aiuto 1; README 3. `make`: 0 warning.
 Banco e giro non rieseguiti: non compilano `video_sdl.c`.
+Hash partita 1A (verifica 8) senza opzione, `--scanlines`, `--scanlines 1`,
+`--scanlines 2 -s 4`, `--scanlines 3 -s 4`, `--scanlines 3 --pieno -s 2`:
+tutte 4000 / 3f25ba053eeb56b9 / 2988510 / c097308a8678392e.

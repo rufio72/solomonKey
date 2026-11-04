@@ -10,7 +10,7 @@ typedef struct {
     int senza_joy;      /* --senza-joystick */
     long tempo;         /* -t SEC (solo con --joystick) */
     int tempo_dato;
-    int scanlines;      /* --scanlines (lotto 57): solo presentazione */
+    int scanlines;      /* --scanlines [S] (lotto 57): 0 spente, 1-3 quarti di fila */
 } gioca_extra;
 
 extern gioca_extra gx;

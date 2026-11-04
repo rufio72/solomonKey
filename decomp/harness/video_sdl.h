@@ -21,7 +21,7 @@ void vsdl_pieno(int on);
  * texture 1x(2*VID_ALTO) semitrasparente sopra il frame scurisce la metà
  * inferiore di ogni riga sorgente (alpha 80, circa 31%). Solo presentazione:
  * il framebuffer e vsdl_hash non cambiano. Predefinito: spento. */
-void vsdl_scanlines(int on);
+void vsdl_scanlines(int quarti);
 int vsdl_apri(const char *titolo, int scala);   /* 0 ok, -1 errore */
 /* Mostra il frame (SDL_UpdateTexture + RenderCopy + RenderPresent), smaltisce
  * gli eventi. 0 = continua; 1 = l'utente vuole uscire (ESC o chiusura finestra);

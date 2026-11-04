@@ -1,16 +1,27 @@
 /* Prova dei pixel delle scanlines (addendum 57C del brief 57).
  * Include video_sdl.c, apre il renderer (driver dummy: renderer software),
  * presenta un framebuffer uniforme e rilegge i pixel con SDL_RenderReadPixels.
- * Atteso: a scala N >= 2, in ogni blocco di N righe fisiche le ultime
- * max(1, round(N/4)) scurite a v*(255-64)/255 (±2), le altre intatte;
- * a scala 1 e senza --scanlines tutte intatte.
+ * Atteso: a scala N >= 2 con --scanlines S (S = 1, 2, 3 quarti di fila),
+ * in ogni blocco di N righe fisiche le ultime max(1, round(N*S/4)), al più
+ * N-1, scurite a v*(255-64)/255 (±2), le altre intatte; a scala 1 e senza
+ * --scanlines tutte intatte.
  * Uso: prova_scanlines [N...]   (da decomp/harness: make prova_scanlines)
  * Uscita 0 se tutte le scale provate rispettano l'atteso, 1 altrimenti. */
 #include "video_sdl.c"
 
 static uint8_t fb[VID_ALTO][VID_LARGO][3];
 
-/* Una prova: scala n, scanlines on/off, finestra o --pieno. Restituisce
+/* Spessore atteso, calcolato qui e non con spessore() di video_sdl.c:
+ * round(n*s/4) con l'arrotondamento a metà verso l'alto, tra 1 e n-1. */
+static int atteso_spessore(int n, int s)
+{
+    int quarti = n * s;               /* righe fisiche * 4 */
+    int t = quarti / 4 + (quarti % 4 >= 2);
+    if (t > n - 1) t = n - 1;
+    return t < 1 ? 1 : t;
+}
+
+/* Una prova: scala n, scanlines 0 (spente) o S quarti, finestra o --pieno. Restituisce
  * il numero di pixel fuori tolleranza. */
 static int prova(int n, int on, int pieno)
 {
@@ -36,7 +47,7 @@ static int prova(int n, int on, int pieno)
         vsdl_chiudi();
         return -1;
     }
-    int t = spessore(ne), errori = 0, scure = 0;
+    int t = atteso_spessore(ne, on), errori = 0, scure = 0;
     for (int y = 0; y < h; y++) {
         int scura = on && ne >= 2 && (y % ne) >= ne - t;
         scure += scura;
@@ -51,9 +62,11 @@ static int prova(int n, int on, int pieno)
         }
     }
     const uint8_t *a = &px[0], *b = &px[(size_t)(ne - 1) * w * 4];
+    char opz[24];
+    snprintf(opz, sizeof opz, on ? "--scanlines %d" : "senza opzione", on);
     printf("scala %d%s %s: uscita %dx%d, righe scure %d su %d, "
            "riga 0 = %d,%d,%d  riga %d = %d,%d,%d, fuori tolleranza %d\n",
-           ne, pieno ? " (--pieno)" : "", on ? "--scanlines" : "senza opzione",
+           ne, pieno ? " (--pieno)" : "", opz,
            ow, oh, scure, h, a[0], a[1], a[2], ne - 1, b[0], b[1], b[2], errori);
     vsdl_chiudi();
     return errori;
@@ -72,10 +85,11 @@ int main(int argc, char **argv)
     }
     int male = 0;
     for (int i = 0; i < ns; i++) {
-        if (prova(scale[i], 1, 0) != 0) male = 1;
-        if (prova(scale[i], 0, 0) != 0) male = 1;
+        for (int q = 0; q <= 3; q++)
+            if (prova(scale[i], q, 0) != 0) male = 1;
     }
-    if (prova(1, 1, 1) != 0) male = 1;   /* --pieno: scala decisa da SDL */
+    for (int q = 1; q <= 3; q++)        /* --pieno: scala decisa da SDL */
+        if (prova(1, q, 1) != 0) male = 1;
     printf(male ? "PROVA SCANLINES FALLITA\n" : "PROVA SCANLINES PASSATA\n");
     return male;
 }

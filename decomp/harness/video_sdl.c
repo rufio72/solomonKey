@@ -11,7 +11,7 @@ static SDL_Renderer *rend;
 static SDL_Texture *tex;
 static int con_vsync;
 static int a_schermo_pieno;   /* vsdl_pieno: finestra a schermo intero «desktop» */
-static int con_scanlines;     /* vsdl_scanlines: righe scure alla CRT */
+static int con_scanlines;     /* vsdl_scanlines: 0 spente, 1-3 quarti di fila */
 static SDL_Texture *overlay;  /* 1 x N*VID_ALTO, linee tra le file del gioco */
 static uint64_t scadenza;   /* contatore SDL del prossimo present, ripiego */
 static uint64_t periodo;    /* 1/60 s in tick del contatore */
@@ -74,15 +74,16 @@ void vsdl_pieno(int on)
     a_schermo_pieno = on;
 }
 
-void vsdl_scanlines(int on)
+void vsdl_scanlines(int quarti)
 {
-    con_scanlines = on;
+    con_scanlines = quarti;
 }
 
 /* Overlay delle scanlines (addendum 57C): le linee stanno sulla griglia
  * nativa del gioco, al confine tra una fila di pixel del gioco e la
  * successiva. A scala intera N ogni fila è alta N pixel fisici: le ultime
- * max(1, round(N/4)) righe fisiche di ogni fila sono nere con alpha 64
+ * max(1, round(N*S/4)) righe fisiche di ogni fila (S = quarti scelti con
+ * --scanlines S, 1-3), al più N-1, sono nere con alpha 64
  * (con SDL_BLENDMODE_BLEND il pixel sotto diventa v*(1-64/255), circa -25%).
  * La texture è 1 x VID_ALTO*N e si copia sull'area di gioco: a scala N
  * ogni sua riga cade su una riga fisica. A scala 1 non c'è spazio tra i
@@ -91,10 +92,13 @@ void vsdl_scanlines(int on)
 static int scala_overlay;     /* scala per cui è costruito l'overlay, 0 = nessuno */
 static int overlay_fallito;   /* avviso già dato: non si riprova */
 
-/* Spessore in righe fisiche della linea a scala n: max(1, round(n/4)). */
-static int spessore(int n)
+/* Spessore in righe fisiche della linea a scala n con s quarti di fila:
+ * max(1, round(n*s/4)), limitato a n-1 perché resti almeno una riga intatta
+ * (altrimenti a scala 2 con s = 3 la fila sarebbe tutta scura, senza linee). */
+static int spessore(int n, int s)
 {
-    int t = (n + 2) / 4;
+    int t = (n * s + 2) / 4;
+    if (t > n - 1) t = n - 1;
     return t < 1 ? 1 : t;
 }
 
@@ -105,7 +109,7 @@ static void crea_overlay(int n)
     overlay = NULL;
     scala_overlay = n;
     if (n < 2 || n > 8 || overlay_fallito) return;
-    int t = spessore(n);
+    int t = spessore(n, con_scanlines);
     for (int y = 0; y < VID_ALTO * n; y++) {
         px[y][0] = px[y][1] = px[y][2] = 0;
         px[y][3] = (y % n) >= n - t ? SCANLINE_ALPHA : 0;
