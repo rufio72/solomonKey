@@ -470,3 +470,13 @@ Codice della sospensione verificato senza correzioni; aggiunti solo lo script
 tabelle identici a `rst20_tables.h`, 646B a 10 voci; cambiano solo i commenti
 «eseguito/indice osservato» delle tabelle viste in traccia, quindi il file in
 albero (fatto con la traccia) non è stato sovrascritto.
+
+## Esito del ciclo (chat principale, 2026-11-04)
+
+Verificatore (Sonnet, ~24k token): verifiche rifatte, TUTTE PASSATE.
+Parziali solo 5 e 6 (non ha rifatto le copie in /tmp, già fatte dallo
+sviluppatore), 10 non misurabile (DAIJA scollegato), 14 manuale dell'utente.
+`git status` pulito. Sviluppatore ~75k token (stima). Lotto H7 CHIUSO con
+77e66e2; resta la prova manuale col DAIJA e la scelta della mappa pulsanti
+(predefinita 0,1,7,6), più la riga «Z jump, X magic» del README da
+riconciliare dopo la prova.
