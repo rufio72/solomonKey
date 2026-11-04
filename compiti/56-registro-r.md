@@ -252,3 +252,12 @@ Deviazioni: il blocco del surrogato in `macchina_libera.c` sta prima di
 `nmi_libera` (che chiama `r_avanza`) e non al posto di `r_letto_libero`;
 aggiornato anche il commento di `nemici_r_gancio` («NULL ... nel gioco
 libero»), dato che ora il gioco libero lo lascia NULL.
+
+## Esito del ciclo (chat principale, 2026-11-04)
+
+Verificatore (Sonnet, ~23k token): le 8 verifiche rifatte, TUTTE PASSATE
+(fermata nuova attesa su «routine 386A mancante» ai frame 27938/25954/25218,
+HASH ultimo comune 16ea230eea591d30; determinismo del seme 10 confermato;
+albero pulito). Analista Opus ~70k, sviluppatore ~42k. Lotto 56 CHIUSO con
+03afb46: il gioco libero non si ferma più sul registro R. Il ramo 386A
+(una istruzione, inc c in fase_07_3861 con c243>=24) va al lotto 57.
