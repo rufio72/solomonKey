@@ -11,6 +11,8 @@ static SDL_Renderer *rend;
 static SDL_Texture *tex;
 static int con_vsync;
 static int a_schermo_pieno;   /* vsdl_pieno: finestra a schermo intero «desktop» */
+static int con_scanlines;     /* vsdl_scanlines: righe scure alla CRT */
+static SDL_Texture *overlay;  /* 1 x 2*VID_ALTO, righe dispari semitrasparenti */
 static uint64_t scadenza;   /* contatore SDL del prossimo present, ripiego */
 static uint64_t periodo;    /* 1/60 s in tick del contatore */
 
@@ -72,6 +74,31 @@ void vsdl_pieno(int on)
     a_schermo_pieno = on;
 }
 
+void vsdl_scanlines(int on)
+{
+    con_scanlines = on;
+}
+
+/* Overlay delle scanlines: riga pari trasparente, riga dispari nera con
+ * alpha 80; con SDL_BLENDMODE_BLEND il pixel sotto diventa v*(1-80/255).
+ * Se non si crea: avviso e si continua senza effetto. */
+static void crea_overlay(void)
+{
+    static uint8_t px[VID_ALTO * 2][4];
+    for (int y = 0; y < VID_ALTO * 2; y++) {
+        px[y][0] = px[y][1] = px[y][2] = 0;
+        px[y][3] = (y & 1) ? 80 : 0;
+    }
+    overlay = SDL_CreateTexture(rend, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC,
+                                1, VID_ALTO * 2);
+    if (!overlay || SDL_UpdateTexture(overlay, NULL, px, 4) != 0 ||
+        SDL_SetTextureBlendMode(overlay, SDL_BLENDMODE_BLEND) != 0) {
+        fprintf(stderr, "AVVISO: scanlines non disponibili: %s\n", SDL_GetError());
+        if (overlay) SDL_DestroyTexture(overlay);
+        overlay = NULL;
+    }
+}
+
 int vsdl_apri(const char *titolo, int scala)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -115,6 +142,7 @@ int vsdl_apri(const char *titolo, int scala)
         vsdl_chiudi();
         return -1;
     }
+    if (con_scanlines) crea_overlay();
     periodo = SDL_GetPerformanceFrequency() / 60;
     scadenza = 0;
     return 0;
@@ -131,6 +159,10 @@ int vsdl_presenta(const uint8_t fb[VID_ALTO][VID_LARGO][3])
     if (SDL_UpdateTexture(tex, NULL, fb, VID_LARGO * 3) != 0 ||
         SDL_RenderClear(rend) != 0 ||
         SDL_RenderCopy(rend, tex, NULL, NULL) != 0) {
+        fprintf(stderr, "ERRORE: SDL: %s\n", SDL_GetError());
+        return -1;
+    }
+    if (overlay && SDL_RenderCopy(rend, overlay, NULL, NULL) != 0) {
         fprintf(stderr, "ERRORE: SDL: %s\n", SDL_GetError());
         return -1;
     }
@@ -159,10 +191,11 @@ int vsdl_presenta(const uint8_t fb[VID_ALTO][VID_LARGO][3])
 
 void vsdl_chiudi(void)
 {
+    if (overlay) SDL_DestroyTexture(overlay);
     if (tex) SDL_DestroyTexture(tex);
     if (rend) SDL_DestroyRenderer(rend);
     if (finestra) SDL_DestroyWindow(finestra);
-    tex = NULL; rend = NULL; finestra = NULL;
+    overlay = NULL; tex = NULL; rend = NULL; finestra = NULL;
     SDL_Quit();
 }
 

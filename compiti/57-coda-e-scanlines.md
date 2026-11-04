@@ -205,3 +205,37 @@ finale: massimo trenta righe con uscita delle verifiche e deviazioni. Niente pus
    lotto; eventuali code si decidono dopo il test dell'utente.
 4. --scanlines con --oracolo o --riproduci: ACCETTATA E IGNORATA per il
    calcolo (è solo presentazione), preferenza accettata.
+
+## Esito (sviluppatore Opus 5.5, 2026-11-04)
+
+Due commit: «Lotto 57A» (386A) e «Lotto 57B» (--scanlines). Verifiche:
+1. `make 0`, `0` warning/errori (anche i due `mostra_*`), dopo A e dopo B.
+2. Banco: `exit 0`, `0`, `335`, `1412`, `1412`.
+3. Giro: riga attesa esatta.
+4. Oracolo: `AUDIO campioni 4042500` / `AUDIO hash c4b40fea06623a96`.
+5. Partita 1A headless: 4000 / 3f25ba053eeb56b9 / 2988510 / c097308a8678392e.
+6. Semi: nessun `386A`; FERMATA NUOVA, censita e non tradotta, nella stessa
+   fase e nello stesso frame: «FERMO routine 3901 mancante» (il giro
+   38FB-3901 sulla tabella 82D3, `jr l38fbh`, quando c243 supera la voce
+   confrontata; `attivita_attract07a.c`, ramo `q > leggi(0x82d3)`).
+   Seme 10: frame 27938, FRAME rese 27872, HASH 16ea230eea591d30, AUDIO 46b2da66631444cb.
+   Seme 4: frame 25954, FRAME rese 25888, stesso HASH, AUDIO e7d412a36e88f8cc.
+   Seme 67: frame 25218, FRAME rese 25152, stesso HASH, AUDIO f447b05e997e0553.
+   I numeri coincidono con quelli del lotto 56: la fermata si è solo spostata
+   più avanti nella stessa chiamata della fase 0 (nessuna scrittura RAM nuova resa).
+7. Determinismo seme 10: diff vuoto.
+8. Finestra dummy: senza opzione, `--scanlines`, `--scanlines --pieno -s 2`:
+   tutte e tre 4000 / 3f25ba053eeb56b9 / 2988510 / c097308a8678392e, nessun avviso.
+9. `--scanlines --stampa-dsw` → `DSW1 02 DSW2 00`, uscita 0; aiuto `1`; README `2`.
+10. Programma di prova nello scratchpad (include `video_sdl.c`, renderer software,
+    `SDL_RenderReadPixels`), pixel (200,100,50): scala 2 righe 20/21 = 200,100,50 /
+    137,68,34; scala 3 righe 30,31 intatte, 32 = 137,68,34 (overlay 448 su 672 righe:
+    una sotto-riga su tre scura); `--pieno` uguale a scala 3; senza opzione tutte
+    intatte; 0 canali fuori tolleranza ±2. Scala 1: tutte le righe scurite
+    (limite accettato nella risoluzione 1).
+11. Nessun file sopra 800 righe (video_sdl.c 209, attivita_attract07a.c 256).
+12. Ambito: solo i file previsti; `pgrep -c mame` → `0`.
+
+Deviazioni: STATO.md è nella radice del repository, non in `decomp/STATO.md`
+come scritto nel brief: aggiornato quello. A scala 3 l'effetto scurisce una
+sotto-riga su tre, non «la metà inferiore» (geometria 448 righe, atteso).

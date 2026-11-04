@@ -256,6 +256,7 @@ int main(int argc, char **argv)
     }
     if (!opz.headless) {
         vsdl_pieno(gx.pieno);
+        vsdl_scanlines(gx.scanlines);
         if (vsdl_apri("Solomon's Key - gioca", opz.scala) != 0) return 2;
         finestra = 1;
         if (!gx.senza_joy) joy_apri();

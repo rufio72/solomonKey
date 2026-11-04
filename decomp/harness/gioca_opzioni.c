@@ -5,7 +5,7 @@
 #include "gioca_opzioni.h"
 #include "gioca_joy.h"
 
-gioca_extra gx = { 0, 100, 0, 0, 0, 0 };
+gioca_extra gx = { 0, 100, 0, 0, 0, 0, 0 };
 
 static int intero(const char *s, long *v)
 {
@@ -24,6 +24,7 @@ int gioca_opzione_extra(int argc, char **argv, int *i)
         exit(0);
     }
     if (!strcmp(a, "--pieno")) { gx.pieno = 1; return 1; }
+    if (!strcmp(a, "--scanlines")) { gx.scanlines = 1; return 1; }
     if (!strcmp(a, "--joystick")) { gx.joystick = 1; return 1; }
     if (!strcmp(a, "--senza-joystick")) { gx.senza_joy = 1; return 1; }
     if (!strcmp(a, "--volume") || !strcmp(a, "--joy-mappa") || !strcmp(a, "-t")) {

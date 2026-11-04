@@ -17,6 +17,11 @@ int vsdl_leggi_opzioni(int argc, char **argv, vsdl_opz *o);
 /* Da chiamare prima di vsdl_apri: schermo intero «desktop» con scala intera
  * (proporzioni mantenute, bordi neri), cursore nascosto. Predefinito: spento. */
 void vsdl_pieno(int on);
+/* Da chiamare prima di vsdl_apri: righe scure alla CRT (lotto 57). Una
+ * texture 1x(2*VID_ALTO) semitrasparente sopra il frame scurisce la metà
+ * inferiore di ogni riga sorgente (alpha 80, circa 31%). Solo presentazione:
+ * il framebuffer e vsdl_hash non cambiano. Predefinito: spento. */
+void vsdl_scanlines(int on);
 int vsdl_apri(const char *titolo, int scala);   /* 0 ok, -1 errore */
 /* Mostra il frame (SDL_UpdateTexture + RenderCopy + RenderPresent), smaltisce
  * gli eventi. 0 = continua; 1 = l'utente vuole uscire (ESC o chiusura finestra);

@@ -249,6 +249,10 @@ ogni ciclo nei brief in `compiti/`.
    oltre la prima voce (`jr l38fbh`), NON tradotto (perimetro chiuso, da
    decidere dopo il test dell'utente). FRAME rese 27872/25888/25152, HASH
    ultimo 16ea230eea591d30, AUDIO hash invariati rispetto al lotto 56.
+   [x] Lotto 57B (brief 57, 2026-11-04): opzione `--scanlines` di `gioca`
+   (predefinita spenta): texture 1x448 semitrasparente sopra il frame, la
+   metà inferiore di ogni riga sorgente scurita al 69% circa (alpha 80).
+   Solo presentazione: framebuffer, hash video, replay e oracolo invariati.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

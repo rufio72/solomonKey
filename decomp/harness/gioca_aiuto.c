@@ -11,6 +11,7 @@ void gioca_aiuto(void)
 "Schermo\n"
 "  -s, --scala N        scala della finestra, da 1 a 8 (predefinita 3)\n"
 "  --pieno              schermo intero, proporzioni mantenute\n"
+"  --scanlines          righe scure alla CRT (solo presentazione, hash invariati)\n"
 "  -n, --headless N     senza finestra: N frame e poi esce (prove)\n"
 "  -m, --max N          con finestra: esce dopo N frame\n"
 "\n"

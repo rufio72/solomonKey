@@ -181,11 +181,16 @@ make -C decomp/harness gioco      # extracts the zip, builds main64.bin and gioc
 decomp/harness/gioca              # play (works from any directory)
 decomp/harness/gioca -s 4         # window at 4x scale
 decomp/harness/gioca --pieno      # fullscreen, integer scaling, 8:7 kept
+decomp/harness/gioca --scanlines  # CRT-style dark horizontal lines (display only, default off)
 decomp/harness/gioca --vite 5     # DIP switch: 5 lives
 decomp/harness/gioca --volume 50  # half volume
 decomp/harness/gioca --muto       # no sound
 decomp/harness/gioca --aiuto      # every option (in Italian)
 ```
+
+`--scanlines` works with `-s N` and `--pieno` and looks best at scale 2 or
+more; it is display only and never changes the video hash, replays or the
+oracle mode.
 
 **Keys** (from `gioca --mappa`): arrows or WASD move; Z, Space or Left Ctrl
 is BUTTON1; X or Left Alt is BUTTON2 (which of the two is jump and which is
