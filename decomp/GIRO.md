@@ -346,3 +346,45 @@ da `gancio_porta` a ogni scrittura a `e800` (nella NMI del frame).
   all'FNV-1a dei byte di `audio_wav` sul flusso scritto da `gioca`
   (`partita_audio_confronta.py --hash-wav`). Modo libero 2000 frame:
   `c8145bb8b3dac910`.
+
+## H7: pacchetto (brief 51)
+
+Nessun cambio di comportamento nel banco, nel replay, nel giro o nell'audio:
+uscite identiche byte per byte a quelle del commit a293344 (prima del lotto) per
+`harness --tutte` (307 / 1278 / 0), `sched_proto`, `replay`, `gioca --oracolo`
+(hash a239d0a940bec0b9, audio c4b40fea06623a96) e `audio_wav.sh oracoli`
+(uguali 40 diversi 5).
+
+- `make -C decomp/harness gioco` (o `make -C decomp gioco`): senza `sdl2-config`
+  si ferma con `ERRORE: SDL2 non trovato ...` (uscita 2); se mancano le ROM estrae
+  `roms/solomon.zip` in `roms/ext/solomon/` (senza zip: `ERRORE: mancano le
+  ROM ...`), costruisce `out/main64.bin` con `build_rom.sh` se manca, compila
+  `gioca` e dice come lanciarlo. Provato su una copia fresca con il solo zip:
+  `main64.bin` rifatto identico (cmp).
+- A runtime servono solo 4 ROM: `6.3f`, `7.3h`, `8.3jk` (dentro `out/main64.bin`)
+  e `1.3jk` (strace: gli unici file ROM aperti sono `main64.bin` e `1.3jk`).
+  Grafica e dati audio sono C generato.
+- Percorsi: `carica_rom()` (`comune.c`, funzione `percorso_exe`) e
+  `aud_carica_rom()` provano in coda la cartella dell'eseguibile
+  (`/proc/self/exe`): `<exe>/../out/main64.bin` e
+  `<exe>/../../roms/ext/solomon/1.3jk`. `gioca` parte da qualunque cartella;
+  `gioca -n 600` dà da ovunque `HASH ultimo ecd5acf694285489`, `AUDIO hash
+  8aedf41c0424df54`.
+- Joystick (`gioca_joy.c`): API joystick grezza di SDL, tutti i dispositivi
+  aperti (al più 8), hotplug con `SDL_AddEventWatch`, eventi anche senza fuoco;
+  direzioni da assi 0/1 (soglia ±8000) e hat 0, pulsanti con la mappa
+  `--joy-mappa B1,B2,START,COIN` (predefinita 0,1,7,6, da ritoccare dopo la prova
+  sul DAIJA); si somma alla tastiera. `--senza-joystick` non apre il sottosistema.
+- Diagnostica `gioca --joystick [-t SEC]` (`gioca_diag.c`): righe `JOYSTICK`,
+  `ASSE`, `PULSANTE`, `CAPPELLO`, `COLLEGATO`, `SCOLLEGATO` con l'azione di gioco
+  tra parentesi. Provata con un joystick virtuale uinput
+  (`decomp/prova_joystick_uinput.py`, solo joystick, nome «solomon-test»):
+  collegamento, asse, hat, pulsante e scollegamento visti tutti.
+- Opzioni: `--volume N` (solo il dispositivo, gli hash non cambiano), `--pieno`
+  (schermo intero desktop, scala intera, 8:7 mantenuto), `--aiuto`/`-h`
+  (`gioca_aiuto.c`); il parsing delle opzioni nuove è in `gioca_opzioni.c`.
+- `rst20_646B`: 10 voci (era 3), anche nel generatore `rst20.py` (`VOCI_NOTE`);
+  rigenerato senza `out/trace.txt`, i dati coincidono, cambiano solo i commenti
+  «eseguito/indice osservato» delle tabelle viste in traccia.
+- Resta all'utente la prova manuale con il DAIJA collegato (`gioca --joystick`
+  e una partita vera): quale pulsante salta e quale lancia la magia.

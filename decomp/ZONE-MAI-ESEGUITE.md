@@ -132,6 +132,8 @@ Verificate con la definizione `void sub_XXXX(` nei sorgenti C di `decomp/harness
    674A 64BC 675B 64C0 6842 6785 64CC 6A43 69A7 6ADE (649C-64AF); il sito 64A8
    (destinazione 4364) è fatto dal byte alto di 64CC e dal byte basso di
    6A43. Non è stato toccato `rst20_tables.h` (fuori perimetro).
+   **Corretto nel brief 51 (2026-11-04)**: `rst20_646B` ha ora le 10 voci,
+   anche nel generatore `rst20.py` (eccezione `VOCI_NOTE`); banco identico.
 4. **Cosa resta da svegliare.** Delle 6 `RAGGIUNGIBILE` sono svegliate con
    ricetta propria 2533, 6379, 7E03, 7E14; 4364 è già esercitata dalla
    forzata `forza08` di sub_4319; resta non svegliata solo 560A (0 tentativi

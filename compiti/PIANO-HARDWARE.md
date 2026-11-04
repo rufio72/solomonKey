@@ -75,13 +75,21 @@ Materiale già pronto:
   Verifica: il flusso dei cambi di registro durante una sequenza nota
   coincide con l'oracolo `_ay.txt` corrispondente. *Analista Sonnet.*
 
-- [ ] **H7 — Pulizia e pacchetto.** Bersaglio `make gioco`, temporizzazione
+- [x] **H7 — Pulizia e pacchetto.** *Fatto (brief 51, 2026-11-04):
+  `make -C decomp/harness gioco`, `gioca` da qualunque cartella, joystick con
+  diagnostica `--joystick` e hotplug, `--joy-mappa`, `--volume`, `--pieno`,
+  `--aiuto`, sezione «How to play» del README; banco, replay, giro e audio
+  identici a prima; vedi GIRO.md. Resta la prova manuale sullo stick DAIJA.*
+  Bersaglio `make gioco`, temporizzazione
   stabile, opzioni (scala, fullscreen, volume), replay come regressione nel
   Makefile, README aggiornato con le istruzioni (le ROM restano fuori dal
-  repo: il gioco le carica da `roms/`). *Analista Sonnet.*
+  repo; a runtime ne servono solo 4 file: `6.3f`, `7.3h`, `8.3jk`, uniti in
+  `out/main64.bin` da `make gioco`, e `1.3jk`; grafica e dati audio sono C
+  generato). *Analista Sonnet.*
 
 Manutenzione da infilare dove capita: correggere `rst20_tables.h`
-(la tabella a 646B ha 10 parole vere, non 3 — vedi brief 40).
+(la tabella a 646B ha 10 parole vere, non 3 — vedi brief 40). *Fatto nel
+brief 51, anche nel generatore `rst20.py`.*
 
 Dopo H7 restano, fuori da questo piano: la classificazione delle 885
 divergenze a metà attività del replay e ogni rifinitura che emerge

@@ -1,6 +1,6 @@
 # Stato del progetto
 
-Aggiornato al 2026-11-03. Fotografia operativa per riprendere il
+Aggiornato al 2026-11-04. Fotografia operativa per riprendere il
 lavoro; la descrizione del metodo è nel [README](README.md), la storia di
 ogni ciclo nei brief in `compiti/`.
 
@@ -138,8 +138,8 @@ ogni ciclo nei brief in `compiti/`.
    (2533, 6379, 4364, e 7E03/7E14 che richiedono i dip switch Bonus
    Life via `solomon.cfg`), 1 non svegliata (560A, serve un nemico di
    tipo 12 con via libera). Scoperta collaterale: la tabella `rst 20h`
-   a 646B ha 10 parole vere contro le 3 di `rst20_tables.h` (non
-   corretto, tutte già eseguite). Attenzione: `att_27` è artificiale
+   a 646B ha 10 parole vere contro le 3 di `rst20_tables.h` (tutte già
+   eseguite; corretta nel brief 51, anche in `rst20.py`, banco identico). Attenzione: `att_27` è artificiale
    (esecuzione in RAM).
    **Novità 2026-10-27**: una partita dal vivo sorvegliata con punti di
    interruzione (`decomp/copertura_viva.lua`, MAME con finestra) ha
@@ -194,6 +194,13 @@ ogni ciclo nei brief in `compiti/`.
    (165 su 165); cambi AY: 604 frame con insieme diverso, 312 con stato
    diverso (fissati come atteso in `sh partita_audio.sh confronta`); hash audio
    c4b40fea06623a96. Residuo da modellare in un eventuale H6b. Vedi `decomp/GIRO.md`.
+   H7 (brief 51, 2026-11-04): pacchetto. `make -C decomp/harness gioco`
+   (estrae lo zip, costruisce `main64.bin`, compila), `gioca` da qualunque
+   cartella (percorsi da `/proc/self/exe`), a runtime solo 4 ROM; joystick SDL
+   grezzo con diagnostica `--joystick`, hotplug e `--joy-mappa` (predefinita
+   0,1,7,6), `--volume`, `--pieno`, `--aiuto`; `rst20_646B` a 10 voci. Banco,
+   replay, giro e audio identici byte per byte a prima. Piano hardware chiuso;
+   resta la prova manuale sul DAIJA. Vedi `decomp/GIRO.md`.
 4. **Z80 audio** (ROM `1.3jk`, 16 KB): decisione del 2026-10-22, **va
    tradotto per intero** (audio originale, niente emulazione né campioni).
    Lotto 1 (infrastruttura, brief 18) e lotto 2 (ossatura, brief 19)

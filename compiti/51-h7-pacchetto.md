@@ -426,3 +426,47 @@ codice è già nell'albero e va verificato, completato nei documenti e
 committato — non riscritto da capo. Poi le prove manuali dell'utente:
 `gioca --joystick` col DAIJA collegato (SDL lo vede: 4 assi, 13 pulsanti,
 1 hat) e la partita vera.
+
+## Esito (sviluppatore Opus, 2026-11-04, ripresa)
+
+Codice della sospensione verificato senza correzioni; aggiunti solo lo script
+`decomp/prova_joystick_uinput.py` (verifica 12) e i documenti. Riferimento
+«prima del lotto»: copia di a293344 compilata nella cartella scratch, con
+`decomp/out` in comune.
+
+1. `make -C decomp/harness gioco`, `make -C decomp/harness`, `make -C decomp gioco`:
+   uscita 0, zero avvisi.
+2. Banco: 1278 `^OK`, 307 `RIEPILOGO`, 0 `FALLITO`/`DIVERSO`; uscita identica
+   byte per byte a quella di a293344.
+3. `giro_completo.sh`: riga attesa, uscita 0. `sched_proto`, `replay` e
+   `gioca --oracolo`: uscite identiche ad a293344 (a239d0a940bec0b9, 5499,
+   4042500, c4b40fea06623a96). `partita_audio.sh confronta`: 604/312/1190.
+   In più `audio_wav.sh oracoli`: identico ad a293344 (uguali 40 diversi 5).
+4. `gioca -n 600` da `/tmp` e da `decomp/`: ecd5acf694285489, 489510,
+   8aedf41c0424df54.
+5. Con le sole 4 ROM: `main64.bin` rifatto, `cmp` silenzioso; strace: aperti
+   solo `.../out/main64.bin` e `.../roms/ext/solomon/1.3jk` (trovati con il
+   percorso dell'eseguibile), stesso hash audio.
+6. Copia fresca con il solo `roms/solomon.zip`: `make -C decomp gioco` estrae,
+   costruisce `main64.bin` identico (cmp) e `gioca`; `SDL2_CONFIG=/nonesiste`
+   → messaggio atteso, uscita 2; senza zip né ROM → `ERRORE: mancano le ROM`, uscita 2.
+7. `--aiuto`: uscita 0, grep 5; tutte le opzioni del punto 3 presenti.
+8. `--volume 50`: stesso hash audio; 101, abc, -1 → errore italiano, uscita 2.
+9. `--joy-mappa 2,3,9,8 --stampa-dsw` → `DSW1 02 DSW2 00`; `1,2,3` e `a,b,c,d`
+   → uscita 2. `-t` senza `--joystick` → uscita 2.
+10. NON MISURABILE oggi: lo stick DAIJA non è collegato (nessun `/dev/input/js*`,
+    niente in lsusb); la diagnostica dà `nessun joystick rilevato`, uscita 0.
+    La riga `JOYSTICK` è stata vista con il joystick virtuale (12):
+    `JOYSTICK 0 "solomon-test" assi=2 pulsanti=8 cappelli=1 guid=030073da341200007856000001000000`.
+11. `nessun joystick rilevato`, uscita 0; il filtro
+    `SDL_GAMECONTROLLER_IGNORE_DEVICES` nasconde davvero il joystick virtuale.
+12. ESEGUITA (dispositivo «solomon-test», solo joystick): `COLLEGATO 0
+    "solomon-test"`, `ASSE 0 0 32767 (destra)`, `CAPPELLO 0 0 destra (destra)`,
+    `PULSANTE 0 0 giu (BUTTON1)`/`su`, `SCOLLEGATO 0`; uscita 0.
+13. Nessun `.c` sopra 800 righe; `gioca.c` 280, `macchina.c` 645.
+14. MANUALE, resta all'utente (stick collegato).
+
+`rst20.py` rigenerato in scratch (senza `out/trace.txt`, che manca): dati delle
+tabelle identici a `rst20_tables.h`, 646B a 10 voci; cambiano solo i commenti
+«eseguito/indice osservato» delle tabelle viste in traccia, quindi il file in
+albero (fatto con la traccia) non è stato sovrascritto.

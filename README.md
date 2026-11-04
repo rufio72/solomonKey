@@ -140,7 +140,13 @@ YM2149 emulator and compared against the original's — has been passed.
   (`--muto` to disable). The latch sequence is identical to MAME's; the
   register-change stream still differs in 312 of 5486 frames (timing of the
   sound routine inside a frame), to be judged by ear.
-- **Next up:** H7 (packaging) — then classifying the remaining
+- **Packaged — H7 closes the hardware plan.** `make -C decomp/harness gioco`
+  prepares everything (ROM extraction, `out/main64.bin`, build), `gioca` runs
+  from any directory, and it gained joystick support with a live diagnostic
+  (`--joystick`, hotplug, button remapping), `--volume`, `--pieno`
+  (fullscreen) and `--aiuto`. See [How to play](#how-to-play).
+- **Next up:** the manual joystick test on a real arcade stick, then
+  classifying the remaining
   mid-activity NMI divergences, and finally the readability rewrite,
   module by module, with the harness and the full run as the safety
   net.
@@ -159,6 +165,59 @@ YM2149 emulator and compared against the original's — has been passed.
   checks with expected outputs, decisions taken and outcome. The project's
   working documents are in Italian; the code and this README are the
   interface for everyone else.
+
+## How to play
+
+**Requirements:** `libsdl2-dev` (SDL2 ≥ 2.0, tested with 2.30.0), gcc, make
+and `unzip`. Put `solomon.zip` in `roms/` (never commit it). At runtime the
+game uses only four ROM files: `6.3f`, `7.3h`, `8.3jk` (main CPU, assembled
+into `decomp/out/main64.bin`) and `1.3jk` (sound CPU). The other eight ROMs
+(graphics, and `solomonj.zip`) are no longer needed: graphics and sound data
+ship as generated C in this repository. MAME is needed only to rebuild the
+oracles, not to play.
+
+```
+make -C decomp/harness gioco      # extracts the zip, builds main64.bin and gioca
+decomp/harness/gioca              # play (works from any directory)
+decomp/harness/gioca -s 4         # window at 4x scale
+decomp/harness/gioca --pieno      # fullscreen, integer scaling, 8:7 kept
+decomp/harness/gioca --vite 5     # DIP switch: 5 lives
+decomp/harness/gioca --volume 50  # half volume
+decomp/harness/gioca --muto       # no sound
+decomp/harness/gioca --aiuto      # every option (in Italian)
+```
+
+**Keys** (from `gioca --mappa`): arrows or WASD move; Z, Space or Left Ctrl
+is BUTTON1; X or Left Alt is BUTTON2 (which of the two is jump and which is
+magic will be noted after the manual test); 5 or C inserts a coin; 1 or
+Enter is START1 (2 = START2). Player 2: IJKL, N (BUTTON1), M (BUTTON2).
+In game: P pauses, F2 resets, ESC quits.
+
+**Joystick:** any SDL joystick works and adds to the keyboard (it does not
+replace it); sticks plugged in while the game runs are picked up (hotplug).
+Directions come from axes 0/1 and from hat 0 — arcade encoders often report
+the lever as a hat. To find your button numbers run the diagnostic, which
+lists the devices and prints every event with the game action it maps to:
+
+```
+$ decomp/harness/gioca --joystick
+JOYSTICK 0 "Bigben Interactive DAIJA Arcade Stick" assi=4 pulsanti=13 cappelli=1 guid=...
+CAPPELLO 0 0 destra (destra)
+PULSANTE 0 0 giu (BUTTON1)
+PULSANTE 0 0 su (BUTTON1)
+```
+
+(ESC in its small window or Ctrl-C to quit.) Then remap with
+`--joy-mappa B1,B2,START,COIN`, e.g. `--joy-mappa 2,3,9,8` (button indices,
+`-1` = none; default `0,1,7,6`). `--senza-joystick` disables joysticks.
+
+**DIP switches and recordings:** `--vite`, `--cabinet`, `--demo`, `--bonus`,
+`--difficolta`, `--timer`, `--extra` (or raw `--dsw1`/`--dsw2`;
+`--stampa-dsw` prints the result). `--registra FILE` records your inputs,
+`--riproduci FILE` replays them — any match can become a future oracle.
+
+**Known limit:** in free mode the game stops with a `FERMO ...` line (exit
+code 3) if it reaches Z80 code that is not translated yet.
 
 ## Requirements
 
