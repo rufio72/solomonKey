@@ -53,7 +53,10 @@ void fase_2dee(void)
 
 /* Fase 5, 2D07: con c243 = 1D chiamerebbe 3812 (mai eseguito); altrimenti,
  * con il bit 4 di c045 spento, ritorna senza scrivere. Con il bit acceso
- * legge R (2D1F): sentinella. */
+ * (stanze bonus, 3903) rimescola otto celle della griglia a c0bd (2D1F-2D48,
+ * lotto 59): B = (R1 + R2) & 1F, per c da 7 a 0 la cella c0bd + ROM[2D52+B]
+ * prende ROM[2D4A+c], + 40 se il suo bit 7 era acceso; poi B = (B+1) & 1F.
+ * Ramo mai eseguito nel giro: senza punti di sincronia. */
 static void fase_2d07(void)
 {
     NEMICI_PUNTO(0x2d07, 0x2d1e);
@@ -61,9 +64,16 @@ static void fase_2d07(void)
         nemici_manca(0x2d0f);
         return;
     }
-    if (M(0xc045) & 0x10) {                    /* 2D19-2D1E */
-        nemici_r_somma();
-        nemici_manca(0x2d1f);
+    if (!(M(0xc045) & 0x10))                   /* 2D19-2D1E */
+        return;
+    uint8_t b = (uint8_t)(nemici_r_somma() & 0x1f);    /* 2D1F-2D27 */
+    for (int c = 7; c >= 0; c--) {             /* 2D28-2D2D dec c; ret m */
+        uint8_t a = leggi((uint16_t)(0x2d4a + c));     /* 2D2E-2D33 */
+        uint16_t cella = (uint16_t)(0xc0bd + leggi((uint16_t)(0x2d52 + b)));
+        if (M(cella) & 0x80)                   /* 2D3E rl (hl); 2D40 jr nc */
+            a = (uint8_t)(a + 0x40);           /* 2D42 */
+        M(cella) = a;                          /* 2D44 */
+        b = (uint8_t)((b + 1) & 0x1f);         /* 2D45 inc b; 2D46 res 5,b */
     }
 }
 

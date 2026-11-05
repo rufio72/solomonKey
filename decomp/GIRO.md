@@ -132,8 +132,9 @@ spedidore; 9 a metà attività, tutte nel primo corpo 06 (frame 603-611).
 - Istruzioni tradotte: ingresso e fasi 0-12 come da brief (501 stimate). I rami
   mai eseguiti nei frame 0-2410 chiamano `nemici_manca(indirizzo)` (386A, 3874,
   38BA, 38CA, 38D9, 3901, 3903, 3960, 398B, 3986, 39B9, 351E, 353B, 352E,
-  365F, 366C, 2D0F, 2E04; 351E, 353B e 352E tradotti nel lotto 54); il bit 4 di c045 in 2D07 passa da
-  `nemici_r_somma()` (sentinella) e poi `nemici_manca(0x2d1f)`.
+  365F, 366C, 2D0F, 2E04; 351E, 353B e 352E tradotti nel lotto 54; 386A nel
+  57; 3901, 3903 e 3960 nel lotto 59); il bit 4 di c045 in 2D07 legge R con
+  `nemici_r_somma()` e dal lotto 59 rimescola la griglia c0bd (2D1F-2D48).
 - Punti `NEMICI_PUNTO`: uno per scrittura in RAM o chiamata, secondo la regola
   di `nemici.h`; nei cicli (fase 0 d840 e c251, fase 2, fase 3, fase 4
   3642-3668, `ldir` di 34FA, fase 7 dc80/d780) dentro il ciclo; le attese
@@ -606,3 +607,26 @@ Hash nuovi del gioco libero (cambiano per costruzione):
 
 Le registrazioni del gioco libero vanno rifatte con il binario nuovo. Le
 stanze oltre la 3 (FERMO 3901 forzando c243) si controllano a vista giocando.
+
+### Lotto 59 (brief 59): famiglia 3901/3903, 3960, 2D1F
+
+La fase 0 del corpo 07 scorre ora tutta la tabella 82D3 (03 0C 15 1F 28 32
+FF): con c243 uguale a una voce esegue il blocco 3903-392F (bit 4 di c045,
+«BONUS» o «FINAL» a d5ca, «PRISON!» a d5d0, c09a = 1E salvo c243 = 32);
+con il quadro >= 10 scrive la cifra delle decine a d610 (3960). La fase 5
+(2D07) col bit 4 acceso rimescola otto celle della griglia c0bd con le
+tabelle ROM 2D4A/2D52 e R (2D1F-2D48). Rami senza punti di sincronia, mai
+eseguiti nei frame 0-5499: giro, oracolo e replay identici. Catture
+`snap_0x2CCD_att07_f0q*` (c243 forzata al 2300) e `f5r1`/`f5r2` (due R
+diversi, la seconda con c045 posto al 2250), tutte OK nel banco
+(`banco_r_2ccd`).
+
+Misure (parte A):
+- `ricette/riferimento_nuova.reg` `-n 16000`: nessun FERMO (prima 3903 al
+  13926), `HASH ultimo a040200b69679371`, `AUDIO hash caa004b13ad0a661`;
+- libero senza ingressi `-n 6000`: «routine 39B9 mancante» al frame 3385
+  (prima 3901 allo stesso frame), hash invariati 383d885eb6e0cd95 /
+  ed1cb697b9c3c557;
+- semi 4 e 67 `-n 40000`: «routine 39B9 mancante» ai frame 25937 e 25198
+  (prima 3901), hash invariati. 39B9 è la coda della fase 0 con c243 = 33
+  (dopo la finale): censita, non tradotta.

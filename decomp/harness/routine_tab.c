@@ -100,7 +100,7 @@ const struct voce_routine tabella_routine[] = {
     { "0x2BF3", sub_2bf3, 0, 0, 0 },
     { "0x2C1A", sub_2c1a, 0, 0, 0 },
     { "0x2C72", banco_corpo_2c72, 0, 0, 1 },
-    { "0x2CCD", banco_corpo_2ccd, 0, 0, 1 },
+    { "0x2CCD", banco_r_2ccd, 0, 0, 1 },
     { "0x2D8A", sub_2d8a, 0, 0, 0 },
     { "0x2E11", sub_2e11, 0, 0, 0 },
     { "0x2E90", sub_2e90, 0, 0, 0 },

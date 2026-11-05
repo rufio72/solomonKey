@@ -23,6 +23,7 @@
 #include <string.h>
 #include "routine.h"
 #include "nemici.h"
+#include "attivita_libera.h"
 
 static uint8_t r_valori[2];
 static unsigned r_usati;
@@ -88,14 +89,18 @@ static int carica_reg(const char *prefisso, const char *quale, struct z80 *z)
 }
 
 /* Come confronta il banco: RAM c000-e5ff salvo la pila libera, e A BC DE
- * HL IX IY. */
+ * HL IX IY. Con solo_ram (corpi di attività) i registri non contano e la
+ * pila libera comprende [SP] (slot tolto dal pop hl), come in harness.c. */
 static int coincide(const struct z80 *z, const struct z80 *atteso,
-                    const uint8_t *dopo, uint16_t sp)
+                    const uint8_t *dopo, uint16_t sp, int solo_ram)
 {
-    if (z->a != atteso->a || BC(z) != BC(atteso) || DE(z) != DE(atteso) ||
-        HL(z) != HL(atteso) || z->ix != atteso->ix || z->iy != atteso->iy)
+    if (!solo_ram &&
+        (z->a != atteso->a || BC(z) != BC(atteso) || DE(z) != DE(atteso) ||
+         HL(z) != HL(atteso) || z->ix != atteso->ix || z->iy != atteso->iy))
         return 0;
     unsigned pila_ini = (unsigned)sp - 0x40, pila_fine = sp;
+    if (solo_ram)
+        pila_fine += 2;
     for (unsigned i = 0; i < 0x2600; i++) {
         if (0xc000 + i >= pila_ini && 0xc000 + i < pila_fine) continue;
         if (ram[i] != dopo[i]) return 0;
@@ -134,7 +139,8 @@ static int trova_cattura(const char *entry, const struct stato_cattura *in,
     return 0;
 }
 
-static void prova_con_r(struct z80 *z, const char *entry, void (*fn)(struct z80 *))
+static void prova_con_r(struct z80 *z, const char *entry, void (*fn)(struct z80 *),
+                        int solo_ram)
 {
     static struct stato_cattura in, atteso;
     static uint8_t dopo[0x4000];
@@ -154,7 +160,7 @@ static void prova_con_r(struct z80 *z, const char *entry, void (*fn)(struct z80 
                 r_valori[1] = (uint8_t)v2;
                 r_usati = 0;
                 fn(z);
-                if (coincide(z, &atteso.z, dopo, in.z.sp))
+                if (coincide(z, &atteso.z, dopo, in.z.sp, solo_ram))
                     return;
                 if (r_usati < 2)               /* il secondo valore non conta */
                     break;
@@ -170,14 +176,16 @@ static void prova_con_r(struct z80 *z, const char *entry, void (*fn)(struct z80 
     fn(z);
 }
 
-void banco_r_54c5(struct z80 *z) { prova_con_r(z, "0x54C5", sub_54c5); }
-void banco_r_51d7(struct z80 *z) { prova_con_r(z, "0x51D7", sub_51d7); }
-void banco_r_5995(struct z80 *z) { prova_con_r(z, "0x5995", sub_5995); }
-void banco_r_57cd(struct z80 *z) { prova_con_r(z, "0x57CD", sub_57cd); }
-void banco_r_51fa(struct z80 *z) { prova_con_r(z, "0x51FA", sub_51fa); }
-void banco_r_5ddf(struct z80 *z) { prova_con_r(z, "0x5DDF", sub_5ddf); }
-void banco_r_5e1a(struct z80 *z) { prova_con_r(z, "0x5E1A", sub_5e1a); }
-void banco_r_4fd4(struct z80 *z) { prova_con_r(z, "0x4FD4", sub_4fd4); }
-void banco_r_50df(struct z80 *z) { prova_con_r(z, "0x50DF", sub_50df); }
-void banco_r_5cfb(struct z80 *z) { prova_con_r(z, "0x5CFB", sub_5cfb); }
-void banco_r_4302(struct z80 *z) { prova_con_r(z, "0x4302", sub_4302); }
+void banco_r_54c5(struct z80 *z) { prova_con_r(z, "0x54C5", sub_54c5, 0); }
+void banco_r_51d7(struct z80 *z) { prova_con_r(z, "0x51D7", sub_51d7, 0); }
+void banco_r_5995(struct z80 *z) { prova_con_r(z, "0x5995", sub_5995, 0); }
+void banco_r_57cd(struct z80 *z) { prova_con_r(z, "0x57CD", sub_57cd, 0); }
+void banco_r_51fa(struct z80 *z) { prova_con_r(z, "0x51FA", sub_51fa, 0); }
+void banco_r_5ddf(struct z80 *z) { prova_con_r(z, "0x5DDF", sub_5ddf, 0); }
+void banco_r_5e1a(struct z80 *z) { prova_con_r(z, "0x5E1A", sub_5e1a, 0); }
+void banco_r_4fd4(struct z80 *z) { prova_con_r(z, "0x4FD4", sub_4fd4, 0); }
+void banco_r_50df(struct z80 *z) { prova_con_r(z, "0x50DF", sub_50df, 0); }
+void banco_r_5cfb(struct z80 *z) { prova_con_r(z, "0x5CFB", sub_5cfb, 0); }
+void banco_r_4302(struct z80 *z) { prova_con_r(z, "0x4302", sub_4302, 0); }
+/* Lotto 59: corpo 07 (2CCD), la fase 5 legge R a 2D1F. */
+void banco_r_2ccd(struct z80 *z) { prova_con_r(z, "0x2CCD", banco_corpo_2ccd, 1); }

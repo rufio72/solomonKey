@@ -20,7 +20,11 @@
  * i bit 4-5 di c045, due tile 60 a d840, poi dalla tabella ROM 85EC il
  * quadro b e il resto c di c243: cifre a d611, d613 (e c245 = cifra + 1),
  * dfbf, c244 = b e, se b è cambiato, c251-c257 = FF; con i bit 1-2 di c045 spenti scrive una terza stringa
- * a dfb8 (6771 con HL = 39FA). */
+ * a dfb8 (6771 con HL = 39FA). Con c243 nella tabella 82D3 (stanze
+ * bonus/finale, lotto 59) accende il bit 4 di c045 (non per 32), scrive
+ * «BONUS» o «FINAL» a d5ca e «PRISON!» a d5d0 e, salvo 32, c09a = 1E; con
+ * il quadro >= 10 scrive la cifra delle decine a d610 (3960). Questi rami
+ * non sono mai eseguiti nel giro e non hanno punti di sincronia. */
 void fase_07_3861(void)
 {
     struct z80 z = {0};
@@ -83,15 +87,35 @@ void fase_07_3861(void)
     M(0xd840) = 0x60;                          /* 38EF */
     NEMICI_PUNTO(0x38f0, 0x38f2);
     M(0xd841) = 0x60;                          /* 38F2 */
-    uint8_t q = M(0xc243);                     /* 38F4-38FB */
-    if (q == leggi(0x82d3)) {                  /* 38FD */
-        nemici_manca(0x3903);
-        return;
-    }
-    if (q > leggi(0x82d3)) {                   /* 38FF */
-        nemici_manca(0x3901);
-        return;
-    }
+    uint8_t q = M(0xc243);                     /* 38F4-38F7 */
+    uint16_t t = 0x82d3;                       /* 38F8: 03 0C 15 1F 28 32 FF */
+    int uguale = 0;
+    for (;;) {                                 /* 38FB-3901 */
+        uint8_t v = leggi(t++);                /* 38FB cp (hl); 38FC inc hl */
+        if (q == v) {                          /* 38FD jr z,3903 */
+            uguale = 1;
+            break;
+        }
+        if (q < v)                             /* 38FF jr c,3931 */
+            break;
+    }                                          /* 3901 jr 38FB (FF chiude) */
+    if (uguale) {                              /* 3903-392F: bonus/finale */
+        uint8_t bb = 0x10;                     /* 3904 */
+        uint16_t s = 0x39e3;                   /* 3906 «BONUS» */
+        if (q == 0x32) {                       /* 3909-390B */
+            bb = 0x00;                         /* 390D */
+            s = 0x39ea;                        /* 390F «FINAL» */
+        }
+        M(0xc045) = (uint8_t)(M(0xc045) | bb); /* 3912-3914: E = c045 di 38EC */
+        SET_HL(&z, s);
+        SET_DE(&z, 0xd5ca);
+        sub_6771(&z);                          /* 391A */
+        SET_HL(&z, 0x39f1);                    /* 391D «PRISON!» */
+        SET_DE(&z, 0xd5d0);
+        sub_6771(&z);                          /* 3923 */
+        if (bb)                                /* 3926-3928 */
+            M(0xc09a) = 0x1e;                  /* 392C */
+    }                                          /* 392F pop bc; 3930 ld a,c */
     uint16_t hl = 0x85ec;                      /* 3931-393B */
     uint8_t quadro = 0;
     while (q >= leggi(hl) && quadro < 0x20) {
@@ -110,10 +134,8 @@ void fase_07_3861(void)
     sub_6771(&z);                              /* 3950 */
     z.a = quadro;
     sub_3a1c(&z);                              /* 3955 */
-    if (z.d != 0x30) {                         /* 395C-395E */
-        nemici_manca(0x3960);
-        return;
-    }
+    if (z.d != 0x30)                           /* 395C-395E */
+        M(0xd610) = z.d;                       /* 3960 ld (hl),d (HL = D610) */
     NEMICI_PUNTO(0x3953, 0x3962);
     M(0xd611) = z.e;                           /* 3962 */
     z.a = resto;

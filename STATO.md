@@ -1,6 +1,6 @@
 # Stato del progetto
 
-Aggiornato al 2026-11-04. Fotografia operativa per riprendere il
+Aggiornato al 2026-11-05. Fotografia operativa per riprendere il
 lavoro; la descrizione del metodo è nel [README](README.md), la storia di
 ogni ciclo nei brief in `compiti/`.
 
@@ -15,8 +15,8 @@ ogni ciclo nei brief in `compiti/`.
 | …di cui `verificata` (doppia cattura MAME non forzata) | 286 |
 | …di cui `tradotta` con nota (senza cattura o cattura singola) | 61 |
 | …di cui `tradotta (replay)` | 43 |
-| Banco di prova (`harness --tutte`) | 322 voci, 1310 catture, 0 fallite |
-| Catture `regs` in `decomp/out/` | 1310 |
+| Banco di prova (`harness --tutte`) | 335 voci, 1422 catture, 0 fallite |
+| Catture `regs` in `decomp/out/` | 1422 (banco) |
 | Stub residui del motore nemici | 0 (motore completo, `nemici_stub.c` tolto) |
 | Destinazioni mai osservate | 59 documentate in `decomp/ZONE-MAI-ESEGUITE.md`: 53 `DATO`, 0 `MORTO`, 6 `RAGGIUNGIBILE` (5 con ricetta di sveglia provata); le altre 5 delle 64 originali sono ormai tradotte |
 
@@ -232,6 +232,21 @@ ogni ciclo nei brief in `compiti/`.
    1 altri), gli orbitanti della stanza 3 non vanno più 2,26 volte troppo
    veloci; oracolo, banco, replay e giro identici; partite registrate del
    libero con hash nuovi (vanno rifatte). Vedi `decomp/GIRO.md`.
+   [x] Lotto 59 (brief 59, 2026-11-05): famiglia 3901/3903 della fase 0
+   del corpo 07 (giro sulla tabella 82D3 = 03 0C 15 1F 28 32 FF, blocco
+   3903-392F «BONUS»/«FINAL»/«PRISON!», c045 bit 4 e c09a = 1E), 3960 (cifra
+   delle decine a d610) e 2D1F-2D48 della fase 5 (rimescola otto celle di
+   c0bd con R); `banco_r_2ccd` cerca R anche nei corpi (`solo_ram`); 10
+   catture nuove (f0q02..f0q32, f5r1, f5r2), banco 335 voci / 1422 catture.
+   Giro, oracolo e partita 1A identici. La riproduzione di riferimento
+   (`ricette/riferimento_nuova.reg`, prima FERMO 3903 al 13926) arriva a
+   16000 frame senza FERMO: `HASH ultimo a040200b69679371`, `AUDIO hash
+   caa004b13ad0a661` (parte A). CODA RESIDUA: la 3901 è chiusa; il libero
+   senza ingressi e i semi 4/67 si fermano ora, negli stessi frame (3385,
+   25937, 25198) e con gli stessi hash, su «routine 39B9 mancante» (c243 =
+   33, coda della fase 0, stanza dopo la finale nella demo post-game-over),
+   censita e non tradotta. Parte B: lettura e603 a 4CED modellata come
+   `C & 08` (vedi `decomp/DATI.md`).
    [x] Lotto 54 (brief 54, 2026-11-04): corpi 1C, 25, 26, 22 (con 12F0, il
    suo `rst 38` e 11 gestori di raccolta nuovi), raccolta 12AB di 1288 e
    rami 352E/353B/351E della fase 1 del 07; 5 voci e 61 catture nuove
