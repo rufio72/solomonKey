@@ -32,7 +32,8 @@ Indice di stanza `N` = `c243`, 0-based (0-51). Strumenti: `stanze.py`
 | 9 | valore BCD per c090-c095 (tempo) |
 | coppie | `pos, h`: cella pos = h; con c24e bit 0 già a 1 (stanza già visitata) e `(h&0x3f) ≥ 0x32` si scrive `(h&0xc0)+0x29`; `(h&0x3f) = 0x36` suona l'effetto 0x23 |
 
-Valori di cella: 0x37 vuota; 0x40-0x76 non disegnati (oggetti nascosti);
+Valori di cella: 0x37 vuota; 0x40-0x76 non disegnati (oggetti nascosti,
+vedi «Oggetti nascosti (special)» in fondo);
 gli altri disegnati da 3829 come blocco 2x2 (codici c, c+1 / c+2, c+3, un
 solo colore) con la tabella 8578 o 858E. c24a e c248 sono stato di gioco,
 non ROM: `stanze.py` legge c24a dal dump (2 se manca) e suppone c248 ≠ D.
@@ -175,3 +176,99 @@ finale); azzera c299 e c19d; c248 = FF.
   14), 3DCE (posta 25 → 3B77), 3E47 (posta 26 → 3B63) non compare nelle
   finestre di `finale`/`finale2`: il blocco 3D20-3E71 è coperto solo dalle
   corse dedicate `att_25` e `att_26` (vedi `CENSIMENTO-12.md`).
+
+## Oggetti nascosti (special)
+
+Compito 60 (2026-11-05). Mappe di tutte le stanze in `docs/special/`
+(`stanza_NN.png`, NN = c243), generate con
+`python3 mappe_special.py` da `decomp/` (palette dai dump
+`out/dump_stanza_N_2300.bin`; `--nei-blocchi` aggiunge gli oggetti dentro i
+blocchi in `docs/special/nei_blocchi/`, `--confronta-mame` confronta i tile
+con MAME, `--rendi-dump` rende un dump intero col renderizzatore python
+`render_py.py`, identico a `harness/video_rendi.c` pixel per pixel).
+
+- **Regola**: una cella di valore 0x40-0x76 è un oggetto nascosto di classe
+  `v & 0x3F`: vuota e attraversabile (`sub_5c78` dà classe di collisione 0
+  per 0x37-0x7F), non disegnata da 3829.
+- **4A02-4A0A** (creazione del mattone, `nemici_comuni.c`): se `v >= 0x40`
+  fa `v -= 0x40`, poi `v |= 0x80`; la classe resta nei bit 5-0 del blocco.
+- **4938** (rottura del blocco): con A in 80-F7 la cella diventa `v & 0x3F` e
+  si ridisegna con la tabella di 3A2E (`stanze.tile_fg`): blocco 2x2 (c, c+1 /
+  c+2, c+3) di un solo colore, come gli oggetti visibili. Anche 4ADA usa 3A2E.
+- I valori `0x80|classe` / `0xC0|classe` sono oggetti già dentro un blocco
+  (87 celle in tutto, p.es. la giara rossa 0x9A della stanza 1, cella 118):
+  non sono «nascosti», si vedono solo rompendo il blocco.
+- Con la stanza già visitata (bit 0 di c24e) una classe ≥ 0x32 diventa 0x29;
+  le mappe mostrano la prima visita.
+
+Tabella delle classi. Il nome inglese è quello delle immagini (pubbliche);
+nessun testo del gioco dà nomi, sono descrittivi dal tile. Punti dalla
+tabella 0x150C (parole da 3 byte: 100, 200, 500, 1000, 2000, 5000, 10000,
+20000, 50000, 100000, 200000, 500000, 1000000) indicizzata da `A − 0x29`
+dopo il gestore (`sub_13fc`); gestori dalla tabella 130A di `sub_12f0`
+(voce = classe − 8).
+
+| classe | tile (descrizione) | nome nelle immagini | effetto alla raccolta | nascoste |
+|---|---|---|---|---|
+| 00 | — | — | niente | 0 |
+| 01 | porta | door | — | 0 |
+| 02 | porta/muro rosso | — | 12AB: posta il corpo 1C | 0 |
+| 03-04 | specchi di partenza | — | — | 0 |
+| 05-07 | chiavi | key | 12AB (1340): suono 11, corpo 18 | 0 |
+| 08 | diamante blu | blue diamond | 13CD: 500 punti | 3 |
+| 09 | ampolla blu piccola | small blue jar | 13D5: 200 punti | 0 |
+| 0A | moneta gialla | yellow coin | 13D1: 2000 punti | 0 |
+| 0B | sfera rossa | red orb | 13B9: 200 punti | 0 |
+| 0C | gemma | gem | 13D1: 2000 punti | 0 |
+| 0D | ampolla blu | blue jar | 13E6: 500 punti | 0 |
+| 0E | pergamena | scroll | 1413 | 0 |
+| 0F | campana | bell | 139C: 200 punti | 0 |
+| 10 | ampolla verde | green potion A | 1424: raddoppia BCD c093-c098, 100 punti | 1 |
+| 11 | ampolla verde | green potion B | 1436: ×5 BCD c093-c098, 500 punti | 11 |
+| 12 | clessidra rossa | red hourglass | 14AA: byte del quadro ×5 in c094-c095, 200 punti | 5 |
+| 13 | clessidra blu | blue hourglass | 1491: byte del quadro ×16 in c094-c095, 500 punti | 5 |
+| 14 | sfera verde | green orb | 13C3: 134B con DE=4, 100 punti | 20 |
+| 15 | ampolla blu | blue jar A | 13D5: coppia libera 55, 200 punti | 2 |
+| 16 | ampolla blu | blue jar B | 13E6: coppia libera AA, 500 punti | 1 |
+| 17 | pergamena | scroll | 1413: c259 +1 fino a 9, ridisegna tabellone, 200 punti | 3 |
+| 18 | campana arancio | orange bell | 139C: c1ad=0B, posta attività 19, 200 punti | 4 |
+| 19 | campana gialla | yellow bell | 13AB: c1ad=0C, 500 punti | 7 |
+| 1A | giara rossa | red jar (fire bottle) | 135B: scorre 17 oggetti da c4fe, bit 1 se campo +4−40 in 00-0F o 28-37, suono 33 e attività 12; 500 punti | 3 (stanze 14, 23, 37) |
+| 1B | giara rossa | red jar | 14D4: 200 punti | 0 |
+| 1C-28 | giara rossa (stesso tile) | — | nessun gestore (fuori tabella) | 0 |
+| 29 | lingotto d'oro | gold bar | 13F7: 100 punti | 1 |
+| 2A | diamante giallo | yellow diamond | 13F7: 200 punti | 0 |
+| 2B | zaffiro | sapphire | 13F7: 500 punti | 8 |
+| 2C | moneta d'oro | gold coin | 13F7: 1000 punti | 4 |
+| 2D | monete doppie | coins | 13F7: 2000 punti | 11 |
+| 2E | rubino/lanterna | ruby | 13F7: 5000 punti | 6 |
+| 2F | moneta stellata | star coin A | 13F7: 10000 punti | 12 |
+| 30 | moneta stellata | star coin B | 13F7: 20000 punti | 0 |
+| 31 | gemma verde | green gem | 13F7: 50000 punti | 6 |
+| 32 | gru/ornamento giallo | yellow ornament | 13F7: 100000 punti | 7 |
+| 33 | sigillo (stella di Davide) | seal | 13F7: 200000 punti | 4 |
+| 34 | ala/X dorata | winged ornament | 13F7: 500000 punti | 1 |
+| 35 | muso di tigre | tiger | 13F7: 1000000 punti | 1 |
+| 36 | medaglia/vaso | medal | 13F7 → 14FC: suono 12, c237 +1, barra (31E9); al carico suona l'effetto 0x23; indice 0x0D oltre la tabella dei punti («special» nelle immagini) | 2 |
+
+Le classi 1A e 1B hanno lo stesso tile: nelle immagini la classe è scritta in
+esadecimale. Confronto con MAME (`--confronta-mame`): 21 classi nascoste su
+24 hanno codice e colore uguali al blocco visibile della stessa classe nei
+dump (0x31 animata, coincide al frame 2000); 0x16, 0x17 e 0x35 non sono mai
+visibili in chiaro e restano senza confronto (coda: una prova di rivelazione
+reale in MAME, solo se una mappa mostra un oggetto sospetto).
+
+Conteggi per stanza (128 celle nascoste, tutte nella griglia 15x12, 24
+classi): `0:1 1:3 2:1 3:0 4:1 5:3 6:8 7:4 8:3 9:11 10:2 11:2 12:0 13:0 14:3
+15:3 16:0 17:19 18:1 19:3 20:3 21:0 22:1 23:4 24:6 25:3 26:2 27:2 28:4 29:2
+30:3 31:0 32:2 33:1 34:0 35:1 36:0 37:3 38:2 39:1 40:0 41:2 42:1 43:2 44:5
+45:0 46:2 47:2 48:3 49:3 50:0 51:0`.
+
+Cella E della testa: con `c248 ≠ D` la cella E diventa
+`(cella & 0x80) + c24a + 5`, cioè la chiave di classe 05, 06 o 07 secondo
+c24a; c24a iniziale = `main64.bin[0x8DD4 + 4N]` (1 o 2 in tutte le stanze;
+la stanza 50 nel dump `_2300` ha 0). Nelle 52 stanze la cella E è visibile;
+le immagini la contornano in arancio. I byte 5-8 della testa non sono
+oggetti: sono i quattro passi del contatore del tempo (c08f, letto da
+`sub_026c`: `c090-c091 += c08f`), scelti con `(e605 >> 2) & 3`; le immagini
+li elencano solo in legenda.

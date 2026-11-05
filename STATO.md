@@ -35,6 +35,13 @@ ogni ciclo nei brief in `compiti/`.
   d'urto, porte come funzioni di piattaforma (`porte.c`, proposta A del
   brief 12; proposta C — log degli accessi — rinviata a NMI/audio).
 
+- **Mappe degli oggetti nascosti (brief 60): fatte il 2026-11-05.**
+  `decomp/mappe_special.py` (+ `render_py.py`, identico al renderizzatore C
+  su 3 frame MAME) scrive `docs/special/stanza_00-51.png`: 128 oggetti
+  nascosti in 40 stanze, chiave della cella E, legenda in inglese; tabella
+  delle classi in `decomp/DATI.md`. Coda: classi 0x16, 0x17, 0x35 senza
+  confronto con MAME (mai visibili in chiaro).
+
 ## Lavoro in sospeso
 
 - **Lotto replay (brief 23): fatto in parte il 2026-10-27, infrastruttura
