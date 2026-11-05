@@ -128,7 +128,8 @@ void sub_4c89(struct z80 *z)
         sub_0028(z);                           /* 4CE8 rst 28 */
         z->a = M(0xc1b9);                      /* 4CE9 */
         z->c = z->a;                           /* 4CEC */
-        z->a = leggi_e603(0x4ced);             /* 4CED */
+        z->a = (uint8_t)(z->c & 0x08);         /* 4CED: la protezione di MAME restituisce
+                                                  BC & 08 (att_25_e603.txt) */
         z->a = (uint8_t)((z->a ^ z->c) & 0x08);    /* 4CF0-4CF1 */
         if (z->a != 0) {                       /* 4CF3 */
             sub_75aa(z);                       /* 4D00 */

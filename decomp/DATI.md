@@ -19,7 +19,7 @@ Indice di stanza `N` = `c243`, 0-based (0-51). Strumenti: `stanze.py`
 | 8578 | 3A2E | coppie (codice, colore) per i valori di cella 0-7 e per i blocchi (indice 8 per 0x40-0xBF, 9 per 0xC0-0xF7, 10 per ≥ 0xF8) | — |
 | 858E | 3A2E | coppie (codice, colore) per i valori 0x08-0x3F (indice v-8) | — |
 | rst $20 | gestore 0020 | `jp tabella[A]` con tabella inline dopo il byte E7; elenco in `out/rst20.txt` e `harness/rst20_tables.h` | vedi sotto |
-| e603 | 015E, 4CED, 62BE | protezione, valore secondo il PC; tabella in `harness/e603.h` | solo 015E osservato (valore 00) |
+| e603 | 015E, 4CED, 62BE | protezione, valore secondo il PC; tabella in `harness/e603.h` | 015E osservato (valore 00); 4CED modellato come `C & 08` (lotto 59); 62BE non misurato |
 
 ### Record 8EA4 (testa da 10 byte)
 
@@ -91,6 +91,15 @@ di 3B10) e la tabella di 3B68 finisce a 3B76. 8C93, A497, A4A8 sono in zona dati
 `e603.lua` (5500 frame, input casuali di trace.lua): una sola chiave,
 PC 015E valore 00, 5435 letture. 4CED e 62BE non letti. `leggi_e603()` in
 `harness/porte.c` restituisce 0 con un avviso per PC non in tabella.
+
+Lotto 59 (brief 59): a 4CED (`sub_4c89`, `attivita_piccoli.c`) la lettura
+non passa più da `leggi_e603()`: è modellata come `C & 08` (C = c1b9),
+cioè il valore che il gestore di MAME restituisce (`BC & 08`, documenti
+`compiti/12-filone-porte.md` e `compiti/03-*.md`; tap a 4CF0 in
+`out/att_25_e603.txt`: 00, 00, 08, coerente). Il confronto `xor c; and 08`
+passa quindi sempre e la deviazione a 4D00 (`sub_75aa`) non si prende mai,
+come in MAME. Dedotto dai documenti, non dal sorgente di MAME. 62BE
+(`attivita_27.c`) resta non misurato e passa ancora da `leggi_e603()`.
 
 ## Avanzamento di stanza e stanze nascoste
 
