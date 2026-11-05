@@ -540,3 +540,69 @@ istruzioni). Il gancio `nemici_r_gancio` nel gioco libero è NULL.
 - Invarianti identici: banco (335 voci, 1412 catture, 0 FALLITO), giro
   completo, `gioca --oracolo` (`AUDIO hash c4b40fea06623a96`), partita 1A
   (`HASH ultimo 3f25ba053eeb56b9`, `AUDIO hash c097308a8678392e`).
+
+## Brief 58: cadenza del motore dei nemici nel gioco libero
+
+Sintomo: nella stanza 3 (c243 = 2) i due nemici che girano attorno al blocco
+in alto a destra (tipo 8, `sub_6eca`, (IY+3) = 0E) vanno 2,26 volte più
+veloci che in MAME. `sub_6eca` somma la velocità a ogni chiamata, senza c2b7:
+il passo per frame dipende da quante volte gira il ciclo del corpo 0A (4DAD,
+4632, 4EE6 = 3 spedizioni). La macchina libera chiudeva il frame a 22
+spedizioni qualunque fosse il loro costo.
+
+MAME (`-video none`, stanza forzata, frame 2000-2700; S = slot attivi):
+
+| c243 | spedizioni/frame | 0A/frame | cicli/frame | S | oggetti gestiti (tipo 8 / altri) |
+|---|---:|---:|---:|---:|---|
+| 0 | 19,51 | 4,88 | 1,63 | 4 | 0 / 4 |
+| 2 | 9,72 | 2,43 | 0,81 | 4 | 3 / 6,65 |
+| 7 | 14,20 | 3,36 | 1,12 | 4,23 | 0 / 7,83 |
+| 8 | 5,85 | 1,46 | 0,49 | 4 | 12 / 1 |
+| 10 | 25,27 | 5,41 | 1,80 | 4,67 | 0 / 1,24 |
+| 11 | 10,47 | 2,62 | 0,87 | 4 | 6 / 3,02 |
+| 22 | 8,45 | 2,11 | 0,70 | 4 | 5 / 6 |
+
+Modello scelto: budget del frame 22, ogni spedizione 1, ogni oggetto che passa
+(IY+4) ≥ 6 in 4F0F costa in più 3 se di tipo 8, 1 altrimenti; il costo oltre
+il frame passa al frame seguente. Cicli per frame = 22 / (3·S + 3·n8 + n_altri):
+
+| c243 | modello | MAME | libero prima |
+|---|---:|---:|---:|
+| 0 | 1,38 | 1,63 | 1,83 |
+| 2 | 0,80 | 0,81 | 1,83 |
+| 7 | 1,07 | 1,12 | 1,73 |
+| 8 | 0,45 | 0,49 | 1,83 |
+| 10 | 1,44 | 1,80 | 1,57 |
+| 11 | 0,67 | 0,87 | 1,83 |
+| 22 | 0,67 | 0,70 | 1,83 |
+
+Realizzazione: gancio `MACCHINA_COSTO(n)` (ram.h, comune.c; NULL fuori dalla
+macchina libera), chiamato da `sub_4f0f`; in `macchina_libera.c` il costo
+dichiarato si accumula in `debito`, conta nel budget del frame e l'eccesso
+del solo costo dichiarato passa al frame dopo.
+
+Misure nel libero (gdb, partita 1A fino al frame 2533, stanza forzata in
+`fase_07_3861` al frame 2534, poi nessun ingresso; frame 2900-3764, 865
+frame), spedizioni di 0A per frame:
+
+| c243 | prima | dopo | MAME |
+|---|---:|---:|---:|
+| 2 | 5,50 | 2,39 | 2,43 |
+| 0 | 5,50 | 4,12 | 4,88 |
+
+Invarianti identici: banco (335 voci, 1412 catture, 0 FALLITO), giro
+completo, `sched_proto`, `replay`, `gioca --oracolo` (`HASH ultimo
+a239d0a940bec0b9`, `AUDIO hash c4b40fea06623a96`).
+
+Hash nuovi del gioco libero (cambiano per costruzione):
+- partita 1A (`-n 4000`): `HASH ultimo 474cc37bfa97faeb` (prima
+  3f25ba053eeb56b9), `AUDIO hash b6758278078e86fe` (prima c097308a8678392e);
+  nessun FERMO; la ricetta 1A arriva ancora al 1A al frame 3320;
+- `bottiglia_rossa.reg` (`-n 10502`): `HASH ultimo c03ed875b0113706` (prima
+  fea0687d9840b5ce), `AUDIO hash e2d13799e645d436` (prima 7b324fb363bc2758);
+  nessun FERMO;
+- seme 10 (`-n 6000`): `HASH ultimo e151506436aa1c18` (prima
+  923cbefe0efb5a9f); nessun FERMO.
+
+Le registrazioni del gioco libero vanno rifatte con il binario nuovo. Le
+stanze oltre la 3 (FERMO 3901 forzando c243) si controllano a vista giocando.

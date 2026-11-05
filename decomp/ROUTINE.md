@@ -193,7 +193,7 @@ per la NMI del replay (4EE6 fra due slot, 58DF, 5928; `REPLAY.md`).
 | 0x4DAD | sub_4dad (statica) | nemici.c | fase 0: c2b7 sui 17 slot (249E), conta in c2af, 4E87, 4E31, 4DEE | tradotta (replay) |
 | 0x4632 | sub_4632 (statica) | nemici.c | fase 1: con c459 bit 5 e bit 6-7, `rst 20` a 4644 (46A3, 4649) | tradotta (replay); `rst 20` non in onda |
 | 0x4EE6 | sub_4ee6 (statica) | nemici.c | fase 2: 4F0F per ogni oggetto c4fe con (IY+0) ≥ c0, fase a 0 | tradotta (replay) |
-| 0x4F0F | sub_4f0f | nemici.c | gestore per tipo: `rst 38` a 4F1B su (IY+3) − 6 se (IY+4) ≥ 6 | tradotta (replay) |
+| 0x4F0F | sub_4f0f | nemici.c | gestore per tipo: `rst 38` a 4F1B su (IY+3) − 6 se (IY+4) ≥ 6; nel gioco libero dichiara il costo (3 tipo 8, 1 gli altri; brief 58) | tradotta (replay) |
 | 0x3B62 | sub_3b62 | nemici.c | `ret` solo, voce nulla delle tabelle | tradotta |
 | 0x2482 | sub_2482 | nemici_comuni.c | HL = 32·D + E | tradotta (replay) |
 | 0x248D | sub_248d | nemici_comuni.c | C nel blocco 2×2 a HL | tradotta (replay) |

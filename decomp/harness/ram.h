@@ -78,4 +78,12 @@ extern void (*macchina_frame_pieno)(void);
 #define MACCHINA_FRAME_PIENO() \
     do { if (macchina_frame_pieno) macchina_frame_pieno(); } while (0)
 
+/* Costo (gioco libero, brief 58): una routine che nell'originale costa
+ * quanto n spedizioni lo dichiara con MACCHINA_COSTO(n); la macchina
+ * libera lo somma al lavoro del frame e passa l'eccesso al frame seguente.
+ * Altrove è NULL e non cambia nulla (definito in comune.c). */
+extern void (*macchina_costo)(int n);
+#define MACCHINA_COSTO(n) \
+    do { if (macchina_costo) macchina_costo(n); } while (0)
+
 #endif

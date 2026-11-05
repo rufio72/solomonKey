@@ -86,6 +86,9 @@ void sub_4f0f(struct z80 *z)
         NEMICI_PONI_RIPORTO(z, 1);
         return;
     }
+    /* gioco libero (brief 58): costo del gestore in spedizioni, tarato su
+     * MAME in 7 stanze; tipo 8 (6ECA, IY+3 = 0E) 3, gli altri 1. */
+    MACCHINA_COSTO(M(z->iy + 0x03) == 0x0e ? 3 : 1);
     z->a = (uint8_t)(M(z->iy + 0x03) - z->d);  /* 4F16-4F19 */
     z->e = z->a;                               /* 4F1A */
     uint16_t dest = nemici_rst38(z, 0x4F1B, rst38_4F1B,

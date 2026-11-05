@@ -58,7 +58,11 @@ ogni ciclo nei brief in `compiti/`.
   e vanno rivisti: già noto il fondale 322A (in MAME ~6 frame con NMI
   interne, nel libero uno solo; vedi `decomp/GIRO.md`, brief 53). Ogni nuovo
   difetto visivo o di ritmo nel gioco libero va sospettato prima come
-  cadenza, poi come traduzione.
+  cadenza, poi come traduzione. Dal brief 58 il motore dei nemici (4F0F)
+  dichiara il proprio costo (`MACCHINA_COSTO`: 3 per oggetto di tipo 8, 1
+  per gli altri) e il budget del frame conta anche quello: la cadenza delle
+  stanze con nemici è vicina a MAME (stanza 2: 2,39 spedizioni di 0A per
+  frame contro 2,43; stanza 0: 4,12 contro 4,88).
 
 ## Prossimi passi, in ordine
 
@@ -223,6 +227,11 @@ ogni ciclo nei brief in `compiti/`.
    gancio `MACCHINA_FRAME_PIENO`); oracolo, banco, replay e giro identici.
    Il fondale (322A) ha un difetto di cadenza diverso, misurato e rimandato.
    Vedi `decomp/GIRO.md`.
+   [x] Brief 58 (2026-11-05): cadenza del motore dei nemici nel gioco
+   libero; 4F0F dichiara il costo per oggetto (`MACCHINA_COSTO`, 3 tipo 8,
+   1 altri), gli orbitanti della stanza 3 non vanno più 2,26 volte troppo
+   veloci; oracolo, banco, replay e giro identici; partite registrate del
+   libero con hash nuovi (vanno rifatte). Vedi `decomp/GIRO.md`.
    [x] Lotto 54 (brief 54, 2026-11-04): corpi 1C, 25, 26, 22 (con 12F0, il
    suo `rst 38` e 11 gestori di raccolta nuovi), raccolta 12AB di 1288 e
    rami 352E/353B/351E della fase 1 del 07; 5 voci e 61 catture nuove

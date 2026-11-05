@@ -3,9 +3,11 @@
  * (boot_2833); dopo, lo spedidore gira in un ciclo e la NMI entra ai confini
  * (scansione dello spedidore, prima del corpo). Non c'è un modello dei cicli
  * del Z80: l'istante vero delle NMI dentro i corpi viene solo dall'oracolo
- * (modo --oracolo di gioca), qui la cadenza è un'approssimazione: 22 corpi
- * per frame, salvo le routine che dichiarano il frame pieno con
- * MACCHINA_FRAME_PIENO() (oggi 3097, cerchio di stelline; brief 53).
+ * (modo --oracolo di gioca), qui la cadenza è un'approssimazione: 22 unità
+ * di lavoro per frame, una per corpo più il costo dichiarato con
+ * MACCHINA_COSTO() (oggi 4F0F, motore dei nemici; brief 58), salvo le
+ * routine che dichiarano il frame pieno con MACCHINA_FRAME_PIENO() (oggi
+ * 3097, cerchio di stelline; brief 53).
  * R: surrogato deterministico, vedi r_libero (brief 56). */
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +38,8 @@ extern attivita_fn corpo_attivita_replay[SCHED_CODICI];
 
 static long frame_corr = PRIMO_FRAME;
 static int in_nmi;
-static long punti, corpi, letture;
+/* debito = costo dichiarato con MACCHINA_COSTO non ancora speso (brief 58) */
+static long punti, corpi, letture, debito;
 static jmp_buf uscita;
 
 static void fermo(const char *motivo)
@@ -75,6 +78,9 @@ static void nmi_libera(void)
     in_nmi = 0;
     frame_corr++;
     r_avanza();
+    /* l'eccesso del solo costo dichiarato passa al frame seguente (brief 58) */
+    long eccesso = corpi + debito - CORPI_PER_FRAME;
+    debito = eccesso <= 0 ? 0 : (eccesso < debito ? eccesso : debito);
     punti = corpi = letture = 0;
 }
 
@@ -88,7 +94,7 @@ static void punto_libero(uint16_t da, uint16_t a)
 static void scansione_libera(int lettura)
 {
     (void)lettura;
-    if (++letture >= LETTURE_PER_FRAME || corpi >= CORPI_PER_FRAME)
+    if (++letture >= LETTURE_PER_FRAME || corpi + debito >= CORPI_PER_FRAME)
         nmi_libera();
 }
 
@@ -100,10 +106,18 @@ static void frame_pieno_libero(void)
     corpi = CORPI_PER_FRAME;
 }
 
+/* Costo (brief 58): la routine chiamante vale nell'originale n spedizioni;
+ * si somma al lavoro del frame e chiude il frame al confine seguente se il
+ * budget è finito, l'eccesso passa al frame dopo (nmi_libera). */
+static void costo_libero(int n)
+{
+    debito += n;
+}
+
 static void involucro_libero(uint8_t slot)
 {
     uint8_t codice = tabella[slot];
-    if (++corpi > CORPI_PER_FRAME)
+    if (++corpi + debito > CORPI_PER_FRAME)
         nmi_libera();
     if (codice >= SCHED_CODICI || !corpo_attivita_replay[codice]) {
         char m[64];
@@ -133,9 +147,10 @@ int macchina_libera_esegui(void)
     nemici_r_gancio = NULL;
     nemici_r_valore = r_libero;
     macchina_frame_pieno = frame_pieno_libero;  /* non durante il boot */
+    macchina_costo = costo_libero;              /* non durante il boot */
     for (int i = 0; i < SCHED_CODICI; i++)
         corpo_attivita[i] = involucro_libero;
-    punti = corpi = letture = 0;
+    punti = corpi = letture = debito = 0;
     int vuoti = 0;
     for (;;) {
         uint8_t slot = 0xff, codice = 0;

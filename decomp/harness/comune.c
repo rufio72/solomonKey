@@ -14,6 +14,8 @@ uint8_t rom[0x10000];
 void (*macchina_punto)(uint16_t da, uint16_t a) = NULL;
 /* Frame pieno del gioco libero (ram.h); NULL = spento. */
 void (*macchina_frame_pieno)(void) = NULL;
+/* Costo del gioco libero (ram.h); NULL = spento. */
+void (*macchina_costo)(int n) = NULL;
 
 /* Percorso `relativo` rispetto alla cartella dell'eseguibile (Linux:
  * /proc/self/exe), scritto in buf. NULL se non si può calcolare. */
