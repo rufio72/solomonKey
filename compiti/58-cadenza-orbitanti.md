@@ -323,3 +323,13 @@ deviazioni.
 2. Pesi **3 per il tipo 8, 1 per gli altri** — preferenza accettata.
 3. Si procede subito col fix: `partita_1a.reg` e `bottiglia_rossa.reg` si desincronizzeranno e l'utente rifarà le registrazioni dopo (il bug della bottiglia rossa non si è riprodotto stamattina, chiuso come non riproducibile salvo ricomparsa). — scelta di progetto, decisa dall'utente.
 4. Le stanze oltre la 3 si controllano a vista giocando — preferenza accettata.
+
+## Esito (2026-11-05)
+
+Ciclo passato al primo colpo (29º). Fix in `eb9b55d`; verificatore: 10/10 passate,
+stanza 3 a 2,39 corpi 0A/frame (MAME 2,43), stanza 0 a 4,12 (MAME 4,88), banco
+335/1412 identico, giro completo e oracolo invariati byte per byte. Nuovi hash
+del libero annotati in GIRO.md (1A video 474cc37bfa97faeb / audio
+b6758278078e86fe). Token: analista Opus ~159k, sviluppatore Opus ~42k,
+verificatore Sonnet ~24k. Resta il collaudo a vista dell'utente nella stanza 3
+e il rifacimento delle registrazioni di riferimento.
