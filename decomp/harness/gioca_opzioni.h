@@ -11,6 +11,7 @@ typedef struct {
     long tempo;         /* -t SEC (solo con --joystick) */
     int tempo_dato;
     int scanlines;      /* --scanlines [S] (lotto 57): 0 spente, 1-3 quarti di fila */
+    int stanza;         /* --stanza N (collaudo): quadro iniziale c243 0-51, -1 = spento */
 } gioca_extra;
 
 extern gioca_extra gx;

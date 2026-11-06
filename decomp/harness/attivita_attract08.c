@@ -80,6 +80,10 @@ void attivita_0b_2c27(uint8_t slot)
         return;
     }
     NEMICI_PUNTO(0x2c6b, 0x2c6e);
+    if (partita_stanza >= 0) {                 /* collaudo (gioca --stanza N): */
+        M(0xc243) = (uint8_t)partita_stanza;   /* quadro del giocatore 1 */
+        M(0xc274) = (uint8_t)partita_stanza;   /* e del 2 (blocco c268, 2D8A) */
+    }
     posta(0x07);                               /* 2C6E */
     NEMICI_PUNTO(0x2c71, 0x2c71);
 }

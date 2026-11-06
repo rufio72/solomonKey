@@ -5,7 +5,7 @@
 #include "gioca_opzioni.h"
 #include "gioca_joy.h"
 
-gioca_extra gx = { 0, 100, 0, 0, 0, 0, 0 };
+gioca_extra gx = { 0, 100, 0, 0, 0, 0, 0, -1 };
 
 static int intero(const char *s, long *v)
 {
@@ -38,6 +38,15 @@ int gioca_opzione_extra(int argc, char **argv, int *i)
             gx.scanlines = (int)v;
             ++*i;
         }
+        return 1;
+    }
+    if (!strcmp(a, "--stanza")) {
+        if (*i + 1 >= argc || intero(argv[*i + 1], &v) != 0 || v < 0 || v > 51) {
+            fprintf(stderr, "ERRORE: --stanza vuole un quadro da 0 a 51 (c243)\n");
+            return -1;
+        }
+        gx.stanza = (int)v;
+        ++*i;
         return 1;
     }
     if (!strcmp(a, "--joystick")) { gx.joystick = 1; return 1; }

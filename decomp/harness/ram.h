@@ -93,6 +93,12 @@ extern void (*macchina_frame_pieno)(void);
  * libera lo somma al lavoro del frame e passa l'eccesso al frame seguente.
  * Altrove è NULL e non cambia nulla (definito in comune.c). */
 extern void (*macchina_costo)(int n);
+
+/* Quadro iniziale di collaudo (gioca --stanza N): se >= 0, l'avvio della
+ * partita (attività 0B, prima di postare il carico del quadro 07) mette N in
+ * c243 e nella copia del secondo giocatore c274. -1 = spento, il gioco resta
+ * quello originale (definito in comune.c). */
+extern int partita_stanza;
 #define MACCHINA_COSTO(n) \
     do { if (macchina_costo) macchina_costo(n); } while (0)
 

@@ -237,6 +237,7 @@ int main(int argc, char **argv)
     if (dsw2_raw >= 0) d2 = (uint8_t)dsw2_raw;
     if (stampa_dsw) { printf("DSW1 %02X DSW2 %02X\n", d1, d2); return 0; }
     if (gioca_extra_valida() != 0) return 2;
+    partita_stanza = gx.stanza;                /* -1 senza --stanza */
     if (gx.joystick) return joy_diagnostica(gx.tempo);
     int k = vsdl_leggi_opzioni(ac, av, &opz);
     if (k < 0) return 2;
