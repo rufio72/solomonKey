@@ -1,6 +1,6 @@
 # Stato del progetto
 
-Aggiornato al 2026-11-05. Fotografia operativa per riprendere il
+Aggiornato al 2026-11-06. Fotografia operativa per riprendere il
 lavoro; la descrizione del metodo è nel [README](README.md), la storia di
 ogni ciclo nei brief in `compiti/`.
 
@@ -42,6 +42,9 @@ ogni ciclo nei brief in `compiti/`.
   nascosti in 40 stanze, chiave della cella E, legenda in inglese; tabella
   delle classi in `decomp/DATI.md`. Coda: classi 0x16, 0x17, 0x35 senza
   confronto con MAME (mai visibili in chiaro).
+
+- **Lotto 64 (brief 64, 2026-11-06): README e NOTICE riscritti in inglese,
+  pacchetto e note della v1.01 in `decomp/out/release/` (non versionato).**
 
 ## Lavoro in sospeso
 

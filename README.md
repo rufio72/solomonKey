@@ -1,11 +1,22 @@
-# solomonKey — reverse engineering Solomon's Key (Tecmo, 1986)
+# Solomon's Key (Tecmo, 1986)
 
-![Solomon's Key running in the decompiled C port](docs/cover.png)
+**A playable C decompilation, reverse-engineered from the original arcade ROMs**
+
+Original game © 1986 Tecmo (now Koei Tecmo). This project is an unofficial, non-commercial study and preservation effort; see [NOTICE.md](NOTICE.md).
+
+<p>
+<a href="docs/cover.png"><img src="docs/cover.png" width="160" alt="The decompiled C port running in its SDL2 window"></a>
+<a href="decomp/out/video/titolo.png"><img src="decomp/out/video/titolo.png" width="160" alt="Title screen"></a>
+<a href="decomp/out/video/gioco.png"><img src="decomp/out/video/gioco.png" width="160" alt="Room 1 in play"></a>
+<a href="decomp/out/video/finale.png"><img src="decomp/out/video/finale.png" width="160" alt="Rest bonus screen"></a>
+</p>
+
+Hidden-object maps for all 52 rooms: [`docs/special/`](docs/special/).
 
 A from-scratch **decompilation** of the arcade game **Solomon's Key** — the
 classic Tecmo puzzle-platformer where the wizard Dana creates and destroys
 blocks to reach the key in every room — reconstructed in **readable C** from
-nothing but the original ROMs, with **MAME as the oracle**.
+the original arcade program, with **MAME as the oracle**.
 
 No original source code exists. This project recovers it the hard way:
 execution-driven **reverse engineering** of the two **Zilog Z80** CPUs on the
@@ -14,15 +25,93 @@ for three **YM2149/AY-3-8910** PSG chips), routine by routine, with every
 translation **verified bit-for-bit** against the real machine state captured
 in the emulator. Rules, enemy AI, timers, glitches — original bugs included.
 
-> **Ownership note.** The images, dumps and data tables under `roms/decoded/`
-> and `decomp/harness/` are derived from the Tecmo arcade ROMs and are **not
-> the property of this repository's author**. See [NOTICE.md](NOTICE.md).
-> The ROMs are not included and must never be committed.
-
 **Keywords:** reverse engineering · decompilation · disassembly · Z80 ·
 arcade · Tecmo · Solomon's Key · 1986 · MAME · emulation · bit-accurate ·
 cycle-exact verification · game preservation · C port · retrogaming ·
 YM2149 · AY-3-8910 · static and dynamic analysis.
+
+## How to play
+
+**No ROM is needed, neither to play nor to build.** The game data the C code
+needs is compiled in from `tecmo/`; MAME is only a development tool.
+
+**Option 1 — prebuilt binary (Linux x86_64).** Download
+`solomons-key-v1.01-linux-x86_64.tar.gz` from the
+[Releases](https://github.com/rufio72/solomonKey/releases) page, then:
+
+```
+sudo apt install libsdl2-2.0-0     # SDL2 runtime (Debian/Ubuntu)
+tar -xzf solomons-key-v1.01-linux-x86_64.tar.gz
+cd solomons-key-v1.01-linux-x86_64
+./gioca
+```
+
+**Option 2 — build from source.** You need `gcc`, `make` and `libsdl2-dev`
+(SDL2 ≥ 2.0, tested with 2.30.0):
+
+```
+git clone https://github.com/rufio72/solomonKey.git
+cd solomonKey
+make -C decomp/harness gioco      # builds gioca, nothing else
+decomp/harness/gioca              # play (works from any directory)
+```
+
+**Main options:**
+
+```
+gioca -s 4             # window at 4x scale (1-8, default 3)
+gioca --pieno          # fullscreen, integer scaling, 8:7 kept
+gioca --scanlines      # CRT-style dark horizontal lines (display only, default off)
+gioca --scanlines 3    # thicker lines (1, 2 or 3 quarters of a game pixel row)
+gioca --vite 5         # DIP switch: 5 lives
+gioca --volume 50      # half volume (0-100)
+gioca --muto           # no sound
+gioca --aiuto          # every option (the help text is in Italian)
+```
+
+`--scanlines [S]` draws a dark line (about 25% darker) at the border between
+consecutive rows of game pixels. S is the thickness in quarters of a game
+pixel row, from 1 to 3 (default 2): at scale N the line is
+max(1, round(N*S/4)) screen pixels thick, at most N-1, so the lines follow
+the game grid with `-s N` and `--pieno`. At scale 1 there is no room between
+the pixels and the option has no effect. It is display only and never
+changes the video hash, replays or the oracle mode.
+
+**Keys** (from `gioca --mappa`): arrows or WASD move; Z, Space or Left Ctrl
+is BUTTON1; X or Left Alt is BUTTON2 (one jumps, the other casts magic);
+5 or C inserts a coin; 1 or Enter is START1 (2 = START2). Player 2: IJKL,
+N (BUTTON1), M (BUTTON2). In game: P pauses, F2 resets, ESC quits.
+
+**Joystick:** any SDL joystick works and adds to the keyboard (it does not
+replace it); sticks plugged in while the game runs are picked up (hotplug).
+Directions come from axes 0/1 and from hat 0 — arcade encoders often report
+the lever as a hat. To find your button numbers run the diagnostic, which
+lists the devices and prints every event with the game action it maps to:
+
+```
+$ gioca --joystick
+JOYSTICK 0 "Bigben Interactive DAIJA Arcade Stick" assi=4 pulsanti=13 cappelli=1 guid=...
+CAPPELLO 0 0 destra (destra)
+PULSANTE 0 0 giu (BUTTON1)
+PULSANTE 0 0 su (BUTTON1)
+```
+
+(ESC in its small window or Ctrl-C to quit.) Then remap with
+`--joy-mappa B1,B2,START,COIN`, e.g. `--joy-mappa 2,3,9,8` (button indices,
+`-1` = none; default `0,1,7,6`). `--senza-joystick` disables joysticks.
+
+**DIP switches and recordings:** `--vite`, `--cabinet`, `--demo`, `--bonus`,
+`--difficolta`, `--timer`, `--extra` (or raw `--dsw1`/`--dsw2`;
+`--stampa-dsw` prints the result). `--registra FILE` records your inputs,
+`--riproduci FILE` replays them — any match can become a future oracle.
+
+**Known limits:**
+
+- In free mode the game can stop with a `FERMO ...` line (exit code 3) if it
+  reaches Z80 code that is not translated yet.
+- Free-mode timing is a heuristic, not a Z80 cycle model: in rooms with
+  enemies the speed is close to MAME's, but some rhythms differ (the room
+  background animation runs about 5 frames out of step with MAME).
 
 ## Method: decompilation with an oracle
 
@@ -128,8 +217,8 @@ YM2149 emulator and compared against the original's — has been passed.
   (`decomp/giro_completo.sh`).
 - **Playable — the game runs on the keyboard.** H5 added `gioca`
   (`decomp/harness/gioca`): cold boot, SDL2 window, keys mapped on the
-  real port bits from the MAME driver (arrows/WASD, Z jump, X magic,
-  5 coin, 1 start; player 2 on IJKL+N/M), readable DIP-switch options,
+  real port bits from the MAME driver (arrows/WASD, Z/X for the two
+  buttons, 5 coin, 1 start; player 2 on IJKL+N/M), readable DIP-switch options,
   and record/replay of input files — any played match can become a
   future oracle. In `--oracolo` mode it replays the recorded match and
   the final frame's framebuffer hash is **identical to MAME's**; free
@@ -143,23 +232,45 @@ YM2149 emulator and compared against the original's — has been passed.
   register-change stream still differs in 312 of 5486 frames (timing of the
   sound routine inside a frame), to be judged by ear.
 - **Packaged — H7 closes the hardware plan.** `make -C decomp/harness gioco`
-  prepares everything (ROM extraction, `out/main64.bin`, build), `gioca` runs
-  from any directory, and it gained joystick support with a live diagnostic
-  (`--joystick`, hotplug, button remapping), `--volume`, `--pieno`
-  (fullscreen) and `--aiuto`. See [How to play](#how-to-play).
-- **Next up:** the manual joystick test on a real arcade stick, then
-  classifying the remaining
-  mid-activity NMI divergences, and finally the readability rewrite,
-  module by module, with the harness and the full run as the safety
-  net.
+  builds `gioca`, which runs from any directory, and it gained joystick
+  support with a live diagnostic (`--joystick`, hotplug, button remapping),
+  `--volume`, `--pieno` (fullscreen) and `--aiuto`. See
+  [How to play](#how-to-play).
+- **Self-contained (v1.01).** The game reads no ROM file, neither at runtime
+  nor at build time: the Tecmo data it needs lives in `tecmo/` (91 main-CPU
+  data tables, the sound driver, the music and the graphics), so a clean
+  clone builds and plays. Free-mode timing now follows the enemy engine's
+  own cost (in rooms with enemies the speed is close to MAME's), bonus rooms
+  and the room change no longer stop the free game, and the hidden-object
+  maps for all 52 rooms are in `docs/special/`. The harness stands at
+  **1,422 comparisons, 335 entries, 0 failures**.
+- **Next up:** classifying the remaining mid-activity NMI divergences, the
+  remaining untranslated free-mode paths, and finally the readability
+  rewrite, module by module, with the harness and the full run as the
+  safety net.
+
+## Ownership note
+
+This repository contains data derived from the original arcade game: the
+graphics, data tables, music and sound driver in `tecmo/`, and the decoded
+graphics, RAM dumps and screenshots in `roms/decoded/`. They are copyright
+Tecmo (now Koei Tecmo), are **not the property of this repository's
+author**, and are included for study and preservation only. The original
+ROMs (`solomon.zip` and the like) are **not** included and must never be
+committed (they stay ignored by git). See [NOTICE.md](NOTICE.md).
 
 ## Repository layout
 
 - `decomp/` — tracing, coverage and call-graph tooling (`trace.lua`,
   `coverage.py`, `callgraph.py`), before/after capture (`snap.lua`), data
   extractors, the audio toolchain (`audio.lua`, `audio.sh`), the test harness
-  with the translated routines (`harness/`), and the reports (`RAPPORTO.md`,
-  `DATI.md`, `AUDIO.md`, `ROUTINE.md`).
+  with the translated routines and the game (`harness/`), and the reports
+  (`RAPPORTO.md`, `DATI.md`, `AUDIO.md`, `ROUTINE.md`).
+- `tecmo/` — the Tecmo data compiled into the game (main-CPU tables, sound
+  driver, music, graphics), generated by the extractors in `decomp/`; see
+  `tecmo/README.md`.
+- `docs/` — the cover image and the hidden-object maps of every room
+  (`docs/special/`).
 - `roms/decoded/` — decoded graphics chips (tiles, sprites, palettes), RAM
   dumps and MAME screenshots used as oracles, plus `colora.py` to render the
   sheets with any room's real palette.
@@ -168,75 +279,15 @@ YM2149 emulator and compared against the original's — has been passed.
   working documents are in Italian; the code and this README are the
   interface for everyone else.
 
-## How to play
+## Requirements for development
 
-**Requirements:** `libsdl2-dev` (SDL2 ≥ 2.0, tested with 2.30.0), gcc, make
-and `unzip`. Put `solomon.zip` in `roms/` (never commit it). At runtime the
-game uses only four ROM files: `6.3f`, `7.3h`, `8.3jk` (main CPU, assembled
-into `decomp/out/main64.bin`) and `1.3jk` (sound CPU). The other eight ROMs
-(graphics, and `solomonj.zip`) are no longer needed: graphics and sound data
-ship as generated C in this repository. MAME is needed only to rebuild the
-oracles, not to play.
-
-```
-make -C decomp/harness gioco      # extracts the zip, builds main64.bin and gioca
-decomp/harness/gioca              # play (works from any directory)
-decomp/harness/gioca -s 4         # window at 4x scale
-decomp/harness/gioca --pieno      # fullscreen, integer scaling, 8:7 kept
-decomp/harness/gioca --scanlines  # CRT-style dark horizontal lines (display only, default off)
-decomp/harness/gioca --scanlines 1  # thinner lines (1, 2 or 3 quarters of a game pixel row)
-decomp/harness/gioca --vite 5     # DIP switch: 5 lives
-decomp/harness/gioca --volume 50  # half volume
-decomp/harness/gioca --muto       # no sound
-decomp/harness/gioca --aiuto      # every option (in Italian)
-```
-
-`--scanlines [S]` draws a dark line (about 25% darker) at the border between
-consecutive rows of game pixels. S is the thickness in quarters of a game
-pixel row, from 1 to 3 (default 2): at scale N the line is
-max(1, round(N*S/4)) screen pixels thick, at most N-1, so the lines follow
-the game grid with `-s N` and `--pieno`. At
-scale 1 there is no room between the pixels and the option has no effect.
-It is display only and never changes the video hash, replays or the oracle
-mode.
-
-**Keys** (from `gioca --mappa`): arrows or WASD move; Z, Space or Left Ctrl
-is BUTTON1; X or Left Alt is BUTTON2 (which of the two is jump and which is
-magic will be noted after the manual test); 5 or C inserts a coin; 1 or
-Enter is START1 (2 = START2). Player 2: IJKL, N (BUTTON1), M (BUTTON2).
-In game: P pauses, F2 resets, ESC quits.
-
-**Joystick:** any SDL joystick works and adds to the keyboard (it does not
-replace it); sticks plugged in while the game runs are picked up (hotplug).
-Directions come from axes 0/1 and from hat 0 — arcade encoders often report
-the lever as a hat. To find your button numbers run the diagnostic, which
-lists the devices and prints every event with the game action it maps to:
-
-```
-$ decomp/harness/gioca --joystick
-JOYSTICK 0 "Bigben Interactive DAIJA Arcade Stick" assi=4 pulsanti=13 cappelli=1 guid=...
-CAPPELLO 0 0 destra (destra)
-PULSANTE 0 0 giu (BUTTON1)
-PULSANTE 0 0 su (BUTTON1)
-```
-
-(ESC in its small window or Ctrl-C to quit.) Then remap with
-`--joy-mappa B1,B2,START,COIN`, e.g. `--joy-mappa 2,3,9,8` (button indices,
-`-1` = none; default `0,1,7,6`). `--senza-joystick` disables joysticks.
-
-**DIP switches and recordings:** `--vite`, `--cabinet`, `--demo`, `--bonus`,
-`--difficolta`, `--timer`, `--extra` (or raw `--dsw1`/`--dsw2`;
-`--stampa-dsw` prints the result). `--registra FILE` records your inputs,
-`--riproduci FILE` replays them — any match can become a future oracle.
-
-**Known limit:** in free mode the game stops with a `FERMO ...` line (exit
-code 3) if it reaches Z80 code that is not translated yet.
-
-## Requirements
-
-MAME 0.264, `z80dasm`, Python 3 with Pillow, gcc and make. Put the `solomon`
-ROM set in `roms/` (never commit it). Every measurement in the reports can be
-reproduced with the commands listed at the end of `decomp/RAPPORTO.md`.
+Playing needs nothing beyond [How to play](#how-to-play). To work on the
+decompilation you also need MAME 0.264, `z80dasm`, Python 3 with Pillow,
+gcc and make, and — **only to regenerate the oracles and the extracted
+data** — the `solomon` ROM set in `roms/` (never commit it);
+`make -C decomp/harness rom` unpacks it for the extractors. Every
+measurement in the reports can be reproduced with the commands listed at
+the end of `decomp/RAPPORTO.md`.
 
 ## Contributing
 
