@@ -73,13 +73,13 @@ Release pubblicate:
 2. **Lotto 65 (in coda, deciso)**: versione browser — C+SDL2 compilato in
    WebAssembly con Emscripten, pubblicata su GitHub Pages, link nel
    README. Niente filesystem virtuale: i dati sono già C compilato.
-3. **Code minori**: 39B9 chiusa nel lotto 65. Restano censiti
-   (`--stanza N -n 8000/3000 --riproduci` seme 4): `routine 2E04 mancante`
-   (fase 16 del 07) al frame 7790 della stanza 5 (hash 3d9c0ae560d66f59) e
-   `routine 2D0F mancante` (fase 5) al frame 1562 della stanza 29; letture
-   «fuori voce» già presenti prima del lotto 65 in 66C4-66D3, 6BC7-6BC8,
-   6F45-6F48, 746C-746F, 756E-756F, 7576-7577, B126-B14D (stanze 2 6 11 16
-   18 20 23 30 32 33 38 44 50: tabelle del censimento ancora corte); fondale
+3. **Code minori**: 39B9 chiusa nel lotto 65; 2E04 (fase 11 del 07),
+   2D0F (fase 5, stanza 29) e le sette zone «fuori voce» chiusi nel lotto
+   66: la spazzata delle 52 stanze (`--stanza N -n 3000 --riproduci` seme
+   4) non dà né FERMO né AVVISO. Resta censito `routine 2D9D mancante`
+   (fase 16 del 07, mai eseguita prima: ci arriva ora la stanza 5 dopo
+   2E04) al frame 7871 della stanza 5 (`-n 8000`, hash 4f6770fd98a0f823,
+   audio 27f47f454157523b); fondale
    322A avanti ~5 frame nel libero (cadenza, vedi sotto); mappa dei
    pulsanti nel README (quale è BUTTON1/BUTTON2; mappa DAIJA predefinita
    0,1,7,6); classi special 0x16/0x17/0x35 mai viste in chiaro (si

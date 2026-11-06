@@ -30,8 +30,9 @@ CARTELLE = ['../roms/ext/solomon', '../../roms/ext/solomon',
 PER_RIGA = 24
 # 88 voci e 17739 byte dal brief 61; il brief 62 ne aggiunge 2 e ne allarga 7,
 # il collaudo del 2026-11-06 allarga tab_3709_8661, il brief 65
-# copione_demo_767c (CENSIMENTO-ROM.md, «Esito del lotto 62»).
-VOCI_ATTESE, BYTE_L_ATTESI = 91, 20118
+# copione_demo_767c, il brief 66 ne aggiunge 2 (tab_2d72, tab_66c4) e ne
+# allarga 5 (CENSIMENTO-ROM.md, «Esito del lotto 62» e «del lotto 66»).
+VOCI_ATTESE, BYTE_L_ATTESI = 92, 20204
 
 # Voce locale: riempimento della finestra F000-FFFF dopo i flussi dei fondali.
 # Il codice del driver audio finisce dove cominciano i dati (estrai_dati.py).

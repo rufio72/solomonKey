@@ -151,6 +151,7 @@ seguente. Nessuna voce si sovrappone a un'altra e in ognuna i byte di
 | `tab_monete_29c7` | 29C7-29CE | 8 | letto dalla ROM | 2980 | monete 29C7, vite 29CB | zona | 2/8 | 6.3f+29C7 |
 | `tab_testi_2b29` | 2B29-2BC2 | 154 | letto dalla ROM | 2B08, rst 10 | parole 2B29 + testi 2B61 | zona | 146/154 | 6.3f+2B29 |
 | `tab_attract_2d4a` | 2D4A-2D71 | 40 | letto dalla ROM | 2D07 | 8 byte + 32 posizioni (R & 1F) | statica | 24/40 | 6.3f+2D4A |
+| `tab_2d72` | 2D72-2D89 | 24 | letto dalla ROM | 3812 via 2D0F | 24 byte, bit della griglia per la stanza 1D (brief 66) | statica | 0/24 | 6.3f+2D72 |
 | `tab_303e` | 303E-3044 | 7 | letto dalla ROM | 3009 | 7 byte copiati | statica | 7/7 | 6.3f+303E |
 | `tab_3111` | 3111-3130 | 32 | letto dalla ROM | 30EF | 32 byte | zona | 32/32 | 6.3f+3111 |
 | `testo_31e1` | 31E1-31E8 | 8 | letto dalla ROM | 6771 | stringa (attributo, caratteri, FF) | zona | 8/8 | 6.3f+31E1 |
@@ -177,17 +178,18 @@ seguente. Nessuna voce si sovrappone a un'altra e in ognuna i byte di
 | `tab_4ff9` | 4FF9-5004 | 12 | letto dalla ROM | 4FEF | 6 parole | statica | 0/12 | 7.3h+4FF9 |
 | `tab_nemici_608c` | 608C-610B | 128 | letto dalla ROM | 5F4B 5F82 5FDC 6046 | 4 tabelle da 16 parole | statica | 0/128 | 7.3h+608C |
 | `tab_6653` | 6653-6654 | 2 | letto dalla ROM | 3569 | 2 byte copiati | misurata | 2/2 | 7.3h+6653 |
+| `tab_66c4` | 66C4-66D3 | 16 | letto dalla ROM | 6676 via 3569 | 16 byte copiati (A = 5, brief 66) | statica | 0/16 | 7.3h+66C4 |
 | `testo_6766` | 6766-6770 | 11 | letto dalla ROM | 6771 | stringa | statica | 11/11 | 7.3h+6766 |
 | `tab_segni_6837` | 6837-6841 | 11 | letto dalla ROM | 6785 (att. 16) | 11 caratteri | statica | 0/11 | 7.3h+6837 |
 | `tab_6970` | 6970-6975 | 6 | letto dalla ROM | 6842 (att. 16) | 6 byte copiati | statica | 0/6 | 7.3h+6970 |
 | `testi_6a9e` | 6A9E-6ADD | 64 | letto dalla ROM | 6771 | stringhe | misurata | 64/64 | 7.3h+6A9E |
-| `tab_6bc5` | 6BC5-6BC6 | 2 | letto dalla ROM | rst 10 (6BA8) | parole | misurata | 2/2 | 7.3h+6BC5 |
-| `tab_velocita_6f3d` | 6F3D-6F44 | 8 | letto dalla ROM | rst 10 (nemici 08-14) | parole | misurata | 4/8 | 7.3h+6F3D |
+| `tab_6bc5` | 6BC5-6BCC | 8 | letto dalla ROM | rst 10 (6BA8) | 4 parole, indice (IY+4) & 3 (brief 66) | statica | 2/8 | 7.3h+6BC5 |
+| `tab_velocita_6f3d` | 6F3D-6F48 | 12 | letto dalla ROM | rst 10 (nemici 08-14) | 6 parole, indice (IY+4) - 16 (brief 66) | zona | 4/12 | 7.3h+6F3D |
 | `tab_8089` | 8089-808C | 4 | estratto | 8042 (copia a mano tab8089[4]) | 4 byte | statica | 0/4 | 7.3h+0089 |
 | `tab_70ee` | 70EE-70FC | 15 | letto dalla ROM | 6ECA | 15 byte | misurata | 15/15 | 7.3h+70EE |
 | `tab_direzioni_7196` | 7196-719D | 8 | letto dalla ROM | rst 10 (nemici 10-13) | 4 parole | statica | 2/8 | 7.3h+7196 |
-| `tab_velocita_7468` | 7468-746B | 4 | letto dalla ROM | rst 10 (comparsa) | coppie di byte | misurata | 4/4 | 7.3h+7468 |
-| `tab_urto_754c` | 754C-7567 | 28 | letto dalla ROM | rst 10 (comparsa) | parole urto X (754C) e Y (755C) | misurata | 16/28 | 7.3h+754C |
+| `tab_velocita_7468` | 7468-746F | 8 | letto dalla ROM | rst 10 (comparsa) | 4 coppie di byte (brief 66) | zona | 4/8 | 7.3h+7468 |
+| `tab_urto_754c` | 754C-7577 | 44 | letto dalla ROM | rst 10 (comparsa) | parole urto X (754C) e Y (755C); 756C-7577 sono byte del codice di 756C letti per indice fuori tabella come nell'originale (brief 66) | stimata | 16/44 | 7.3h+754C |
 | `tab_demo_765e` | 765E-767B | 30 | letto dalla ROM | 760B 2551 | record da 3 byte | misurata | 15/30 | 7.3h+765E |
 | `copione_demo_767c` | 767C-78DF | 612 | letto dalla ROM | 01C5 (NMI) | tre copioni di coppie (chiave, codice) da 765E: 767C, 76F6, 77D6; codice a 78E0 (brief 65) | puntatori | 147/612 | 7.3h+767C |
 | `testi_79a4` | 79A4-79DE | 59 | letto dalla ROM | 6771 | stringhe | misurata | 59/59 | 7.3h+79A4 |
@@ -225,7 +227,7 @@ seguente. Nessuna voce si sovrappone a un'altra e in ognuna i byte di
 | `tab_anim2_9dcd` | 9DCD-A745 | 2425 | letto dalla ROM | 07DE | record | stimata | 990/2425 | 7.3h+1DCD |
 | `tab_comparse_a746` | A746-A88D | 328 | letto dalla ROM | 0602 | 164 parole | statica | 50/328 | 7.3h+2746 |
 | `tab_comparse_rec_a88e` | A88E-AEE1 | 1620 | letto dalla ROM | 0602 | record da 3 byte + parole | stimata | 550/1620 | 7.3h+288E |
-| `tab_campi_aee2` | AEE2-B125 | 580 | letto dalla ROM | 0602 | campi copiati | misurata | 221/580 | 7.3h+2EE2 |
+| `tab_campi_aee2` | AEE2-B14D | 620 | letto dalla ROM | 0602 | campi copiati, chiusi da 2D FF 00 FF a B14A (brief 66) | misurata | 221/620 | 7.3h+2EE2 |
 | `tab_palette_f000` | F000-F067 | 104 | letto dalla ROM | 33BA (via ram[]) | 52 parole | statica | 10/104 | 8.3jk+0000 |
 | `tab_fondali_f068` | F068-F137 | 208 | letto dalla ROM | 3231 (via ram[]) | 52 voci da 4 byte | statica | 20/208 | 8.3jk+0068 |
 | `tab_sovrapposizioni_f138` | F138-F1E7 | 176 | letto dalla ROM | 325E (via ram[]) | 44 voci da 4 byte | puntatori | 24/176 | 8.3jk+0138 |
@@ -296,6 +298,7 @@ voce, più 6 di intestazione per file; byte = n × 85587 / 16384) e controllo.
 | `tab_monete_29c7` | 8 | rom_dati_varie.c | `const uint8_t tab_monete_29c7[8]` | 3 | 42 | round-trip byte per byte, uscita 2 |
 | `tab_testi_2b29` | 154 | rom_dati_varie.c | `const uint8_t tab_testi_2b29[154]` | 9 | 804 | round-trip byte per byte, uscita 2 |
 | `tab_attract_2d4a` | 40 | rom_dati_varie.c | `const uint8_t tab_attract_2d4a[40]` | 4 | 209 | round-trip byte per byte, uscita 2 |
+| `tab_2d72` | 24 | rom_dati_varie.c | `const uint8_t tab_2d72[24]` | 3 | 125 | round-trip byte per byte, uscita 2 |
 | `tab_303e` | 7 | rom_dati_varie.c | `const uint8_t tab_303e[7]` | 3 | 37 | round-trip byte per byte, uscita 2 |
 | `tab_3111` | 32 | rom_dati_varie.c | `const uint8_t tab_3111[32]` | 4 | 167 | round-trip byte per byte, uscita 2 |
 | `testo_31e1` | 8 | rom_dati_testi.c | `const uint8_t testo_31e1[8]` | 3 | 42 | round-trip byte per byte, uscita 2 |
@@ -320,16 +323,17 @@ voce, più 6 di intestazione per file; byte = n × 85587 / 16384) e controllo.
 | `tab_4ff9` | 12 | rom_dati_varie.c | `const uint8_t tab_4ff9[12]` | 3 | 63 | round-trip byte per byte, uscita 2 |
 | `tab_nemici_608c` | 128 | rom_dati_varie.c | `const uint8_t tab_nemici_608c[128]` | 8 | 669 | round-trip byte per byte, uscita 2 |
 | `tab_6653` | 2 | rom_dati_varie.c | `const uint8_t tab_6653[2]` | 3 | 10 | round-trip byte per byte, uscita 2 |
+| `tab_66c4` | 16 | rom_dati_varie.c | `const uint8_t tab_66c4[16]` | 3 | 84 | round-trip byte per byte, uscita 2 |
 | `testo_6766` | 11 | rom_dati_testi.c | `const uint8_t testo_6766[11]` | 3 | 57 | round-trip byte per byte, uscita 2 |
 | `tab_segni_6837` | 11 | rom_dati_varie.c | `const uint8_t tab_segni_6837[11]` | 3 | 57 | round-trip byte per byte, uscita 2 |
 | `tab_6970` | 6 | rom_dati_varie.c | `const uint8_t tab_6970[6]` | 3 | 31 | round-trip byte per byte, uscita 2 |
 | `testi_6a9e` | 64 | rom_dati_testi.c | `const uint8_t testi_6a9e[64]` | 5 | 334 | round-trip byte per byte, uscita 2 |
-| `tab_6bc5` | 2 | rom_dati_varie.c | `const uint8_t tab_6bc5[2]` | 3 | 10 | round-trip byte per byte, uscita 2 |
-| `tab_velocita_6f3d` | 8 | rom_dati_varie.c | `const uint8_t tab_velocita_6f3d[8]` | 3 | 42 | round-trip byte per byte, uscita 2 |
+| `tab_6bc5` | 8 | rom_dati_varie.c | `const uint8_t tab_6bc5[8]` | 3 | 42 | round-trip byte per byte, uscita 2 |
+| `tab_velocita_6f3d` | 12 | rom_dati_varie.c | `const uint8_t tab_velocita_6f3d[12]` | 3 | 63 | round-trip byte per byte, uscita 2 |
 | `tab_70ee` | 15 | rom_dati_varie.c | `const uint8_t tab_70ee[15]` | 3 | 78 | round-trip byte per byte, uscita 2 |
 | `tab_direzioni_7196` | 8 | rom_dati_varie.c | `const uint8_t tab_direzioni_7196[8]` | 3 | 42 | round-trip byte per byte, uscita 2 |
-| `tab_velocita_7468` | 4 | rom_dati_varie.c | `const uint8_t tab_velocita_7468[4]` | 3 | 21 | round-trip byte per byte, uscita 2 |
-| `tab_urto_754c` | 28 | rom_dati_varie.c | `const uint8_t tab_urto_754c[28]` | 4 | 146 | round-trip byte per byte, uscita 2 |
+| `tab_velocita_7468` | 8 | rom_dati_varie.c | `const uint8_t tab_velocita_7468[8]` | 3 | 42 | round-trip byte per byte, uscita 2 |
+| `tab_urto_754c` | 44 | rom_dati_varie.c | `const uint8_t tab_urto_754c[44]` | 4 | 230 | round-trip byte per byte, uscita 2 |
 | `tab_demo_765e` | 30 | rom_dati_varie.c | `const uint8_t tab_demo_765e[30]` | 4 | 157 | round-trip byte per byte, uscita 2 |
 | `copione_demo_767c` | 612 | rom_dati_varie.c | `const uint8_t copione_demo_767c[612]` | 28 | 3197 | round-trip byte per byte, uscita 2 |
 | `testi_79a4` | 59 | rom_dati_testi.c | `const uint8_t testi_79a4[59]` | 5 | 308 | round-trip byte per byte, uscita 2 |
@@ -367,7 +371,7 @@ voce, più 6 di intestazione per file; byte = n × 85587 / 16384) e controllo.
 | `tab_anim2_9dcd` | 2425 | rom_dati_oggetti.c | `const uint8_t tab_anim2_9dcd[2425]` | 104 | 12668 | round-trip byte per byte, uscita 2 |
 | `tab_comparse_a746` | 328 | rom_dati_oggetti.c | `const uint8_t tab_comparse_a746[328]` | 16 | 1713 | round-trip byte per byte, uscita 2 |
 | `tab_comparse_rec_a88e` | 1620 | rom_dati_oggetti.c | `const uint8_t tab_comparse_rec_a88e[1620]` | 70 | 8463 | round-trip byte per byte, uscita 2 |
-| `tab_campi_aee2` | 580 | rom_dati_oggetti.c | `const uint8_t tab_campi_aee2[580]` | 27 | 3030 | round-trip byte per byte, uscita 2 |
+| `tab_campi_aee2` | 620 | rom_dati_oggetti.c | `const uint8_t tab_campi_aee2[620]` | 28 | 3239 | round-trip byte per byte, uscita 2 |
 | `tab_palette_f000` | 104 | rom_dati_fondali.c | `const uint8_t tab_palette_f000[104]` | 7 | 543 | round-trip byte per byte, uscita 2 |
 | `tab_fondali_f068` | 208 | rom_dati_fondali.c | `const uint8_t tab_fondali_f068[208]` | 11 | 1087 | round-trip byte per byte, uscita 2 |
 | `tab_sovrapposizioni_f138` | 176 | rom_dati_fondali.c | `const uint8_t tab_sovrapposizioni_f138[176]` | 10 | 919 | round-trip byte per byte, uscita 2 |
@@ -402,8 +406,8 @@ da rete.
 | 0000-BFFF, codice eseguito in MAME (`out/copertura.txt`) | 7815 | 7815 | codice tradotto in C: non serve più come byte |
 | 0000-80A4, non eseguito e fuori voce | 20565 | 20565 | quasi tutto codice tradotto mai eseguito nelle tracce MAME (p.es. 5005-5506, 566E-5C31, 610C-6652); più dati di percorsi non misurati |
 | 0000-80A4, voci | 4637 | 4637 - letti | tabelle inline, vedi tabella |
-| 80A5-BFFF, voci | 10651 | 10651 - letti | dati |
-| 80A5-BFFF, fuori voce | 5568 | 5568 | dati mai letti: B126-BFFF (3802, coda della ROM), 8693-89CC (826), 8B5B-8D10 (438), 8A31-8B2C (252), 8D5C-8DD3 (120), 8D15-8D58 (68) |
+| 80A5-BFFF, voci | 10691 | 10691 - letti | dati |
+| 80A5-BFFF, fuori voce | 5528 | 5528 | dati mai letti: B14E-BFFF (3762, coda della ROM), 8693-89CC (826), 8B5B-8D10 (438), 8A31-8B2C (252), 8D5C-8DD3 (120), 8D15-8D58 (68) |
 | C000-EFFF | 12288 | 12288 | zeri di `build_rom.sh`: `leggi()` serve tutto ≥ C000 da `ram[]`, `rom[]` non vi è mai indicizzato |
 | F000-F996, voci | 2455 | 1789 | tabelle e flussi dei fondali e delle palette, letti solo in `ram[]` dopo la copia |
 | F997-FFFF | 1641 | 1641 | riempimento 00/FF (un solo byte diverso) |
@@ -596,3 +600,24 @@ stessa procedura (disassemblato, `VOCI`, `estrai_rom.py`). La tabella
 - Promemoria per il lotto 64: restano disallineati `README.md` r. 173-179
   («four ROM files», `solomon.zip` richiesto per giocare) e `NOTICE.md` r.
   9-11 (`decomp/harness/audio_dati*.c`, `decomp/harness/video_dati_*.c`).
+
+## Esito del lotto 66
+
+Data: 2026-11-06 (brief 66). La spazzata delle 52 stanze (`gioca --stanza N
+-n 3000 --muto --riproduci` seme 4) leggeva fuori voce in 13 stanze; con 2D0F
+tradotta si aggiunge la griglia della stanza 29. Due voci nuove e cinque
+allargate, chiuse con il disassemblato e i byte di `main64.bin`:
+
+| voce | prima | ora | motivo |
+|---|---|---|---|
+| `tab_2d72` | — | 2D72-2D89 | 24 byte di bit della griglia, `sub_3812` da 2D0F (stanza 29, c243 = 1D) |
+| `tab_66c4` | — | 66C4-66D3 | 16 byte copiati da `sub_3569` con A = 5 (`passo_6676`); 66D4 è codice |
+| `tab_6bc5` | 6BC5-6BC6 | 6BC5-6BCC | 4 parole, indice `(IY+4) & 3` in `sub_6b9b` |
+| `tab_velocita_6f3d` | 6F3D-6F44 | 6F3D-6F48 | 6 parole, indice `(IY+4) - 16` in `sub_6eca`; 6F49 è codice |
+| `tab_velocita_7468` | 7468-746B | 7468-746F | 4 coppie; 7470 è codice |
+| `tab_urto_754c` | 754C-7567 | 754C-7577 | `sub_756c` legge per indice fuori tabella i byte del codice di 756C (756E-756F, 7576-7577), come l'originale |
+| `tab_campi_aee2` | AEE2-B125 | AEE2-B14D | record chiusi da `2D FF 00 FF` a B14A |
+
+Totale: 92 voci del principale (20204 byte «letto dalla ROM»), 93 tabelle in
+`tecmo/` con il riempimento, 21849 byte. La coda B14E-BFFF (3762 byte) resta
+mai letta e fuori voce. Dopo il lotto la spazzata non dà né FERMO né AVVISO.
