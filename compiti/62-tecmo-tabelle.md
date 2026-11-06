@@ -314,3 +314,17 @@ Tutte e quattro le domande sono preferenze, accettate con le proposte:
    dell'utente è che tutto il materiale Tecmo stia in `tecmo/` prima della
    riscrittura di README/NOTICE (lotto 64).
 4. Bersaglio `rom` del Makefile invariato, solo commento.
+
+## Esito (2026-11-06)
+
+Ciclo passato al primo colpo (33º). Commit `8fa18d0`; verificatore: 12/12
+passate — `tecmo/` creata (5 rom_dati_*.c + rom_voci.c + rom_dati.h + README
+inglese), carica_rom() ricompone rom[] dalle tabelle, `gioca` non apre più
+main64.bin (strace: 0). Numeri finali: 91 voci, 20448 byte (il banco ha
+scoperto 9 voci sottostimate dal censimento: 2 nuove — tab_corpi_3b11,
+tab_porta_47c7 — e 7 allargate; CENSIMENTO-ROM.md aggiornato). Fedeltà:
+giro completo, 4 ricette, oracolo (a239d0a940bec0b9 / c4b40fea06623a96),
+banco 1422/1422, 10 semi — tutto identico. Sentinella «fuori voce» sempre
+attiva: un avviso su stderr in partita = tabella ancora corta da allargare.
+Fatto corretto: 8.3jk è 32768 byte (si usano i primi 4096). Token: analista
+Fable ~105k, sviluppatore Opus ~130k, verificatore Sonnet ~26k.
