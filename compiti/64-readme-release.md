@@ -340,3 +340,14 @@ Non toccare i numeri della tabella iniziale.
   `gioca` da clone pulito con `strip`; note `RELEASE-NOTES-v1.01.md`.
 - Verifiche 1-10 passate (la 8 sul clone con i documenti copiati prima del
   commit, la 9 dopo il commit).
+
+## Esito (2026-11-06)
+
+Ciclo passato al primo colpo (35º). Commit `c2aa7f7`; verificatore: 10/10
+passate — README inglese nuovo (titolo/sottotitolo decisi, 4 miniature
+cliccabili, How to play senza ROM), NOTICE.md in inglese, pacchetto
+solomons-key-v1.01-linux-x86_64.tar.gz (229138 byte, sha256 2d7da8ce…,
+binario da clone pulito con hash verificati) + SHA256SUMS +
+RELEASE-NOTES-v1.01.md in decomp/out/release/ fuori da git. Release v1.01
+pubblicata dalla chat principale con gh (tag + asset + copertina). Token:
+analista Sonnet ~56k, sviluppatore Opus ~61k, verificatore Sonnet ~23k.
