@@ -92,7 +92,7 @@ VOCI = [
     ('P', 'tab_velocita_7468', 0x7468, 0x746B, L, 'rst 10 (comparsa)', 'coppie di byte', 'misurata'),
     ('P', 'tab_urto_754c', 0x754C, 0x7567, L, 'rst 10 (comparsa)', 'parole urto X (754C) e Y (755C)', 'misurata'),
     ('P', 'tab_demo_765e', 0x765E, 0x767B, L, '760B 2551', 'record da 3 byte', 'misurata'),
-    ('P', 'copione_demo_767c', 0x767C, 0x770E, L, '01C5 (NMI)', 'coppie (chiave, codice)', 'misurata'),
+    ('P', 'copione_demo_767c', 0x767C, 0x78DF, L, '01C5 (NMI)', 'tre copioni di coppie (chiave, codice) da 765E: 767C, 76F6, 77D6; codice a 78E0 (brief 65)', 'puntatori'),
     ('P', 'testi_79a4', 0x79A4, 0x79DE, L, '6771', 'stringhe', 'misurata'),
     ('P', 'testi_79fa', 0x79FA, 0x7A0A, L, '6771', 'stringhe', 'misurata'),
     ('P', 'testi_7a3a', 0x7A3A, 0x7A55, L, '6771', 'stringhe', 'misurata'),
@@ -158,10 +158,10 @@ _s('attivita_attract.c', (43,), 'V', 'tab_attract_43e5')
 _s('attivita_attract.c', (45,), 'V', 'tab_attract_43fd')
 _s('attivita_attract.c', (75, 78, 79), 'V', 'tab_demo_765e')
 _s('attivita_attract07.c', (71, 72), 'V', 'tab_attract_2d4a')
-_s('attivita_attract07a.c', (34,), 'V', 'tab_quadri_3a0e')
-_s('attivita_attract07a.c', (94,), 'V', 'tab_82d3')
-_s('attivita_attract07a.c', (121, 126), 'V', 'tab_quadri_85ec')
-_s('attivita_attract07a.c', (223,), 'V', 'tab_avanzamento_8dd4')
+_s('attivita_attract07a.c', (43, 44), 'V', 'tab_quadri_3a0e')
+_s('attivita_attract07a.c', (98,), 'V', 'tab_82d3')
+_s('attivita_attract07a.c', (125, 130), 'V', 'tab_quadri_85ec')
+_s('attivita_attract07a.c', (228,), 'V', 'tab_avanzamento_8dd4')
 _s('attivita_attract07b.c', (46, 50, 59, 69, 70, 80, 96, 121, 125), 'V', 'tab_stanze_8ea4')
 _s('attivita_attract07c.c', (41,), 'V', 'tab_303e')
 _s('attivita_attract07c.c', (269,), 'V', 'tab_parole_8b2d')

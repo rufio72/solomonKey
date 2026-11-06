@@ -52,6 +52,7 @@ oggi servono 32 byte di dato più il codice del driver per decisione del brief).
      `gioca --riproduci F -n 20000 --muto`: tutti `rc=0`;
    - in più, senza ingressi: `gioca -n 30000 --muto` si ferma con `FERMO
      routine 39B9 mancante al frame 3385` (coda nota della demo).
+     Dal lotto 65 39B9 è tradotta: `-n 30000` corre senza FERMO.
 3. `python3 -I censimento_rom.py --unisci <file della copia>` scrive
    `out/censimento_rom_letti.txt` (non versionato: 171 siti, 342 intervalli
    uniti del principale). La copia si cancella a fine lavoro.
@@ -188,7 +189,7 @@ seguente. Nessuna voce si sovrappone a un'altra e in ognuna i byte di
 | `tab_velocita_7468` | 7468-746B | 4 | letto dalla ROM | rst 10 (comparsa) | coppie di byte | misurata | 4/4 | 7.3h+7468 |
 | `tab_urto_754c` | 754C-7567 | 28 | letto dalla ROM | rst 10 (comparsa) | parole urto X (754C) e Y (755C) | misurata | 16/28 | 7.3h+754C |
 | `tab_demo_765e` | 765E-767B | 30 | letto dalla ROM | 760B 2551 | record da 3 byte | misurata | 15/30 | 7.3h+765E |
-| `copione_demo_767c` | 767C-770E | 147 | letto dalla ROM | 01C5 (NMI) | coppie (chiave, codice) | misurata | 147/147 | 7.3h+767C |
+| `copione_demo_767c` | 767C-78DF | 612 | letto dalla ROM | 01C5 (NMI) | tre copioni di coppie (chiave, codice) da 765E: 767C, 76F6, 77D6; codice a 78E0 (brief 65) | puntatori | 147/612 | 7.3h+767C |
 | `testi_79a4` | 79A4-79DE | 59 | letto dalla ROM | 6771 | stringhe | misurata | 59/59 | 7.3h+79A4 |
 | `testi_79fa` | 79FA-7A0A | 17 | letto dalla ROM | 6771 | stringhe | misurata | 17/17 | 7.3h+79FA |
 | `testi_7a3a` | 7A3A-7A55 | 28 | letto dalla ROM | 6771 | stringhe | misurata | 28/28 | 7.3h+7A3A |
@@ -330,7 +331,7 @@ voce, più 6 di intestazione per file; byte = n × 85587 / 16384) e controllo.
 | `tab_velocita_7468` | 4 | rom_dati_varie.c | `const uint8_t tab_velocita_7468[4]` | 3 | 21 | round-trip byte per byte, uscita 2 |
 | `tab_urto_754c` | 28 | rom_dati_varie.c | `const uint8_t tab_urto_754c[28]` | 4 | 146 | round-trip byte per byte, uscita 2 |
 | `tab_demo_765e` | 30 | rom_dati_varie.c | `const uint8_t tab_demo_765e[30]` | 4 | 157 | round-trip byte per byte, uscita 2 |
-| `copione_demo_767c` | 147 | rom_dati_varie.c | `const uint8_t copione_demo_767c[147]` | 9 | 768 | round-trip byte per byte, uscita 2 |
+| `copione_demo_767c` | 612 | rom_dati_varie.c | `const uint8_t copione_demo_767c[612]` | 28 | 3197 | round-trip byte per byte, uscita 2 |
 | `testi_79a4` | 59 | rom_dati_testi.c | `const uint8_t testi_79a4[59]` | 5 | 308 | round-trip byte per byte, uscita 2 |
 | `testi_79fa` | 17 | rom_dati_testi.c | `const uint8_t testi_79fa[17]` | 3 | 89 | round-trip byte per byte, uscita 2 |
 | `testi_7a3a` | 28 | rom_dati_testi.c | `const uint8_t testi_7a3a[28]` | 4 | 146 | round-trip byte per byte, uscita 2 |
@@ -538,7 +539,7 @@ con «AVVISO: lettura ROM fuori voce» se legge sotto C000 fuori da ogni voce.
 
 Il banco (`harness --tutte`, non misurato nel brief 61) leggeva fuori voce in
 13 catture (anche forzate): voci chiuse con il disassemblato e la struttura dei
-byte. Due voci nuove e sette allargate (`VOCI` di `censimento_rom.py`), più una ottava dal collaudo (sotto):
+byte. Due voci nuove e sette allargate (`VOCI` di `censimento_rom.py`), più una ottava dal collaudo e una nona dal lotto 65 (sotto):
 
 | voce | prima | ora | motivo |
 |---|---|---|---|
@@ -559,8 +560,16 @@ puntano a record da 8661 a 89C2, ognuno chiuso da FF; l'ultimo finisce a 89CC,
 subito prima di `tab_89cd`. La voce passa da 8661-8692 (50 byte, *misurata*) a
 8661-89CC (876 byte, *puntatori*).
 
-Totale: 90 voci del principale nel censimento (89 «letto dalla ROM», 19629
-byte, più `tab_8089`), 91 tabelle in `tecmo/` con il riempimento, 21274 byte.
+Lotto 65 (brief 65, 2026-11-06): con 39B9 tradotta la demo della stanza 33
+gira oltre e la sentinella ha segnalato 770F-7712 nel libero senza ingressi.
+`copione_demo_767c` non è un copione solo: la tabella 765B (record da 3 byte,
+stanza e parola, letta da 760B) punta a tre copioni, 767C (stanza 00), 76F6
+(stanza 33) e 77D6 (stanza 02), senza terminatore; l'ultimo finisce a 78DF,
+subito prima del codice di 78E0 (prima voce della tabella 75EC). La voce
+passa da 767C-770E (147 byte, *misurata*) a 767C-78DF (612 byte, *puntatori*).
+
+Totale: 90 voci del principale nel censimento (89 «letto dalla ROM», 20094
+byte, più `tab_8089`), 91 tabelle in `tecmo/` con il riempimento, 21739 byte.
 Le altre voci di estensione *misurata* o *stimata* restano come nel brief 61:
 una lettura fuori voce nel gioco vero si vede dall'avviso e si chiude con la
 stessa procedura (disassemblato, `VOCI`, `estrai_rom.py`). La tabella

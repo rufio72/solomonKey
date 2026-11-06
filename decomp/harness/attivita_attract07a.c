@@ -14,27 +14,34 @@
 #include "attivita_attract07.h"
 
 /* Fase 0, 3861: quadro di presentazione. c09a = 1A, 1B con c243 >= 24
- * (386A inc c; le sette coppie di 3A0E non scattano mai), barra (31E9), tabellone (349F), scritta (31CE),
- * suono 3F, palette (3F88 con HL = 80B3), spegne il bit 0 di c044, riempie
- * d840-d85f con 50, due stringhe a dc40 e dc4d (6771 con HL = 39C0), spegne
- * i bit 4-5 di c045, due tile 60 a d840, poi dalla tabella ROM 85EC il
- * quadro b e il resto c di c243: cifre a d611, d613 (e c245 = cifra + 1),
- * dfbf, c244 = b e, se b è cambiato, c251-c257 = FF; con i bit 1-2 di c045 spenti scrive una terza stringa
- * a dfb8 (6771 con HL = 39FA). Con c243 nella tabella 82D3 (stanze
- * bonus/finale, lotto 59) accende il bit 4 di c045 (non per 32), scrive
- * «BONUS» o «FINAL» a d5ca e «PRISON!» a d5d0 e, salvo 32, c09a = 1E; con
- * il quadro >= 10 scrive la cifra delle decine a d610 (3960). Questi rami
- * non sono mai eseguiti nel giro e non hanno punti di sincronia. */
+ * (386A inc c), oppure il secondo byte della coppia di 3A0E il cui primo
+ * byte vale c243 (3874, prima stanza di ogni quadro dal 5: 13 o 14), barra
+ * (31E9), tabellone (349F), scritta (31CE), suono 3F, palette (3F88 con
+ * HL = 80B3), spegne il bit 0 di c044, riempie d840-d85f con 50, due
+ * stringhe a dc40 e dc4d (6771 con HL = 39C0) e, con i bit 1-2 di c045
+ * entrambi accesi, una terza a dc55 (38BA, HL = 39CB). Il bit 0 di c045
+ * sceglie la cella dei due tile 60: d855 (38CD) invece di d840. Scrive in
+ * e604 (bit 1 di e604 spento → 1, 38D9) AND c045 e porta il bit 0 del
+ * risultato nel bit 5 di c045 (bit 4-5 spenti prima). Poi dalla tabella
+ * ROM 85EC il quadro b e il resto c di c243: cifre a d611, d613 (e c245 =
+ * cifra + 1), a dfbe-dfbf il numero della stanza c246 + 1 (decine solo se
+ * diverse da '0', 3986) oppure, con il bit 1 di c24e, la parola D7D6
+ * (398B); c244 = b e, se b è cambiato, c251-c257 = FF; con i bit 1-2 di
+ * c045 spenti scrive una stringa a dfb8 (6771 con HL = 39FA) e, per
+ * c243 = 33, «  DEMO  » a d60c (39B9, HL = 3A04). Con c243 nella tabella
+ * 82D3 (stanze bonus/finale, lotto 59) accende il bit 4 di c045 (non per
+ * 32), scrive «BONUS» o «FINAL» a d5ca e «PRISON!» a d5d0 e, salvo 32,
+ * c09a = 1E; con il quadro >= 10 scrive la cifra delle decine a d610
+ * (3960). I rami fuori dal giro (lotti 59 e 65) non hanno punti di
+ * sincronia. */
 void fase_07_3861(void)
 {
     struct z80 z = {0};
     uint8_t a = M(0xc243);                     /* 3861 */
     uint8_t c = (a >= 0x24) ? 0x1b : 0x1a;     /* 3864-386A (inc c) */
-    for (int i = 0; i < 7; i++)                /* 386D-3876 */
-        if (a == leggi((uint16_t)(0x3a0e + 2 * i))) {
-            nemici_manca(0x3874);
-            return;
-        }
+    for (int i = 0; i < 7; i++)                /* 386D-3876: nessuna uscita */
+        if (a == leggi((uint16_t)(0x3a0e + 2 * i)))
+            c = leggi((uint16_t)(0x3a0e + 2 * i + 1));   /* 3874 ld c,(hl) */
     NEMICI_PUNTO(0x3861, 0x3879);
     M(0xc09a) = c;                             /* 3879 (ld a,c) */
     NEMICI_PUNTO(0x387c, 0x387f);
@@ -69,24 +76,21 @@ void fase_07_3861(void)
 
     uint8_t b = M(0xc045);                     /* 38AF */
     if ((b & 0x06) == 0x06) {                  /* 38B3-38B7 */
-        nemici_manca(0x38ba);
-        return;
+        SET_HL(&z, 0x39cb);                    /* 38BA */
+        SET_DE(&z, 0xdc55);
+        sub_6771(&z);                          /* 38C0 (B non toccato) */
     }
-    if (b & 0x01) {                            /* 38C3-38C8 */
-        nemici_manca(0x38ca);
-        return;
-    }
-    if (!(leggi_porta(0xe604) & 0x02)) {       /* 38D0-38D7 */
-        nemici_manca(0x38d9);
-        return;
-    }
-    scrivi_porta(0xe604, 0x00);                /* 38DC: c = 0, a = c & b */
+    uint16_t cella = (b & 0x01) ? 0xd855 : 0xd840;   /* 38C3-38CD */
+    uint8_t cc = (leggi_porta(0xe604) & 0x02) ? 0x00 : 0x01;   /* 38D0-38D9 */
+    uint8_t p = (uint8_t)(cc & b);             /* 38DA-38DB */
+    scrivi_porta(0xe604, p);                   /* 38DC */
     NEMICI_PUNTO(0x38af, 0x38ec);
-    M(0xc045) = (uint8_t)(M(0xc045) & 0xcf);   /* 38EC (rr c: riporto 0) */
+    M(0xc045) = (uint8_t)((M(0xc045) & 0xcf)   /* 38E0-38EC: rr c, or 20 */
+                          | ((p & 0x01) ? 0x20 : 0x00));
     NEMICI_PUNTO(0x38ed, 0x38ef);
-    M(0xd840) = 0x60;                          /* 38EF */
+    M(cella) = 0x60;                           /* 38EF */
     NEMICI_PUNTO(0x38f0, 0x38f2);
-    M(0xd841) = 0x60;                          /* 38F2 */
+    M((uint16_t)(cella + 1)) = 0x60;           /* 38F2 */
     uint8_t q = M(0xc243);                     /* 38F4-38F7 */
     uint16_t t = 0x82d3;                       /* 38F8: 03 0C 15 1F 28 32 FF */
     int uguale = 0;
@@ -146,17 +150,16 @@ void fase_07_3861(void)
     NEMICI_PUNTO(0x396c, 0x396d);
     M(0xc245) = cifra;                         /* 396D */
     if (M(0xc24e) & 0x02) {                    /* 3970-3975 */
-        nemici_manca(0x398b);
-        return;
+        M(0xdfbe) = 0xd6;                      /* 398B-398E ld (dfbe),hl */
+        M(0xdfbf) = 0xd7;                      /* HL = D7D6, poi 3991 */
+    } else {
+        z.a = (uint8_t)(M(0xc246) + 1);        /* 3977-397A */
+        sub_3a1c(&z);                          /* 397B */
+        if (z.d != 0x30)                       /* 3981-3984 */
+            M(0xdfbe) = z.d;                   /* 3986 */
+        NEMICI_PUNTO(0x396e, 0x3988);
+        M(0xdfbf) = z.e;                       /* 3988, poi 3989 jr 3991 */
     }
-    z.a = (uint8_t)(M(0xc246) + 1);            /* 3977-397A */
-    sub_3a1c(&z);                              /* 397B */
-    if (z.d != 0x30) {                         /* 3981-3984 */
-        nemici_manca(0x3986);
-        return;
-    }
-    NEMICI_PUNTO(0x396e, 0x3988);
-    M(0xdfbf) = z.e;                           /* 3988 */
     uint8_t prima = M(0xc244);                 /* 3992-3995 */
     NEMICI_PUNTO(0x3989, 0x3996);
     M(0xc244) = quadro;                        /* 3996 */
@@ -176,8 +179,10 @@ void fase_07_3861(void)
     SET_DE(&z, 0xdfb8);
     sub_6771(&z);                              /* 39B0 */
     NEMICI_PUNTO(0x39b3, 0x39b8);
-    if (M(0xc243) == 0x33)                     /* 39B3-39B8 ret nz */
-        nemici_manca(0x39b9);
+    if (M(0xc243) == 0x33) {                   /* 39B3-39B8 ret nz */
+        SET_DE(&z, 0xd60c);                    /* 39B9: HL = 3A04, da 39B0 */
+        sub_6771(&z);                          /* 39BC «  DEMO  » */
+    }                                          /* 39BF ret */
 }
 
 /* Rami 352E-3547 della fase 1 (lotto 54, mai eseguiti nel giro, quindi

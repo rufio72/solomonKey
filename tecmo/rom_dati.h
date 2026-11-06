@@ -52,7 +52,7 @@ extern const uint8_t tab_direzioni_7196[8];  /* 7196-719D */
 extern const uint8_t tab_velocita_7468[4];  /* 7468-746B */
 extern const uint8_t tab_urto_754c[28];  /* 754C-7567 */
 extern const uint8_t tab_demo_765e[30];  /* 765E-767B */
-extern const uint8_t copione_demo_767c[147];  /* 767C-770E */
+extern const uint8_t copione_demo_767c[612];  /* 767C-78DF */
 extern const uint8_t testi_79a4[59];  /* 79A4-79DE */
 extern const uint8_t testi_79fa[17];  /* 79FA-7A0A */
 extern const uint8_t testi_7a3a[28];  /* 7A3A-7A55 */

@@ -51,7 +51,7 @@ const RomVoce rom_voci[] = {
     { 0x7468, 4, tab_velocita_7468 },
     { 0x754C, 28, tab_urto_754c },
     { 0x765E, 30, tab_demo_765e },
-    { 0x767C, 147, copione_demo_767c },
+    { 0x767C, 612, copione_demo_767c },
     { 0x79A4, 59, testi_79a4 },
     { 0x79FA, 17, testi_79fa },
     { 0x7A3A, 28, testi_7a3a },

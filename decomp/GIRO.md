@@ -133,7 +133,8 @@ spedidore; 9 a metà attività, tutte nel primo corpo 06 (frame 603-611).
   mai eseguiti nei frame 0-2410 chiamano `nemici_manca(indirizzo)` (386A, 3874,
   38BA, 38CA, 38D9, 3901, 3903, 3960, 398B, 3986, 39B9, 351E, 353B, 352E,
   365F, 366C, 2D0F, 2E04; 351E, 353B e 352E tradotti nel lotto 54; 386A nel
-  57; 3901, 3903 e 3960 nel lotto 59); il bit 4 di c045 in 2D07 legge R con
+  57; 3901, 3903 e 3960 nel lotto 59; 3874, 38BA, 38CA, 38D9, 398B, 3986,
+  39B9, 365F e 366C nel lotto 65: restano 2D0F e 2E04); il bit 4 di c045 in 2D07 legge R con
   `nemici_r_somma()` e dal lotto 59 rimescola la griglia c0bd (2D1F-2D48).
 - Punti `NEMICI_PUNTO`: uno per scrittura in RAM o chiamata, secondo la regola
   di `nemici.h`; nei cicli (fase 0 d840 e c251, fase 2, fase 3, fase 4
@@ -629,4 +630,31 @@ Misure (parte A):
   ed1cb697b9c3c557;
 - semi 4 e 67 `-n 40000`: «routine 39B9 mancante» ai frame 25937 e 25198
   (prima 3901), hash invariati. 39B9 è la coda della fase 0 con c243 = 33
-  (dopo la finale): censita, non tradotta.
+  (dopo la finale): censita, non tradotta (tradotta nel lotto 65, sotto).
+
+### Lotto 65 (brief 65): fase 0 del 07 completa, 365F/366C della fase 4
+
+Tradotti tutti i rami `nemici_manca` di `fase_07_3861`: 3874 (c09a dal
+secondo byte della coppia di 3A0E, passaggio di quadro), 38BA (terza
+stringa a dc55), 38CA (tile 60 a d855), 38D9 (e604 e bit 5 di c045), 398B
+(dfbe = D7D6), 3986 (decine della stanza a dfbe), 39B9 («  DEMO  » a d60c
+per c243 = 33); nella fase 4 (358F) 366C (suono 23) e 365F (valore
+(bit 6-7) + 29 se il bit 0 di c24e era acceso). Rami senza punti: giro,
+oracolo e le quattro ricette identici. Catture `f0q33` (con c045 = 0 per
+passare 39A9), `f0q05`, `f0q0F`, `f0q2B`, `f0p6`, `f0p1`, `f0w2`, `f0w3`,
+`f0e0` (la poke di e604 non ha effetto in MAME: 38D9 tradotta dal
+disassemblato) e `f1s07a`/`f1s07b`/`f1s1B` (fase 4, c19d = 4), tutte OK.
+La sentinella ha segnalato 770F-7712 subito dopo il fix: `copione_demo_767c`
+allargato a 767C-78DF (`CENSIMENTO-ROM.md`).
+
+Misure:
+- libero senza ingressi `-n 4000`: nessun FERMO (prima 39B9 al 3385),
+  `HASH ultimo e9690b9c1421f21a`, `AUDIO hash 7fc67068a194ac59` (due volte
+  uguali); `-n 30000`: nessun FERMO, `cfde832053b94095` / `58cc653154347157`;
+- seme 4 `-n 40000`: nessun FERMO, `0b8b015f62457828` / `4a6401329f8897cb`;
+  seme 67: nessun FERMO, `ec7b1103568e16ad` / `aa8cb02441cad47e`;
+- `--stanza N` col seme 4: nessun 3874, 365F, 366C; restano `2E04` al
+  frame 7790 della stanza 5 (`-n 8000`, `3d9c0ae560d66f59`) e `2D0F` al
+  1562 della stanza 29 (censiti, fuori famiglia); stanza 35 `-n 8000`
+  `a6a9a24e144e41ae`. Avvisi «fuori voce» preesistenti in 13 stanze
+  (elenco in `STATO.md`).

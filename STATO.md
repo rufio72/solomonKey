@@ -26,8 +26,8 @@ Release pubblicate:
 |---|---|
 | Motore dei nemici | completo, 220/220 routine |
 | Codici della tabella corpi 3B11 | 40/40 tradotti |
-| Banco di prova (`harness --tutte`) | 335 voci, 1422 catture, 0 fallite |
-| Tabelle Tecmo in `tecmo/` (brief 62-63) | 91 del programma (21274 byte) + driver audio + musica + grafica |
+| Banco di prova (`harness --tutte`) | 335 voci, 1434 catture, 0 fallite |
+| Tabelle Tecmo in `tecmo/` (brief 62-63) | 91 del programma (21739 byte) + driver audio + musica + grafica |
 | Letture ROM a runtime | 0 (`strace`: né `main64.bin` né `1.3jk`) |
 | Giro completo | 0-5499, saldatura 0 byte, 0 divergenze nello spedidore, 13 frame con hash coincidenti |
 | Destinazioni mai osservate | 59 in `decomp/ZONE-MAI-ESEGUITE.md` (53 DATO, 6 RAGGIUNGIBILI) |
@@ -47,7 +47,12 @@ Release pubblicate:
 - **Gioco libero completo** (brief 52-59): tutti i corpi, raccolta con
   effetto, registro R surrogato (LCG), cadenza del motore dei nemici a
   costo (`MACCHINA_COSTO`), stanze bonus/finale, classifica, morte e
-  riavvio attract senza FERMO; `--scanlines`.
+  riavvio attract senza FERMO; `--scanlines`. Lotto 65 (brief
+  `compiti/65-routine-39b9.md`): fase 0 del corpo 07 completa (3874 passaggio
+  di quadro, 38BA, 38CA, 38D9, 398B, 3986, 39B9 «DEMO») e 365F/366C della
+  fase 4; il libero senza ingressi corre 30000 frame senza FERMO (hash
+  cfde832053b94095 / audio 58cc653154347157), semi 4 e 67 40000 frame senza
+  FERMO; `copione_demo_767c` allargato a 767C-78DF.
 - **Mappe degli oggetti nascosti** (brief 60): `docs/special/` con le 52
   stanze, 128 oggetti in 40 stanze, renderizzatore Python identico al C.
 - **Autosufficienza** (brief 61-63): censimento delle letture ROM
@@ -68,8 +73,13 @@ Release pubblicate:
 2. **Lotto 65 (in coda, deciso)**: versione browser — C+SDL2 compilato in
    WebAssembly con Emscripten, pubblicata su GitHub Pages, link nel
    README. Niente filesystem virtuale: i dati sono già C compilato.
-3. **Code minori**: routine 39B9 (solo demo post-game-over, frame 3385 e
-   ~25-26k dei semi 4/67, censita e non tradotta per decisione); fondale
+3. **Code minori**: 39B9 chiusa nel lotto 65. Restano censiti
+   (`--stanza N -n 8000/3000 --riproduci` seme 4): `routine 2E04 mancante`
+   (fase 16 del 07) al frame 7790 della stanza 5 (hash 3d9c0ae560d66f59) e
+   `routine 2D0F mancante` (fase 5) al frame 1562 della stanza 29; letture
+   «fuori voce» già presenti prima del lotto 65 in 66C4-66D3, 6BC7-6BC8,
+   6F45-6F48, 746C-746F, 756E-756F, 7576-7577, B126-B14D (stanze 2 6 11 16
+   18 20 23 30 32 33 38 44 50: tabelle del censimento ancora corte); fondale
    322A avanti ~5 frame nel libero (cadenza, vedi sotto); mappa dei
    pulsanti nel README (quale è BUTTON1/BUTTON2; mappa DAIJA predefinita
    0,1,7,6); classi special 0x16/0x17/0x35 mai viste in chiaro (si
