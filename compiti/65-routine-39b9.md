@@ -343,3 +343,18 @@ Deviazioni:
   con la sentinella a 0: `30bb202eb2a5d714`).
 - `censimento_rom.py`: numeri di riga dei siti di 07a/07b aggiornati; il file
   locale non versionato `out/censimento_rom_letti.txt` rimappato alle righe nuove.
+
+## Esito del ciclo (2026-11-06)
+
+Ciclo passato al primo colpo (36º). Commit `0437b66` (A+B) + `b90df57` (C);
+verificatore: 12/12 passate (la 12 segnava solo i .log delle catture
+riscritti dalla sua stessa riesecuzione, ripristinati per ricetta). La fase 0
+del corpo 07 non ha più rami mancanti (7 routine: 3874 38BA 38CA 38D9 398B
+3986 39B9) e la fase 4 ha 365F/366C tradotte; banco a 1434 catture (12
+nuove); tabella copione_demo_767c allargata a 767C-78DF (sentinella);
+censimento a 202 occorrenze. La spazzata delle 52 stanze a 3000 frame ha un
+solo FERMO residuo (2D0F, stanza 29) più 2E04 (stanza 5, frame 7790) — fuori
+perimetro per decisione, vanno al lotto 66 con le 7 zone fuori voce di 13
+stanze annotate in STATO.md. Semi 4 e 67 a 40000 frame senza FERMO. Token:
+analista Sonnet ~144k (brief + estensione B/C), sviluppatore Opus ~133k,
+verificatore Sonnet ~27k.
