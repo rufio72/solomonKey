@@ -5,10 +5,10 @@
 Original game © 1986 Tecmo (now Koei Tecmo). This project is an unofficial, non-commercial study and preservation effort; see [NOTICE.md](NOTICE.md).
 
 <p>
-<img src="docs/cover.png" width="160" alt="The decompiled C port running in its SDL2 window">
-<img src="decomp/out/video/titolo.png" width="160" alt="Title screen">
-<img src="decomp/out/video/gioco.png" width="160" alt="Room 1 in play">
-<img src="decomp/out/video/finale.png" width="160" alt="Rest bonus screen">
+<a><img src="docs/cover.png" width="160" alt="The decompiled C port running in its SDL2 window"></a>
+<a><img src="decomp/out/video/titolo.png" width="160" alt="Title screen"></a>
+<a><img src="decomp/out/video/gioco.png" width="160" alt="Room 1 in play"></a>
+<a><img src="decomp/out/video/finale.png" width="160" alt="Rest bonus screen"></a>
 </p>
 
 Hidden-object maps for all 52 rooms: [`docs/special/`](docs/special/).
