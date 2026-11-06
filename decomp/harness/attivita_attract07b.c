@@ -30,8 +30,10 @@ static uint8_t raddoppia_bcd(uint8_t e, uint8_t *cy)
  * 4B0E in c45f-c462), una coppia (D, E) che aggiorna c248, c249 e la cella
  * E di c0bd se c248 cambia, il byte scelto dai bit 2-3 di DSW2 (e605) in
  * c08f, il tempo BCD in c090-c099, poi la lista (spostamento, valore) che
- * scrive in c0bd fino al terminatore FF. Il valore con 36 (call 366C) o
- * >= 32 (365F) non è mai eseguito. */
+ * scrive in c0bd fino al terminatore FF. Un valore con i 6 bit bassi = 36
+ * accoda il suono 23 (366C); con i 6 bit bassi >= 32, se il bit 0 di c24e
+ * era già acceso (L = 0 a 363D), il valore scritto diventa (bit 6-7) + 29
+ * (365F-3665). Questi rami (lotto 65) non hanno punti di sincronia. */
 void fase_07_358f(void)
 {
     struct z80 z = {0};
@@ -111,8 +113,9 @@ void fase_07_358f(void)
     NEMICI_PUNTO(0x3634, 0x3635);
     M(0xc099) = cy;                            /* 3635 */
 
+    uint8_t l = (M(0xc24e) & 0x01) ? 0x00 : 0x01;   /* 3639-3641: L, usato a 365F */
     NEMICI_PUNTO(0x3636, 0x363b);
-    M(0xc24e) |= 0x01;                         /* 363B (L = 0/1 non usato nel ciclo) */
+    M(0xc24e) |= 0x01;                         /* 363B */
     for (int it = 0;; it++) {                  /* 3642-3668 */
         if (it == 0)
             NEMICI_PUNTO(0x363c, 0x3667);
@@ -124,15 +127,14 @@ void fase_07_358f(void)
         uint16_t dest = (uint16_t)(0xc0bd + s);    /* 364B-364F */
         uint8_t h = leggi(bc++);               /* 3650 */
         uint8_t m = h & 0x3f;
-        if (m == 0x36) {                       /* 3655-3657 */
-            nemici_manca(0x366c);
-            return;
+        if (m == 0x36) {                       /* 3655-3657 call z,366C */
+            z.a = 0x23;                        /* 366F (push/pop af, hl, de) */
+            sub_0493(&z);                      /* 3671 */
         }
-        if (m >= 0x32) {                       /* 365A-365D */
-            nemici_manca(0x365f);
-            return;
-        }
-        M(dest) = h;                           /* 3667 */
+        uint8_t w = h;                         /* 365C ld a,h */
+        if (m >= 0x32 && !l)                   /* 365A-3661 */
+            w = (uint8_t)((h & 0xc0) + 0x29);  /* 3663-3665 */
+        M(dest) = w;                           /* 3667 */
     }
     NEMICI_PUNTO(0x366a, 0x366b);
 }
