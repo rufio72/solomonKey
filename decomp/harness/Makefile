@@ -1,6 +1,9 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra -O0
-SORGENTI_BASE = harness.c comune.c routine.c fondale.c porte.c nmi.c nmi_oggetti.c routine_tab.c $(wildcard z80_*.c)
+# tabelle Tecmo del Z80 principale (estrai_rom.py, brief 62): ricompongono rom[]
+TECMO = ../../tecmo
+SORGENTI_ROM = $(wildcard $(TECMO)/rom_dati_*.c) $(TECMO)/rom_voci.c
+SORGENTI_BASE = harness.c comune.c routine.c fondale.c porte.c nmi.c nmi_oggetti.c routine_tab.c $(wildcard z80_*.c) $(SORGENTI_ROM)
 # i moduli del motore dei nemici (nemici*.c, brief 25) entrano anche nel banco
 # (brief 27), con i corpi delle attività da cui dipendono (sub_4b98 e altri);
 # lo spedidore sched.c non serve al banco
@@ -23,22 +26,22 @@ SDL_CFLAGS := $(shell $(SDL2_CONFIG) --cflags)
 SDL_LIBS := $(shell $(SDL2_CONFIG) --libs)
 endif
 
-all: harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine $(BERSAGLI_SDL)
+all: harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine rom_immagine $(BERSAGLI_SDL)
 
-harness: $(SORGENTI) ram.h routine.h e603.h rst20_tables.h nemici.h rst38_tables.h sched.h attivita_libera.h
+harness: $(SORGENTI) ram.h $(TECMO)/rom_dati.h routine.h e603.h rst20_tables.h nemici.h rst38_tables.h sched.h attivita_libera.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI)
 
 sched_proto: $(SORGENTI_SCHED) sched.h ram.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_SCHED)
 
-replay: $(SORGENTI_REPLAY) ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h
+replay: $(SORGENTI_REPLAY) ram.h $(TECMO)/rom_dati.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_REPLAY)
 
 # giro dal boot (lotto H4a): macchina, NMI una per frame, ingressi registrati
 # (H4c: con il modulo video per gli hash dei framebuffer)
 SORGENTI_LIBERO = $(filter-out harness.c,$(SORGENTI)) sched.c macchina.c gioco_libero.c giro_video.c video_rendi.c $(SORGENTI_GRAFICA)
 
-gioco_libero: $(SORGENTI_LIBERO) ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h giro_video.h
+gioco_libero: $(SORGENTI_LIBERO) ram.h $(TECMO)/rom_dati.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h giro_video.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_LIBERO)
 
 audio_banco: $(SORGENTI_AUDIO) audio.h $(INTESTAZIONI_DATI)
@@ -62,6 +65,10 @@ SORGENTI_GRAFICA = $(wildcard video_dati_*.c)
 rendi_oracolo: rendi_oracolo.c video_rendi.c $(SORGENTI_GRAFICA) video.h
 	$(CC) $(CFLAGS) -o $@ rendi_oracolo.c video_rendi.c $(SORGENTI_GRAFICA)
 
+# andata e ritorno delle tabelle Tecmo (tecmo/) contro out/main64.bin
+rom_immagine: rom_immagine.c $(SORGENTI_ROM) $(TECMO)/rom_dati.h
+	$(CC) $(CFLAGS) -o $@ rom_immagine.c $(SORGENTI_ROM)
+
 # andata e ritorno della grafica estratta
 video_immagine: video_immagine.c $(SORGENTI_GRAFICA) video.h
 	$(CC) $(CFLAGS) -o $@ video_immagine.c $(SORGENTI_GRAFICA)
@@ -70,16 +77,16 @@ video_immagine: video_immagine.c $(SORGENTI_GRAFICA) video.h
 mostra_oracolo: mostra_oracolo.c video_sdl.c video_sdl.h video_rendi.c $(SORGENTI_GRAFICA) video.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ mostra_oracolo.c video_sdl.c video_rendi.c $(SORGENTI_GRAFICA) $(SDL_LIBS)
 
-replay_lib.o: replay.c ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h
+replay_lib.o: replay.c ram.h $(TECMO)/rom_dati.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h
 	$(CC) $(CFLAGS) -Dmain=replay_main -c -o $@ replay.c
 
-mostra_replay: mostra_replay.c video_sdl.c video_sdl.h video_rendi.c $(SORGENTI_GRAFICA) replay_lib.o $(filter-out replay.c,$(SORGENTI_REPLAY)) video.h ram.h
+mostra_replay: mostra_replay.c video_sdl.c video_sdl.h video_rendi.c $(SORGENTI_GRAFICA) replay_lib.o $(filter-out replay.c,$(SORGENTI_REPLAY)) video.h ram.h $(TECMO)/rom_dati.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ mostra_replay.c video_sdl.c video_rendi.c $(SORGENTI_GRAFICA) replay_lib.o $(filter-out replay.c,$(SORGENTI_REPLAY)) $(SDL_LIBS)
 
 # il gioco si gioca (lotto H5): macchina libera o con oracolo, tastiera, DSW
 SORGENTI_GIOCA = $(filter-out gioco_libero.c,$(SORGENTI_LIBERO)) gioca.c gioca_tasti.c gioca_joy.c gioca_diag.c gioca_opzioni.c gioca_aiuto.c gioca_dsw.c macchina_libera.c video_sdl.c scheda_audio.c scheda_pcm.c gioca_audio.c $(SORGENTI_DRIVER) emu2149/emu2149.c
 
-gioca: $(SORGENTI_GIOCA) macchina.h ram.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h video_sdl.h giro_video.h scheda_audio.h audio.h gioca_joy.h gioca_opzioni.h $(INTESTAZIONI_DATI) emu2149/emu2149.h
+gioca: $(SORGENTI_GIOCA) macchina.h ram.h $(TECMO)/rom_dati.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h video_sdl.h giro_video.h scheda_audio.h audio.h gioca_joy.h gioca_opzioni.h $(INTESTAZIONI_DATI) emu2149/emu2149.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ $(SORGENTI_GIOCA) $(SDL_LIBS)
 
 # prova dei pixel delle scanlines (addendum 57C): fuori da all, si lancia
@@ -88,7 +95,8 @@ prova_scanlines: prova_scanlines.c video_sdl.c video_sdl.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ prova_scanlines.c $(SDL_LIBS)
 
 # make gioco (lotto H7): prepara le ROM, compila gioca e dice come lanciarlo.
-# A runtime servono solo 6.3f, 7.3h, 8.3jk (-> out/main64.bin) e 1.3jk.
+# A runtime serve solo 1.3jk (audio): il Z80 principale viene dalle tabelle
+# di tecmo/ (brief 62); out/main64.bin serve ancora a rom_immagine.
 ROM_DIR = ../../roms/ext/solomon
 ifeq ($(HA_SDL),)
 gioco:
@@ -108,6 +116,6 @@ rom:
 	if [ ! -s ../out/main64.bin ]; then echo "costruisco out/main64.bin"; sh ../build_rom.sh >/dev/null || exit 2; fi
 
 clean:
-	rm -f harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine mostra_oracolo mostra_replay gioca prova_scanlines replay_lib.o
+	rm -f harness sched_proto replay gioco_libero audio_banco audio_immagine audio_suona audio_wav rendi_oracolo video_immagine rom_immagine mostra_oracolo mostra_replay gioca prova_scanlines replay_lib.o
 
 .PHONY: all clean gioco rom

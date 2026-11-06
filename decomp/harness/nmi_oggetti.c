@@ -227,12 +227,12 @@ void sub_027c(struct z80 *z)
         M(0xc08d) = 0;
         M(0xc19d) = 0;
         /* res 6 sui 18 slot da c4ce; il passo somma DE intero, con D non
-         * azzerato (probabile svista dell'originale): fuori da c000-ffff
-         * la scrittura si ignora come sulla ROM */
+         * azzerato (svista dell'originale): fuori da c000-efff la scrittura
+         * si perde come su scheda (ROM, e F000-FFFF dei fondali, brief 62) */
         uint16_t p = 0xc4ce;
         uint16_t passo = (uint16_t)((d << 8) | 0x30);
         for (uint8_t i = 0x12; i != 0; i--) {
-            if (p >= 0xc000)
+            if (p >= 0xc000 && p < 0xf000)
                 M(p) &= (uint8_t)~0x40;
             p = (uint16_t)(p + passo);
         }

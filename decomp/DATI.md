@@ -7,6 +7,10 @@ Indice di stanza `N` = `c243`, 0-based (0-51). Strumenti: `stanze.py`
 
 ## Strutture
 
+Le tabelle lette a runtime sono in `tecmo/` come sorgente C (`rom_dati_*.c`,
+una tabella per voce), generate da `decomp/estrai_rom.py` (brief 62); elenco ed
+estensioni delle voci in `CENSIMENTO-ROM.md`.
+
 | indirizzo | chi la legge | formato | limiti noti |
 |---|---|---|---|
 | F000 | 33BA | 52 parole, una per stanza → record palette: testa `h`, poi `2*(h&0x7f)` byte copiati a c9ca (c9ca-ca49 azzerati prima da 33AA); la NMI copia c9ca → e500 (palette BG, voci 128-255) quando c044 bit 6 = 1 | il passo con `rld` dopo la copia dipende dal bit 0 di C (`rrc c`), non dal bit 7 di `h`; al frame 2000 c9ca contiene la copia semplice (51 stanze su 51 dump) |

@@ -142,7 +142,7 @@ seguente. Nessuna voce si sovrappone a un'altra e in ognuna i byte di
 |---|---|---|---|---|---|---|---|---|
 | `tab_parole_08ae` | 08AE-08CD | 32 | letto dalla ROM | 08A2 | 16 parole | zona | 32/32 | 6.3f+08AE |
 | `tab_gestori_chiave_0d18` | 0D18-0D37 | 32 | letto dalla ROM | 0CFD | 16 parole (gestori della chiave) | statica | 4/32 | 6.3f+0D18 |
-| `tab_chiave_0d6e` | 0D6E-0D7D | 16 | letto dalla ROM | 0D3C | 8 coppie, indice <= 14 | statica | 0/16 | 6.3f+0D6E |
+| `tab_chiave_0d6e` | 0D6E-0D8D | 32 | letto dalla ROM | 0D3C | 16 coppie, indice <= 1E (brief 62: 0D7E-0D8D dal banco) | statica | 0/32 | 6.3f+0D6E |
 | `tab_chiave_123c` | 123C-1287 | 76 | letto dalla ROM | 0D8E 0DD1 0E1F 0E64 0EDF 0F2E 100E 105D | 8 tabelle di byte (123C 1246 124F 1258 1261 126A 1274 127E) | zona | 3/76 | 6.3f+123C |
 | `tab_punti_150c` | 150C-1532 | 39 | letto dalla ROM | 13FC, rst 10 | 13 voci da 3 byte | statica | 18/39 | 6.3f+150C |
 | `tab_mappe_blocchi_1557` | 1557-1F16 | 2496 | letto dalla ROM | 3812 | 52 stanze x 48 byte | statica | 192/2496 | 6.3f+1557 |
@@ -155,11 +155,12 @@ seguente. Nessuna voce si sovrappone a un'altra e in ognuna i byte di
 | `testo_31e1` | 31E1-31E8 | 8 | letto dalla ROM | 6771 | stringa (attributo, caratteri, FF) | zona | 8/8 | 6.3f+31E1 |
 | `tab_3427` | 3427-342C | 6 | letto dalla ROM | 33EB | 6 byte copiati | statica | 6/6 | 6.3f+3427 |
 | `tab_bonus_343f` | 343F-349E | 96 | letto dalla ROM | rst 10, 4C89 | parole e BCD | zona | 10/96 | 6.3f+343F |
-| `tab_bonus_355d` | 355D-3568 | 12 | letto dalla ROM | 3569 | byte copiati | zona | 8/12 | 6.3f+355D |
+| `tab_bonus_355d` | 355D-356C | 16 | letto dalla ROM | 354B via 3569 | 4 record da 4 byte (c24a); il quarto sono i primi byte del codice di 3569 (brief 62) | statica | 8/16 | 6.3f+355D |
 | `tab_copie_3574` | 3574-358E | 27 | letto dalla ROM | 23F8 | record da 3 byte | zona | 15/27 | 6.3f+3574 |
 | `tab_36b3` | 36B3-36BC | 10 | letto dalla ROM | 3678 | 10 byte copiati | statica | 10/10 | 6.3f+36B3 |
 | `testi_39c0` | 39C0-3A0D | 78 | letto dalla ROM | 6771 | stringhe | zona | 57/78 | 6.3f+39C0 |
 | `tab_quadri_3a0e` | 3A0E-3A1B | 14 | letto dalla ROM | 3861 | 7 parole confrontate | zona | 7/14 | 6.3f+3A0E |
+| `tab_corpi_3b11` | 3B11-3B60 | 80 | letto dalla ROM | rst 20 a 3B10 (rst 10; banco 0010/0018) | 40 parole, indirizzi dei corpi (brief 62) | zona | 0/80 | 6.3f+3B11 |
 | `testi_bonus_3d0a` | 3D0A-3D1F | 22 | letto dalla ROM | 3BAC (att. 25) | 2 stringhe + 3 byte BCD | statica | 0/22 | 6.3f+3D0A |
 | `tab_bonus_3e72` | 3E72-3E8F | 30 | letto dalla ROM | 3569 | 30 byte copiati | misurata | 30/30 | 6.3f+3E72 |
 | `testi_3f6f` | 3F6F-3F87 | 25 | letto dalla ROM | 6771 | stringa | misurata | 25/25 | 6.3f+3F6F |
@@ -169,6 +170,7 @@ seguente. Nessuna voce si sovrappone a un'altra e in ognuna i byte di
 | `tab_attract_43fd` | 43FD-4402 | 6 | letto dalla ROM | 43C8 (att. 1F) | 6 byte copiati | statica | 6/6 | 7.3h+43FD |
 | `tab_registri_4403` | 4403-451B | 281 | letto dalla ROM | 452B | coppie (registro, valore) | zona | 178/281 | 7.3h+4403 |
 | `tab_record_451c` | 451C-452A | 15 | letto dalla ROM | 452B | 5 record (coppie, destinazione) | zona | 12/15 | 7.3h+451C |
+| `tab_porta_47c7` | 47C7-47EC | 38 | letto dalla ROM | 47B0 (4767) via 3569 | 4 record da 10 byte, 8 copiati; il quarto legge il codice di 47E5 (brief 62) | statica | 0/38 | 7.3h+47C7 |
 | `tab_record_488d` | 488D-48AE | 34 | letto dalla ROM | rst 10 (nemici) | parole per indice | misurata | 26/34 | 7.3h+488D |
 | `tab_oggetti_48af` | 48AF-48D0 | 34 | letto dalla ROM | rst 10 (nemici) | parole per indice | misurata | 28/34 | 7.3h+48AF |
 | `tab_4ff9` | 4FF9-5004 | 12 | letto dalla ROM | 4FEF | 6 parole | statica | 0/12 | 7.3h+4FF9 |
@@ -208,11 +210,11 @@ seguente. Nessuna voce si sovrappone a un'altra e in ognuna i byte di
 | `tab_quadri_85ec` | 85EC-85F8 | 13 | letto dalla ROM | 3861 | 13 soglie | misurata | 13/13 | 7.3h+05EC |
 | `tab_85f9` | 85F9-8660 | 104 | letto dalla ROM | rst 10 (3709) | parole | stimata | 8/104 | 7.3h+05F9 |
 | `tab_3709_8661` | 8661-8692 | 50 | letto dalla ROM | 3709 | record | misurata | 50/50 | 7.3h+0661 |
-| `tab_89cd` | 89CD-89D0 | 4 | letto dalla ROM | 2368 (2E9C) | 4 byte | misurata | 4/4 | 7.3h+09CD |
-| `tab_8a01` | 8A01-8A30 | 48 | letto dalla ROM | 4E87 | 4 record da 12 byte | statica | 22/48 | 7.3h+0A01 |
-| `tab_parole_8b2d` | 8B2D-8B5A | 46 | letto dalla ROM | rst 10, 2E9C | parole + record da 9 | misurata | 14/46 | 7.3h+0B2D |
-| `tab_8d11` | 8D11-8D14 | 4 | letto dalla ROM | 2E9C | 4 byte copiati | misurata | 4/4 | 7.3h+0D11 |
-| `tab_8d59` | 8D59-8D5B | 3 | letto dalla ROM | 470A 46B4 | 3 byte | misurata | 3/3 | 7.3h+0D59 |
+| `tab_89cd` | 89CD-8A00 | 52 | letto dalla ROM | 2368 (2E9C) | 52 byte, indice di 8A01 per quadro (brief 62) | statica | 4/52 | 7.3h+09CD |
+| `tab_8a01` | 8A01-8B2C | 300 | letto dalla ROM | 4E87 | 25 record da 12 byte, indici 00-18 di 89CD (brief 62) | statica | 22/300 | 7.3h+0A01 |
+| `tab_parole_8b2d` | 8B2D-8D10 | 484 | letto dalla ROM | rst 10, 2E9C | 8 parole + 52 record da 9 da 8B3D (brief 62) | statica | 14/484 | 7.3h+0B2D |
+| `tab_8d11` | 8D11-8D58 | 72 | letto dalla ROM | 2E9C | 36 parole, liste di 8D59 (brief 62) | statica | 4/72 | 7.3h+0D11 |
+| `tab_8d59` | 8D59-8DD3 | 123 | letto dalla ROM | 470A 46B4 | liste chiuse da FF + passo indietro (brief 62) | puntatori | 3/123 | 7.3h+0D59 |
 | `tab_avanzamento_8dd4` | 8DD4-8EA3 | 208 | letto dalla ROM | 34FA | 52 record da 4 byte | statica | 16/208 | 7.3h+0DD4 |
 | `tab_stanze_8ea4` | 8EA4-9483 | 1504 | letto dalla ROM | 358F 147F | 52 parole + record (10 byte + coppie fino a FF) | puntatori | 78/1504 | 7.3h+0EA4 |
 | `tab_soglie_9484` | 9484-9494 | 17 | letto dalla ROM | 4722 | 17 soglie | misurata | 17/17 | 7.3h+1484 |
@@ -521,3 +523,39 @@ Nominano `main64.bin` solo come strumento d'analisi (non a runtime): `disasm.sh`
 `censimento_nemici.py`, `audio_numeri.py`, `estrai_dati.py` (per `1.3jk`) e i
 documenti `DATI.md`, `GIRO.md`, `AUDIO.md`, `RAPPORTO.md`: possono continuare a
 usare la ROM vera, non entrano nel binario.
+
+## Esito del lotto 62
+
+Data: 2026-11-06 (brief 62). Le voci del Z80 principale sono estratte da
+`decomp/estrai_rom.py` in `tecmo/rom_dati_{varie,testi,stanze,oggetti,fondali}.c`
+(una tabella `const uint8_t` per voce), con `tecmo/rom_dati.h` e la tabella
+`rom_voci[]` in `tecmo/rom_voci.c`; si aggiunge la voce locale
+`riempimento_f997` (F997-FFFF) perché la finestra F000-FFFF copiata in `ram[]`
+sia intera. `carica_rom()` ricompone `rom[]` dalle tabelle (zero fuori voce) e
+`gioca` non apre più `out/main64.bin`; `leggi()` avvisa una volta per indirizzo
+con «AVVISO: lettura ROM fuori voce» se legge sotto C000 fuori da ogni voce.
+`harness/rom_immagine` confronta le tabelle con `main64.bin`.
+
+Il banco (`harness --tutte`, non misurato nel brief 61) leggeva fuori voce in
+13 catture (anche forzate): voci chiuse con il disassemblato e la struttura dei
+byte. Due voci nuove e sette allargate (`VOCI` di `censimento_rom.py`):
+
+| voce | prima | ora | motivo |
+|---|---|---|---|
+| `tab_chiave_0d6e` | 0D6E-0D7D | 0D6E-0D8D | 16 coppie fino al codice di 0D8E; catture `gioco_oggetti_forza02/03` leggono 0D80 e 0D8A |
+| `tab_bonus_355d` | 355D-3568 | 355D-356C | `sub_354b` con c24a = 3 copia i primi 4 byte del codice di 3569 (cattura `att07_f1f`) |
+| `tab_corpi_3b11` | — | 3B11-3B60 | tabella in linea di `rst 20` a 3B10 (40 corpi), letta da `rst 10` nei test 0010/0018 del banco |
+| `tab_porta_47c7` | — | 47C7-47EC | 47B0: 4 record da 10 byte, 8 copiati da 3569; il quarto legge il codice di 47E5 (`porta_forza10-13`) |
+| `tab_89cd` | 89CD-89D0 | 89CD-8A00 | un byte per ognuno dei 52 quadri (`titolo` legge 8A00) |
+| `tab_8a01` | 8A01-8A30 | 8A01-8B2C | 25 record da 12: i valori di 89CD vanno da 00 a 18 |
+| `tab_parole_8b2d` | 8B2D-8B5A | 8B2D-8D10 | 8 parole + 52 record da 9 da 8B3D (8B3D + 9·52 = 8D11) |
+| `tab_8d11` | 8D11-8D14 | 8D11-8D58 | 36 parole, puntatori alle liste di 8D59 |
+| `tab_8d59` | 8D59-8D5B | 8D59-8DD3 | liste chiuse da FF più il passo indietro, fino a 8DD4 (`stanza06/07/13/14`) |
+
+Totale: 90 voci del principale nel censimento (89 «letto dalla ROM», 18803
+byte, più `tab_8089`), 91 tabelle in `tecmo/` con il riempimento, 20448 byte.
+Le altre voci di estensione *misurata* o *stimata* restano come nel brief 61:
+una lettura fuori voce nel gioco vero si vede dall'avviso e si chiude con la
+stessa procedura (disassemblato, `VOCI`, `estrai_rom.py`). La tabella
+«Estrazione» sopra è la stima del brief 61 e non è aggiornata.
+

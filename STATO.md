@@ -16,6 +16,7 @@ ogni ciclo nei brief in `compiti/`.
 | …di cui `tradotta` con nota (senza cattura o cattura singola) | 61 |
 | …di cui `tradotta (replay)` | 43 |
 | Banco di prova (`harness --tutte`) | 335 voci, 1422 catture, 0 fallite |
+| Tabelle Tecmo del Z80 principale in `tecmo/` (brief 62) | 91 tabelle, 20448 byte; `gioca` non apre più `out/main64.bin` (resta `1.3jk` per l'audio) |
 | Catture `regs` in `decomp/out/` | 1422 (banco) |
 | Stub residui del motore nemici | 0 (motore completo, `nemici_stub.c` tolto) |
 | Destinazioni mai osservate | 59 documentate in `decomp/ZONE-MAI-ESEGUITE.md`: 53 `DATO`, 0 `MORTO`, 6 `RAGGIUNGIBILE` (5 con ricetta di sveglia provata); le altre 5 delle 64 originali sono ormai tradotte |

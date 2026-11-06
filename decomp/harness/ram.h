@@ -8,12 +8,22 @@
 extern uint8_t ram[0x4000];
 #define M(a) ram[(uint16_t)(a) - 0xc000]
 
-/* Immagine della ROM a indirizzi reali (main64.bin), definita in comune.c
- * con ram[] e carica_rom() (che la legge da out/ o ../out/, esce se manca). */
+/* Immagine della ROM a indirizzi reali, definita in comune.c con ram[] e
+ * carica_rom(), che la ricompone dalle tabelle di tecmo/ (brief 62): gli
+ * stessi byte di main64.bin nelle voci del censimento, zero altrove.
+ * rom_coperto[a] = 1 se il byte a (< c000) viene da una voce. */
 extern uint8_t rom[0x10000];
+extern uint8_t rom_coperto[0xC000];
 void carica_rom(void);
-/* Lettura da tutto lo spazio del Z80: c000-ffff dalla cattura, il resto dalla ROM. */
-static inline uint8_t leggi(uint16_t a) { return a >= 0xc000 ? ram[a - 0xc000] : rom[a]; }
+void rom_fuori_voce(uint16_t a);
+/* Lettura da tutto lo spazio del Z80: c000-ffff dalla cattura, il resto dalla
+ * ROM; una lettura fuori voce passa dalla sentinella (avviso su stderr). */
+static inline uint8_t leggi(uint16_t a)
+{
+    if (a >= 0xc000) return ram[a - 0xc000];
+    if (!rom_coperto[a]) rom_fuori_voce(a);
+    return rom[a];
+}
 
 /* Registri del Z80 che servono alle routine tradotte (niente banco alternativo). */
 struct z80 {
