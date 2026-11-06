@@ -209,7 +209,7 @@ seguente. Nessuna voce si sovrappone a un'altra e in ognuna i byte di
 | `tab_tile_858e` | 858E-85EB | 94 | letto dalla ROM | 3A2E | 47 coppie (valori 08-36) | statica | 16/94 | 7.3h+058E |
 | `tab_quadri_85ec` | 85EC-85F8 | 13 | letto dalla ROM | 3861 | 13 soglie | misurata | 13/13 | 7.3h+05EC |
 | `tab_85f9` | 85F9-8660 | 104 | letto dalla ROM | rst 10 (3709) | parole | stimata | 8/104 | 7.3h+05F9 |
-| `tab_3709_8661` | 8661-8692 | 50 | letto dalla ROM | 3709 | record | misurata | 50/50 | 7.3h+0661 |
+| `tab_3709_8661` | 8661-89CC | 876 | letto dalla ROM | 3709 | 52 record per stanza puntati da 85F9, chiusi da FF (collaudo 2026-11-06) | puntatori | 50/876 | 7.3h+0661 |
 | `tab_89cd` | 89CD-8A00 | 52 | letto dalla ROM | 2368 (2E9C) | 52 byte, indice di 8A01 per quadro (brief 62) | statica | 4/52 | 7.3h+09CD |
 | `tab_8a01` | 8A01-8B2C | 300 | letto dalla ROM | 4E87 | 25 record da 12 byte, indici 00-18 di 89CD (brief 62) | statica | 22/300 | 7.3h+0A01 |
 | `tab_parole_8b2d` | 8B2D-8D10 | 484 | letto dalla ROM | rst 10, 2E9C | 8 parole + 52 record da 9 da 8B3D (brief 62) | statica | 14/484 | 7.3h+0B2D |
@@ -538,7 +538,7 @@ con «AVVISO: lettura ROM fuori voce» se legge sotto C000 fuori da ogni voce.
 
 Il banco (`harness --tutte`, non misurato nel brief 61) leggeva fuori voce in
 13 catture (anche forzate): voci chiuse con il disassemblato e la struttura dei
-byte. Due voci nuove e sette allargate (`VOCI` di `censimento_rom.py`):
+byte. Due voci nuove e sette allargate (`VOCI` di `censimento_rom.py`), più una ottava dal collaudo (sotto):
 
 | voce | prima | ora | motivo |
 |---|---|---|---|
@@ -552,8 +552,15 @@ byte. Due voci nuove e sette allargate (`VOCI` di `censimento_rom.py`):
 | `tab_8d11` | 8D11-8D14 | 8D11-8D58 | 36 parole, puntatori alle liste di 8D59 |
 | `tab_8d59` | 8D59-8D5B | 8D59-8DD3 | liste chiuse da FF più il passo indietro, fino a 8DD4 (`stanza06/07/13/14`) |
 
-Totale: 90 voci del principale nel censimento (89 «letto dalla ROM», 18803
-byte, più `tab_8089`), 91 tabelle in `tecmo/` con il riempimento, 20448 byte.
+Collaudo del 2026-11-06 (partita vera dell'utente, 23118 frame): la sentinella
+ha segnalato 826 letture fuori voce, tutte in 8693-89CC. È il seguito di
+`tab_3709_8661`: le 52 parole di `tab_85f9` (85F9-8660, una per stanza)
+puntano a record da 8661 a 89C2, ognuno chiuso da FF; l'ultimo finisce a 89CC,
+subito prima di `tab_89cd`. La voce passa da 8661-8692 (50 byte, *misurata*) a
+8661-89CC (876 byte, *puntatori*).
+
+Totale: 90 voci del principale nel censimento (89 «letto dalla ROM», 19629
+byte, più `tab_8089`), 91 tabelle in `tecmo/` con il riempimento, 21274 byte.
 Le altre voci di estensione *misurata* o *stimata* restano come nel brief 61:
 una lettura fuori voce nel gioco vero si vede dall'avviso e si chiude con la
 stessa procedura (disassemblato, `VOCI`, `estrai_rom.py`). La tabella

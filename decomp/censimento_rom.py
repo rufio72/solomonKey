@@ -113,7 +113,7 @@ VOCI = [
     ('P', 'tab_tile_858e', 0x858E, 0x85EB, L, '3A2E', '47 coppie (valori 08-36)', 'statica'),
     ('P', 'tab_quadri_85ec', 0x85EC, 0x85F8, L, '3861', '13 soglie', 'misurata'),
     ('P', 'tab_85f9', 0x85F9, 0x8660, L, 'rst 10 (3709)', 'parole', 'stimata'),
-    ('P', 'tab_3709_8661', 0x8661, 0x8692, L, '3709', 'record', 'misurata'),
+    ('P', 'tab_3709_8661', 0x8661, 0x89CC, L, '3709', '52 record per stanza puntati da 85F9, chiusi da FF (collaudo 2026-11-06)', 'puntatori'),
     ('P', 'tab_89cd', 0x89CD, 0x8A00, L, '2368 (2E9C)', '52 byte, indice di 8A01 per quadro (brief 62)', 'statica'),
     ('P', 'tab_8a01', 0x8A01, 0x8B2C, L, '4E87', '25 record da 12 byte, indici 00-18 di 89CD (brief 62)', 'statica'),
     ('P', 'tab_parole_8b2d', 0x8B2D, 0x8D10, L, 'rst 10, 2E9C', '8 parole + 52 record da 9 da 8B3D (brief 62)', 'statica'),

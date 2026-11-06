@@ -74,7 +74,7 @@ extern const uint8_t tab_tile_8578[22];  /* 8578-858D */
 extern const uint8_t tab_tile_858e[94];  /* 858E-85EB */
 extern const uint8_t tab_quadri_85ec[13];  /* 85EC-85F8 */
 extern const uint8_t tab_85f9[104];  /* 85F9-8660 */
-extern const uint8_t tab_3709_8661[50];  /* 8661-8692 */
+extern const uint8_t tab_3709_8661[876];  /* 8661-89CC */
 extern const uint8_t tab_89cd[52];  /* 89CD-8A00 */
 extern const uint8_t tab_8a01[300];  /* 8A01-8B2C */
 extern const uint8_t tab_parole_8b2d[484];  /* 8B2D-8D10 */

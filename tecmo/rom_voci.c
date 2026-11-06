@@ -73,7 +73,7 @@ const RomVoce rom_voci[] = {
     { 0x858E, 94, tab_tile_858e },
     { 0x85EC, 13, tab_quadri_85ec },
     { 0x85F9, 104, tab_85f9 },
-    { 0x8661, 50, tab_3709_8661 },
+    { 0x8661, 876, tab_3709_8661 },
     { 0x89CD, 52, tab_89cd },
     { 0x8A01, 300, tab_8a01 },
     { 0x8B2D, 484, tab_parole_8b2d },

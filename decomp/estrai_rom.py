@@ -28,9 +28,10 @@ TECMO = os.path.join(QUI, '..', 'tecmo')
 CARTELLE = ['../roms/ext/solomon', '../../roms/ext/solomon',
             os.path.join(QUI, '../roms/ext/solomon')]
 PER_RIGA = 24
-# 88 voci e 17739 byte dal brief 61; il brief 62 ne aggiunge 2 e ne allarga 7
-# (CENSIMENTO-ROM.md, «Esito del lotto 62»).
-VOCI_ATTESE, BYTE_L_ATTESI = 90, 18803
+# 88 voci e 17739 byte dal brief 61; il brief 62 ne aggiunge 2 e ne allarga 7,
+# il collaudo del 2026-11-06 allarga tab_3709_8661 (CENSIMENTO-ROM.md, «Esito
+# del lotto 62»).
+VOCI_ATTESE, BYTE_L_ATTESI = 90, 19629
 
 # Voce locale: riempimento della finestra F000-FFFF dopo i flussi dei fondali.
 # Il codice del driver audio finisce dove cominciano i dati (estrai_dati.py).
