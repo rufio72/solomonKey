@@ -294,3 +294,13 @@ Verifiche:
 - nessun file sopra 800 righe;
 - spazzata 0-51 a 8000 frame: uscita vuota. Stanza 5: `fe80c34bdbf49e09` /
   `dcf24f542f52de6f`.
+
+## Esito del ciclo 66B (2026-11-06)
+
+Addendum passato al primo colpo (38º ciclo). Commit `d56ef4e`; verificatore:
+tutte passate — 2D9D (fase 16 del corpo 07) e 3065 tradotte, passi del corpo
+18 condivisi in passi_416b(), NESSUN ramo mancante residuo nel corpo 07;
+banco a 1439 (3 catture nuove f16*); SPAZZATA 52 STANZE A 8000 FRAME PULITA
+(zero FERMO, zero avvisi; stanza 5 fe80c34bdbf49e09/dcf24f542f52de6f);
+regressioni e semi invariati; censimento 202/0. Token sviluppatore Opus
+~116k, verificatore Sonnet ~36k.
