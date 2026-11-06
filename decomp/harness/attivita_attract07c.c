@@ -56,7 +56,8 @@ static void t3_3009(void)
  * somma due parole c2cb-c2cc a c2c1-c2c2, c2cd-c2ce a c2c3-c2c4 (23A1); con
  * c463 >= 40 azzera il primo byte di 16 oggetti (c46e, passo 30) e porta
  * c19e a 2. Il `ret z` di 3065 usa il risultato del `dec (hl)`: c19e - 1,
- * mai zero (la voce è la 1). */
+ * mai zero (la voce è la 1, 2DD3-2DD4 l'ha portato a 2); tradotto come
+ * semplice ritorno (brief 66B). */
 static void t3_305f(void)
 {
     struct z80 z = {0};
@@ -64,10 +65,8 @@ static void t3_305f(void)
     uint8_t v = (uint8_t)(M(0xc19e) - 1);
     M(0xc19e) = v;                             /* 305F */
     NEMICI_PUNTO(0x3060, 0x3066);
-    if (v == 0) {                              /* 3065 ret z */
-        nemici_manca(0x3065);
-        return;
-    }
+    if (v == 0)                                /* 3065 ret z (irraggiungibile: */
+        return;                                /* c19e vale 2 qui, brief 66B) */
     M(0xc467) = 0x00;                          /* 3066 */
     NEMICI_PUNTO(0x3067, 0x306f);
     if (M(0xc463) < 0x40) {                    /* 3068-306D */

@@ -193,7 +193,15 @@ void attivita_18_4124(uint8_t slot)
         if (z.f & LIBERA_ZERO)                 /* 4167 jr nz */
             M(HL(&z)) = 0x00;                  /* 4169 */
     }
-    passo = M(0xc19e);                         /* 416B-416E */
+    passi_416b();
+}
+
+/* 416B: HL = c19e, A = passo, c19e avanza di uno, `rst 20h` sulla tabella
+ * 4171 (10 voci). Ci salta anche la fase 16 del 07 (2D9D, brief 66B) con
+ * c19e diverso da 0A. */
+void passi_416b(void)
+{
+    uint8_t passo = M(0xc19e);                 /* 416B-416E */
     M(0xc19e) = (uint8_t)(passo + 1);          /* 416F */
     switch (passo) {                           /* 4170 rst 20h */
     case 0: passo_41b7(); break;

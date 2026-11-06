@@ -76,10 +76,10 @@ Release pubblicate:
 3. **Code minori**: 39B9 chiusa nel lotto 65; 2E04 (fase 11 del 07),
    2D0F (fase 5, stanza 29) e le sette zone «fuori voce» chiusi nel lotto
    66: la spazzata delle 52 stanze (`--stanza N -n 3000 --riproduci` seme
-   4) non dà né FERMO né AVVISO. Resta censito `routine 2D9D mancante`
-   (fase 16 del 07, mai eseguita prima: ci arriva ora la stanza 5 dopo
-   2E04) al frame 7871 della stanza 5 (`-n 8000`, hash 4f6770fd98a0f823,
-   audio 27f47f454157523b); fondale
+   4) non dà né FERMO né AVVISO. Nel lotto 66B chiusa anche 2D9D (fase 16
+   del 07, passi del corpo 18 a 416B) e 3065: nessun `nemici_manca` resta
+   nei file del corpo 07; spazzata a 8000 frame senza FERMO né AVVISO
+   (stanza 5: fe80c34bdbf49e09 / dcf24f542f52de6f); fondale
    322A avanti ~5 frame nel libero (cadenza, vedi sotto); mappa dei
    pulsanti nel README (quale è BUTTON1/BUTTON2; mappa DAIJA predefinita
    0,1,7,6); classi special 0x16/0x17/0x35 mai viste in chiaro (si

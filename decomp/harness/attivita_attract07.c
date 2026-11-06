@@ -4,7 +4,7 @@
  * sotto-contatore c19e; le fasi 0, 1, 3 stanno in attivita_attract07a.c, la
  * 4 e la 7 in attivita_attract07b.c. Le fasi 13-25 sono del lotto H4b3
  * (attivita_attract07c.c e 07d.c); la 16 (2D9D) non è mai eseguita nei
- * frame 0-2410 e resta nemici_manca.
+ * frame 0-2410 ed è tradotta qui dal disassemblato (brief 66B).
  *
  * Regole come attivita_01_10.c: ogni fase inizia con `pop hl` (puntatore
  * allo slot) e termina con `ret`, quindi il `pop hl; ret` diventa `return`;
@@ -21,6 +21,7 @@
 #include "sched.h"
 #include "nemici.h"
 #include "attivita_attract07.h"
+#include "attivita_libera.h"
 
 /* 2E8B-2E8F: attesa a cancello. Come sub_2e90 (decrementa (HL); se c467 non
  * ha raggiunto C ritorna, altrimenti azzera c467 e rincrementa (HL)) ma con
@@ -183,6 +184,21 @@ static void fase_2dfa(void)
     NEMICI_PUNTO(0x2e09, 0x2e09);
 }
 
+/* Fase 16, 2D9D (brief 66B): tiene la fase (c19d - 1); con c19e = 0A
+ * azzera c19e e la fase avanza, altrimenti salta ai passi del corpo 18
+ * (416B, tabella 4171 su c19e: freccia fra c248 e c247, attese, ripristino
+ * di c248). Mai eseguita nel giro: senza punti di sincronia. */
+static void fase_2d9d(void)
+{
+    M(0xc19d)--;                               /* 2D9D dec (hl) */
+    if (M(0xc19e) != 0x0a) {                   /* 2D9E-2DA3 */
+        passi_416b();                          /* jp 416B */
+        return;
+    }
+    M(0xc19e) = 0x00;                          /* 2DA6-2DA7 */
+    M(0xc19d)++;                               /* 2DAA inc (hl) */
+}
+
 /* Fase 12, voce 0 di 2DB8 (2FC1): sull'oggetto c85e le coordinate di c248
  * e di c247 (4B0E), la differenza in passi (2FF3) in c86b, c86c, c87a,
  * c87b (+1 sull'alto), stato C0 con E = 40 e BC = 0301. */
@@ -287,7 +303,7 @@ static void fase_2dad(void)
 
 /* 07, ingresso 2CCD: HL = c19d, A = fase, c19d avanza di uno, salto con
  * `rst 20h` alla tabella 2CD2 (26 voci). Le fasi 13-25 sono del lotto H4b3
- * (07c e 07d, la 16 non è mai eseguita). */
+ * (07c e 07d; la 16, 2D9D, qui sopra). */
 void attivita_07_2ccd(uint8_t slot)
 {
     NEMICI_PUNTO(0x2ccd, 0x2cd1);
@@ -312,7 +328,7 @@ void attivita_07_2ccd(uint8_t slot)
     case 13: fase_07_2dce(); break;
     case 14: fase_07_31c5(); break;
     case 15: fase_07_2e0a(); break;
-    case 16: nemici_manca(0x2d9d); break;
+    case 16: fase_2d9d(); break;
     case 17: fase_07_2e9c(); break;
     case 18: fase_07_3709(); break;
     case 19: fase_07_3829(); break;

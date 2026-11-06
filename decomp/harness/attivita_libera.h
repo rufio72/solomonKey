@@ -46,6 +46,7 @@ void attesa_64ce(uint8_t c);
 
 /* attivita_18.c */
 void attivita_18_4124(uint8_t slot);
+void passi_416b(void);
 void sub_6735(struct z80 *z);
 /* 2E79: voce di attesa `ld c,42h; jr 2e8b` (sub_2e90 su HL = contatore,
  * C = 42), presente anche nelle tabelle dei corpi 25 e 26 (lotto 53). */

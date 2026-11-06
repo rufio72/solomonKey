@@ -166,8 +166,8 @@ spedidore; 9 a metà attività, tutte nel primo corpo 06 (frame 603-611).
   voci: 3009, 305F, 3131, attesa 2E65, 3161, attesa 2E81, 31B7; fasi 14, 15,
   17 e 21), `attivita_attract07d.c` (fasi 18, 19, 20, 22, 24, 25; la 23 è
   l'attesa 2E6D nel `switch`), `attivita_attract08.c` (corpi 08, 0C, 0B). La
-  fase 16 (2D9D) non è mai eseguita nei frame 0-2410 e resta
-  `nemici_manca(0x2d9d)`. `attesa()` di 07.c è ora `attesa_07()` (esportata) e
+  fase 16 (2D9D) non è mai eseguita nei frame 0-2410; tradotta dal
+  disassemblato nel lotto 66B (`fase_2d9d`, passi 416B del corpo 18). `attesa()` di 07.c è ora `attesa_07()` (esportata) e
   `fondale_322a()` serve anche al corpo 08. `[0x08]`, `[0x0b]`, `[0x0c]` in
   `corpo_attivita_replay[]`.
 - Routine nuove nel banco: `sub_37b4` (`z80_38xx.c`, 4 catture) e `sub_2d8a`
@@ -657,6 +657,7 @@ Misure:
   `a6a9a24e144e41ae`. Lotto 66: 2E04 e 2D0F tradotti, zone «fuori voce»
   chiuse (`CENSIMENTO-ROM.md`): spazzata 0-51 a 3000 frame senza FERMO né
   AVVISO; stanza 29 `-n 3000` `d515345ff3d3da8a` / `f69df8e33d3b3b78`
-  (prima FERMO 2D0F al 1562); stanza 5 `-n 8000` arriva alla fase 16 e si
-  ferma su `2D9D` al frame 7871 (`4f6770fd98a0f823` / `27f47f454157523b`,
-  censito, prima FERMO 2E04 al 7790).
+  (prima FERMO 2D0F al 1562). Lotto 66B: fase 16 (2D9D) e 3065 tradotte;
+  spazzata 0-51 a 8000 frame senza FERMO né AVVISO; stanza 5 `-n 8000`
+  `fe80c34bdbf49e09` / `dcf24f542f52de6f` (prima FERMO 2E04 al 7790, poi
+  2D9D al 7871).

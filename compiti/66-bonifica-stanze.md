@@ -265,3 +265,32 @@ Resta la 2D9D (fase 16 del corpo 07, stanza 5 oltre il frame ~7871),
 raggiungibile solo ora grazie ai fix: va nell'addendum 66B prima di
 sostituire il binario della release. Token: analista Sonnet ~83k,
 sviluppatore Opus ~90k, verificatore Sonnet ~33k.
+
+## Esito 66B (sviluppatore, 2026-11-06)
+
+- 2D9D (fase 16 del 07): `dec (hl)` su c19d; con c19e = 0A azzera c19e e
+  la fase avanza, altrimenti `jp 416B`, i passi del corpo 18. Il
+  dispatcher 416B-4170 di `attivita_18.c` è ora la funzione `passi_416b()`
+  (dichiarata in `attivita_libera.h`), usata dal 18 e da `fase_2d9d`.
+  Catture MAME `f16fine` (c19d 10→11, c19e 0A→00), `f16p0` (passo 41B7) e
+  `f16p5` (passo 4185): tutte e tre OK nel banco.
+- 3065 (`ret z` in 305F, `attivita_attract07c.c`): non si raggiunge, perché
+  c19e vale 2 dopo 2DD3-2DD4 e il `dec (hl)` lo porta a 1. È tradotto come
+  ritorno semplice. Nei file del corpo 07 non resta nessun `nemici_manca`.
+- Siti `leggi(` spostati: 07.c 78-79, 07c.c 268, 281, 289 (aggiornati in
+  `censimento_rom.py` e `out/censimento_rom_letti.txt`).
+
+Verifiche:
+- compilazione `0`;
+- `estrai_rom.py` exit 0 (93 voci, 21849 byte), nessun cambio in `tecmo/`;
+  `rom_immagine` exit 0;
+- banco `exit 0`, `0` fallite, `335`, `1439`;
+- giro completo: la riga attesa;
+- oracolo `a239d0a940bec0b9` / `c4b40fea06623a96`;
+- `-n 600` `ecd5acf694285489` / `8aedf41c0424df54`;
+- le 4 ricette con gli hash del punto C, senza FERMO;
+- semi 4 e 67 a 40000 frame con hash invariati;
+- censimento `LETTI FUORI VOCE: 0`, `CENSIMENTO OK: 202 occorrenze`;
+- nessun file sopra 800 righe;
+- spazzata 0-51 a 8000 frame: uscita vuota. Stanza 5: `fe80c34bdbf49e09` /
+  `dcf24f542f52de6f`.
