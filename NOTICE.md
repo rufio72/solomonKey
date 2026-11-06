@@ -13,7 +13,10 @@ and will be handled promptly.
    sound-CPU driver (`audio_driver.c`) and music data (`audio_dati_*.c`,
    `audio_dati_*.h`), and the bytes of the graphics ROMs (12
    `video_dati_*.c`). In `roms/decoded/`: decoded graphics, palettes, RAM
-   dumps and screenshots. Graphics, palettes, levels, text, music, sound
+   dumps and screenshots. The images in `docs/` (cover, room maps of the
+   hidden items) and the reference screenshots in `decomp/out/video/` are
+   likewise renderings of the game's graphics and belong to the same
+   category. Graphics, palettes, levels, text, music, sound
    driver and original program are copyright Tecmo (now Koei Tecmo); they
    are **not the property of this repository's author** and are included
    for study and preservation purposes only. The extractors are
