@@ -14,6 +14,7 @@ const RomVoce rom_voci[] = {
     { 0x29C7, 8, tab_monete_29c7 },
     { 0x2B29, 154, tab_testi_2b29 },
     { 0x2D4A, 40, tab_attract_2d4a },
+    { 0x2D72, 24, tab_2d72 },
     { 0x303E, 7, tab_303e },
     { 0x3111, 32, tab_3111 },
     { 0x31E1, 8, testo_31e1 },

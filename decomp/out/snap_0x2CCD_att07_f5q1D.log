@@ -1,0 +1,9 @@
+Warning: -video none doesn't make much sense without -seconds_to_run
+POKE 2250 C19D 00
+POKE 2250 C19E 00
+POKE 2300 C19D 05
+POKE 2300 C243 1D
+POKE 2300 C045 00
+POSTA 2300 00 07
+SNAP: catturata occorrenza 1 di 0x2CCD [att07_f5q1D] al frame 2302, scartate 0
+Average speed: 2888.34% (37 seconds)

@@ -51,8 +51,9 @@ void fase_2dee(void)
     NEMICI_PUNTO(0x2df8, 0x2df9);
 }
 
-/* Fase 5, 2D07: con c243 = 1D chiamerebbe 3812 (mai eseguito); altrimenti,
- * con il bit 4 di c045 spento, ritorna senza scrivere. Con il bit acceso
+/* Fase 5, 2D07: con c243 = 1D (stanza 29) disegna la griglia dei blocchi
+ * dalla tabella 2D72 (3812 con C = 03, brief 66); altrimenti, con il bit 4
+ * di c045 spento, ritorna senza scrivere. Con il bit acceso
  * (stanze bonus, 3903) rimescola otto celle della griglia a c0bd (2D1F-2D48,
  * lotto 59): B = (R1 + R2) & 1F, per c da 7 a 0 la cella c0bd + ROM[2D52+B]
  * prende ROM[2D4A+c], + 40 se il suo bit 7 era acceso; poi B = (B+1) & 1F.
@@ -61,8 +62,13 @@ static void fase_2d07(void)
 {
     NEMICI_PUNTO(0x2d07, 0x2d1e);
     if (M(0xc243) == 0x1d) {                   /* 2D08-2D0D */
-        nemici_manca(0x2d0f);
-        return;
+        struct z80 z = {0};
+        z.a = 0x1d;                            /* cp 1D: Z acceso, riporto spento */
+        z.f = 0x40;
+        z.ix = 0x2d72;                         /* 2D0F */
+        z.c = 0x03;                            /* 2D13 */
+        sub_3812(&z);                          /* 2D15 */
+        return;                                /* 2D18 */
     }
     if (!(M(0xc045) & 0x10))                   /* 2D19-2D1E */
         return;
@@ -154,8 +160,10 @@ static void fase_2f2d(void)
 }
 
 /* Fase 11, 2DFA: c85e = 0; con c248 diverso da c249 (2E11 azzera anche
- * c19e) suona 38 e ritorna; con i due uguali incrementerebbe c19d (2E04,
- * mai eseguito). */
+ * c19e) suona 38 e ritorna; con i due uguali incrementa c19d (2E04): la
+ * fase 12 (2DAD) si salta e si passa alla 13. HL vale c19d: lo carica
+ * 2CCD e il gestore del rst 20h (0020-0026) lo restituisce intatto; qui il
+ * puntatore allo slot va in DE (2DFE pop de) e 2E11 non tocca HL. */
 static void fase_2dfa(void)
 {
     struct z80 z = {0};
@@ -163,11 +171,13 @@ static void fase_2dfa(void)
     M(0xc85e) = 0x00;                          /* 2DFB */
     NEMICI_PUNTO(0x2dfc, 0x2dff);
     sub_2e11(&z);                              /* 2DFF */
-    NEMICI_PUNTO(0x2e02, 0x2e08);
     if (z.f & 0x40) {                          /* 2E02 jr nz,2E06 */
-        nemici_manca(0x2e04);
+        NEMICI_PUNTO(0x2e02, 0x2e04);
+        M(0xc19d)++;                           /* 2E04 inc (hl) */
+        NEMICI_PUNTO(0x2e05, 0x2e05);
         return;
     }
+    NEMICI_PUNTO(0x2e02, 0x2e08);
     z.c = 0x38;
     sub_0028(&z);                              /* 2E08 rst 28h */
     NEMICI_PUNTO(0x2e09, 0x2e09);

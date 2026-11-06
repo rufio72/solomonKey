@@ -15,6 +15,7 @@ extern const uint8_t tab_boot_295c[36];  /* 295C-297F */
 extern const uint8_t tab_monete_29c7[8];  /* 29C7-29CE */
 extern const uint8_t tab_testi_2b29[154];  /* 2B29-2BC2 */
 extern const uint8_t tab_attract_2d4a[40];  /* 2D4A-2D71 */
+extern const uint8_t tab_2d72[24];  /* 2D72-2D89 */
 extern const uint8_t tab_303e[7];  /* 303E-3044 */
 extern const uint8_t tab_3111[32];  /* 3111-3130 */
 extern const uint8_t testo_31e1[8];  /* 31E1-31E8 */

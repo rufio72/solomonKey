@@ -54,6 +54,7 @@ VOCI = [
     ('P', 'tab_monete_29c7', 0x29C7, 0x29CE, L, '2980', 'monete 29C7, vite 29CB', 'zona'),
     ('P', 'tab_testi_2b29', 0x2B29, 0x2BC2, L, '2B08, rst 10', 'parole 2B29 + testi 2B61', 'zona'),
     ('P', 'tab_attract_2d4a', 0x2D4A, 0x2D71, L, '2D07', '8 byte + 32 posizioni (R & 1F)', 'statica'),
+    ('P', 'tab_2d72', 0x2D72, 0x2D89, L, '3812 via 2D0F', '24 byte, bit della griglia per la stanza 1D (brief 66)', 'statica'),
     ('P', 'tab_303e', 0x303E, 0x3044, L, '3009', '7 byte copiati', 'statica'),
     ('P', 'tab_3111', 0x3111, 0x3130, L, '30EF', '32 byte', 'zona'),
     ('P', 'testo_31e1', 0x31E1, 0x31E8, L, '6771', 'stringa (attributo, caratteri, FF)', 'zona'),
@@ -157,7 +158,7 @@ _s('attivita_25.c', (186,), 'V', 'testi_bonus_3d0a')
 _s('attivita_attract.c', (43,), 'V', 'tab_attract_43e5')
 _s('attivita_attract.c', (45,), 'V', 'tab_attract_43fd')
 _s('attivita_attract.c', (75, 78, 79), 'V', 'tab_demo_765e')
-_s('attivita_attract07.c', (71, 72), 'V', 'tab_attract_2d4a')
+_s('attivita_attract07.c', (77, 78), 'V', 'tab_attract_2d4a')
 _s('attivita_attract07a.c', (43, 44), 'V', 'tab_quadri_3a0e')
 _s('attivita_attract07a.c', (98,), 'V', 'tab_82d3')
 _s('attivita_attract07a.c', (125, 130), 'V', 'tab_quadri_85ec')
@@ -206,7 +207,7 @@ _s('z80_2xxx.c', (166,), 'V', 'tab_testi_2b29')
 _s('z80_2xxx.c', (289, 292, 297), 'V', 'tab_monete_29c7')
 _s('z80_2xxx.c', (520,), 'V', 'tab_demo_765e')
 _s('z80_38xx.c', (89, 90), 'V', 'tab_tile_8578', 'tab_tile_858e')
-_s('z80_38xx.c', (105,), 'V', 'tab_mappe_blocchi_1557')
+_s('z80_38xx.c', (105,), 'V', 'tab_mappe_blocchi_1557', 'tab_2d72')
 _s('z80_38xx.c', (244,), 'V', 'tab_bcd_3fe8')
 _s('z80_3xxx.c', (20,), 'V', 'tab_3111')
 _s('z80_3xxx.c', (106, 108), 'V', 'tab_sovrapposizioni_f138')
