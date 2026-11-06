@@ -19,6 +19,8 @@ Release pubblicate:
 - **v1.01** (2026-11-06): «click and play», eseguibile Linux x86_64 negli
   asset, nessuna ROM richiesta.
   <https://github.com/rufio72/solomonKey/releases/tag/v1.01>
+  Binario sostituito la sera stessa dopo i lotti 65-66B (bug dei mostri
+  dal 3-3 in poi e stop del corpo 07 risolti); note della release aggiornate.
 
 ## Numeri
 
@@ -26,8 +28,8 @@ Release pubblicate:
 |---|---|
 | Motore dei nemici | completo, 220/220 routine |
 | Codici della tabella corpi 3B11 | 40/40 tradotti |
-| Banco di prova (`harness --tutte`) | 335 voci, 1434 catture, 0 fallite |
-| Tabelle Tecmo in `tecmo/` (brief 62-63) | 91 del programma (21739 byte) + driver audio + musica + grafica |
+| Banco di prova (`harness --tutte`) | 335 voci, 1439 catture, 0 fallite |
+| Tabelle Tecmo in `tecmo/` (brief 62-66B) | 93 voci del programma (21849 byte) + driver audio + musica + grafica |
 | Letture ROM a runtime | 0 (`strace`: né `main64.bin` né `1.3jk`) |
 | Giro completo | 0-5499, saldatura 0 byte, 0 divergenze nello spedidore, 13 frame con hash coincidenti |
 | Destinazioni mai osservate | 59 in `decomp/ZONE-MAI-ESEGUITE.md` (53 DATO, 6 RAGGIUNGIBILI) |
@@ -70,7 +72,7 @@ Release pubblicate:
    una tabella del censimento ancora corta, da allargare con
    `estrai_rom.py` (le estensioni «misurate/stimate» sono annotate in
    `CENSIMENTO-ROM.md`).
-2. **Lotto 65 (in coda, deciso)**: versione browser — C+SDL2 compilato in
+2. **Lotto 67 (in coda, deciso)**: versione browser — C+SDL2 compilato in
    WebAssembly con Emscripten, pubblicata su GitHub Pages, link nel
    README. Niente filesystem virtuale: i dati sono già C compilato.
 3. **Code minori**: 39B9 chiusa nel lotto 65; 2E04 (fase 11 del 07),
@@ -104,9 +106,11 @@ nel libero uno solo; vedi `decomp/GIRO.md`).
   hash coincidenti».
 - Le ricette in `decomp/ricette/` con gli hash annotati in `decomp/GIRO.md`.
 - Modo `--oracolo` (hash video `a239d0a940bec0b9`, audio `c4b40fea06623a96`).
-- Banco: `harness --tutte` → 1422 catture, 1422 OK.
-- `python3 decomp/censimento_rom.py --verifica` → «CENSIMENTO OK: 201
-  occorrenze, 0 non classificate».
+- Banco: `harness --tutte` → 1439 catture, 1439 OK.
+- `python3 decomp/censimento_rom.py --verifica` → «CENSIMENTO OK: 202
+  occorrenze, 0 non classificate» e «LETTI FUORI VOCE: 0».
+- Spazzata delle 52 stanze: `gioca --stanza N --riproduci` (seme 4) a 8000
+  frame, per N da 0 a 51 — zero FERMO, zero AVVISO.
 - Clone pulito senza `roms/`: `make -C decomp/harness gioco` compila e
   `gioca -n 600 --muto` dà `ecd5acf694285489` / `8aedf41c0424df54`.
 
