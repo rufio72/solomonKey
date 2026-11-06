@@ -321,3 +321,16 @@ Tutte e cinque le domande sono preferenze, accettate con le proposte:
 4. `aud_usa_dati_estratti()` resta; senza `AUDIO_DATI` gli strumenti audio
    usano le tabelle.
 5. `README.md` e `NOTICE.md` restano disallineati fino al lotto 64.
+
+## Esito (2026-11-06)
+
+Ciclo passato al primo colpo (34º). Commit `e5d775d`; verificatore: tutte le
+verifiche passate — `gioca` NON APRE PIÙ NESSUNA ROM (strace 0), il clone
+pulito senza roms/ né decomp/out/ compila e gioca con gli hash attesi.
+tecmo/ ora contiene tutto il materiale Tecmo: 91 tabelle del programma, 22
+file di grafica/musica traslocati con git mv (contenuto identico), blob
+audio_driver.c (1478 byte, round-trip ok, md5 immagine
+43b065c0ca0bae238fec504ccfee55c0). Fedeltà intatta: giro, 4 ricette,
+oracolo, banco 1422/1422, 10 semi. Le righe di README/NOTICE da sistemare
+nel lotto 64 sono elencate in fondo a CENSIMENTO-ROM.md. Token: analista
+Opus ~110k, sviluppatore Opus ~72k, verificatore Sonnet ~27k.
