@@ -27,7 +27,7 @@ Release pubblicate:
 | Motore dei nemici | completo, 220/220 routine |
 | Codici della tabella corpi 3B11 | 40/40 tradotti |
 | Banco di prova (`harness --tutte`) | 335 voci, 1422 catture, 0 fallite |
-| Tabelle Tecmo in `tecmo/` (brief 62-63) | 91 del programma (20448 byte) + driver audio + musica + grafica |
+| Tabelle Tecmo in `tecmo/` (brief 62-63) | 91 del programma (21274 byte) + driver audio + musica + grafica |
 | Letture ROM a runtime | 0 (`strace`: né `main64.bin` né `1.3jk`) |
 | Giro completo | 0-5499, saldatura 0 byte, 0 divergenze nello spedidore, 13 frame con hash coincidenti |
 | Destinazioni mai osservate | 59 in `decomp/ZONE-MAI-ESEGUITE.md` (53 DATO, 6 RAGGIUNGIBILI) |
