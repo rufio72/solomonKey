@@ -1,7 +1,7 @@
 # Spartiti del Z80 audio: i comandi 01-3F
 
 Generato da `estrai_dati.py` dalla ROM `1.3jk` (brief 21): non modificare a
-mano. I dati stessi stanno in `harness/audio_dati_*.c` come macro leggibili
+mano. I dati stessi stanno in `tecmo/audio_dati_*.c` come macro leggibili
 (`NOTA`, `DUR`, `STRUM`, `SALTA`, `CHIAMA`, ...; definite in
 `harness/audio_dati.h`); la semantica dei byte è in `AUDIO-SEQUENZE.md`.
 

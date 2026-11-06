@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c11 -Wall -Wextra -O0
+CFLAGS = -std=c11 -Wall -Wextra -O0 -I. -I$(TECMO)
 # tabelle Tecmo del Z80 principale (estrai_rom.py, brief 62): ricompongono rom[]
 TECMO = ../../tecmo
 SORGENTI_ROM = $(wildcard $(TECMO)/rom_dati_*.c) $(TECMO)/rom_voci.c
@@ -12,9 +12,11 @@ SORGENTI = $(SORGENTI_BASE) $(SORGENTI_NEMICI)
 SORGENTI_SCHED = sched.c sched_proto.c
 # giro di gioco del replay (brief 23): il banco senza harness.c, più spedidore e replay.c
 SORGENTI_REPLAY = $(filter-out harness.c,$(SORGENTI)) sched.c replay.c
-SORGENTI_DATI = $(wildcard audio_dati*.c)
-INTESTAZIONI_DATI = $(wildcard audio_dati*.h)
-SORGENTI_DRIVER = audio_piattaforma.c audio_ossatura.c audio_registri.c audio_interprete.c $(SORGENTI_DATI)
+# dati audio estratti in tecmo/ (estrai_dati.py), serializzatore e macro in harness/;
+# codice del driver 0000-05C5 in tecmo/audio_driver.c (estrai_rom.py, brief 63)
+SORGENTI_DATI = audio_dati.c $(wildcard $(TECMO)/audio_dati_*.c)
+INTESTAZIONI_DATI = audio_dati.h $(wildcard $(TECMO)/audio_dati_*.h)
+SORGENTI_DRIVER = audio_piattaforma.c audio_ossatura.c audio_registri.c audio_interprete.c $(SORGENTI_DATI) $(TECMO)/audio_driver.c
 SORGENTI_AUDIO = audio_banco.c $(SORGENTI_DRIVER)
 
 # strato video SDL2 (lotto H3): i bersagli SDL esistono solo se sdl2-config risponde
@@ -44,23 +46,23 @@ SORGENTI_LIBERO = $(filter-out harness.c,$(SORGENTI)) sched.c macchina.c gioco_l
 gioco_libero: $(SORGENTI_LIBERO) ram.h $(TECMO)/rom_dati.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h giro_video.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_LIBERO)
 
-audio_banco: $(SORGENTI_AUDIO) audio.h $(INTESTAZIONI_DATI)
+audio_banco: $(SORGENTI_AUDIO) audio.h $(INTESTAZIONI_DATI) $(TECMO)/audio_driver.h
 	$(CC) $(CFLAGS) -o $@ $(SORGENTI_AUDIO)
 
-# andata e ritorno dei dati estratti (estrai_dati.py)
-audio_immagine: audio_immagine.c $(SORGENTI_DATI) $(INTESTAZIONI_DATI)
-	$(CC) $(CFLAGS) -o $@ audio_immagine.c $(SORGENTI_DATI)
+# andata e ritorno dell'immagine di 1.3jk (driver e dati di tecmo/)
+audio_immagine: audio_immagine.c $(SORGENTI_DATI) $(TECMO)/audio_driver.c $(INTESTAZIONI_DATI) $(TECMO)/audio_driver.h
+	$(CC) $(CFLAGS) -o $@ audio_immagine.c $(SORGENTI_DATI) $(TECMO)/audio_driver.c
 
 # un comando dal C del driver, senza oracolo (brief 22)
-audio_suona: audio_suona.c $(SORGENTI_DRIVER) audio.h $(INTESTAZIONI_DATI)
+audio_suona: audio_suona.c $(SORGENTI_DRIVER) audio.h $(INTESTAZIONI_DATI) $(TECMO)/audio_driver.h
 	$(CC) $(CFLAGS) -o $@ audio_suona.c $(SORGENTI_DRIVER)
 
 # renderizzatore dei flussi AY in wav con emu2149 (brief 22)
 audio_wav: audio_wav.c emu2149/emu2149.c emu2149/emu2149.h
 	$(CC) $(CFLAGS) -o $@ audio_wav.c emu2149/emu2149.c
 
-# strato video (lotto H2): renderizzatore, grafica estratta da estrai_grafica.py
-SORGENTI_GRAFICA = $(wildcard video_dati_*.c)
+# strato video (lotto H2): renderizzatore, grafica estratta da estrai_grafica.py in tecmo/
+SORGENTI_GRAFICA = $(wildcard $(TECMO)/video_dati_*.c)
 
 rendi_oracolo: rendi_oracolo.c video_rendi.c $(SORGENTI_GRAFICA) video.h
 	$(CC) $(CFLAGS) -o $@ rendi_oracolo.c video_rendi.c $(SORGENTI_GRAFICA)
@@ -86,7 +88,7 @@ mostra_replay: mostra_replay.c video_sdl.c video_sdl.h video_rendi.c $(SORGENTI_
 # il gioco si gioca (lotto H5): macchina libera o con oracolo, tastiera, DSW
 SORGENTI_GIOCA = $(filter-out gioco_libero.c,$(SORGENTI_LIBERO)) gioca.c gioca_tasti.c gioca_joy.c gioca_diag.c gioca_opzioni.c gioca_aiuto.c gioca_dsw.c macchina_libera.c video_sdl.c scheda_audio.c scheda_pcm.c gioca_audio.c $(SORGENTI_DRIVER) emu2149/emu2149.c
 
-gioca: $(SORGENTI_GIOCA) macchina.h ram.h $(TECMO)/rom_dati.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h video_sdl.h giro_video.h scheda_audio.h audio.h gioca_joy.h gioca_opzioni.h $(INTESTAZIONI_DATI) emu2149/emu2149.h
+gioca: $(SORGENTI_GIOCA) macchina.h ram.h $(TECMO)/rom_dati.h routine.h sched.h nemici.h e603.h rst20_tables.h rst38_tables.h video.h video_sdl.h giro_video.h scheda_audio.h audio.h gioca_joy.h gioca_opzioni.h $(INTESTAZIONI_DATI) $(TECMO)/audio_driver.h emu2149/emu2149.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ $(SORGENTI_GIOCA) $(SDL_LIBS)
 
 # prova dei pixel delle scanlines (addendum 57C): fuori da all, si lancia
@@ -94,18 +96,19 @@ gioca: $(SORGENTI_GIOCA) macchina.h ram.h $(TECMO)/rom_dati.h routine.h sched.h 
 prova_scanlines: prova_scanlines.c video_sdl.c video_sdl.h
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ prova_scanlines.c $(SDL_LIBS)
 
-# make gioco (lotto H7): prepara le ROM, compila gioca e dice come lanciarlo.
-# A runtime serve solo 1.3jk (audio): il Z80 principale viene dalle tabelle
-# di tecmo/ (brief 62); out/main64.bin serve ancora a rom_immagine.
+# make gioco compila gioca e basta: nessuna ROM a runtime né in compilazione
+# (Z80 principale, driver, musica e grafica in tecmo/).
 ROM_DIR = ../../roms/ext/solomon
 ifeq ($(HA_SDL),)
 gioco:
 	@echo "ERRORE: SDL2 non trovato. Installa libsdl2-dev (sudo apt install libsdl2-dev) e riprova." >&2; exit 2
 else
-gioco: rom gioca
+gioco: gioca
 	@echo "Pronto: lancia decomp/harness/gioca (gioca --aiuto per le opzioni)"
 endif
 
+# strumento di sviluppo per chi ha le ROM: estrae roms/solomon.zip e
+# costruisce out/main64.bin (servono a rom_immagine e agli estrattori di decomp/)
 rom:
 	@if [ ! -f $(ROM_DIR)/6.3f ] || [ ! -f $(ROM_DIR)/1.3jk ]; then \
 	  if [ -f ../../roms/solomon.zip ]; then \

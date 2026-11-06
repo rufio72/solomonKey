@@ -2,15 +2,15 @@
  * Spazio del Z80 audio: 0000-3fff ROM, 4000-47ff RAM, 8000 latch (lettura),
  * ffff nop (scrittura); io: tre YM2149 a 10/11, 20/21, 30/31 (pari =
  * indirizzo, dispari = dato). Nomi col prefisso aud_ per non urtare quelli
- * del principale. Nessun byte della ROM qui: la ROM si legge a tempo di
- * esecuzione (aud_carica_rom). */
+ * del principale. Nessun file ROM a runtime: l'immagine si ricompone da
+ * tecmo/ (aud_carica_rom). */
 #ifndef AUDIO_H
 #define AUDIO_H
 
 #include <stdint.h>
 
 extern uint8_t aud_ram[0x800];                 /* 4000-47ff */
-extern uint8_t aud_rom[0x4000];                /* 1.3jk */
+extern uint8_t aud_rom[0x4000];                /* immagine di 1.3jk ricomposta (aud_carica_rom) */
 #define AM(a) aud_ram[(uint16_t)(a) - 0x4000]
 
 /* Indirizzi RAM con nome */
@@ -62,7 +62,7 @@ extern uint8_t aud_rom[0x4000];                /* 1.3jk */
 
 /* Piattaforma (audio_piattaforma.c) */
 extern int aud_frame;                          /* frame corrente per il flusso */
-void aud_carica_rom(void);                     /* 1.3jk o exit(2) */
+void aud_carica_rom(void);                     /* driver e dati da tecmo/ */
 void aud_usa_dati_estratti(int modo);          /* 05C6-3FFF: 1 tabelle estratte, 2 tutta AA */
 void aud_azzera(void);                         /* RAM, ombre, contatori */
 extern uint8_t aud_latch;                      /* ultimo valore del latch (8000) */

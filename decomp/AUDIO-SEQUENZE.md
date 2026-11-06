@@ -133,5 +133,5 @@ tempismo a livello di cicli che il modello a fine frame non simula.
 ## Dati estratti (brief 21)
 
 Le tabelle e i flussi qui descritti sono estratti come macro C in
-`harness/audio_dati_*.c` (`estrai_dati.py`); i comandi 01-3F sono descritti
+`tecmo/audio_dati_*.c` (`estrai_dati.py`); i comandi 01-3F sono descritti
 in `SPARTITI.md`.

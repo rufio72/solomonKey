@@ -119,7 +119,7 @@ traccia). Proposta: **3 lotti**.
 2. Interprete delle sequenze: `0147`, `029E`, `036B` e i gestori di `0216`.
 3. Dati: tabella 0AF3 e sequenze 0B73-385E estratte come dati (da ROM a
    tempo di costruzione, non nel repo), più i codici lunghi in ciclo.
-   **Fatto (brief 21)**: la regione 05C6-3FFF è in `harness/audio_dati_*.c`,
+   **Fatto (brief 21)**: la regione 05C6-3FFF è in `tecmo/audio_dati_*.c` (brief 63),
    generata da `estrai_dati.py`; i comandi sono descritti in `SPARTITI.md`
    (sezione «Dati estratti» in fondo).
 
@@ -228,20 +228,23 @@ modello a cicli (risoluzione aggiuntiva del brief 20).
 ## Dati estratti (brief 21)
 
 - `estrai_dati.py` legge `1.3jk` e scrive la regione dati 05C6-3FFF come
-  sorgente C in `harness/`: `audio_dati_tabelle.c` (riempimenti, periodi dei
+  sorgente C in `tecmo/` (fino al brief 62 in `harness/`): `audio_dati_tabelle.c` (riempimenti, periodi dei
   toni 0700/0760, durate 0790, i 16 inviluppi software 0850-0AF2, tabella dei
   comandi 0AF3, residuo 3811), `audio_dati_spartiti_a.c`-`_g.c` (elenchi e
   flussi dei comandi 01-3F), `audio_dati_indirizzi.h` (un `ADR_<nome>` per
   etichetta) e `audio_dati_gruppi.h`. Macro dei flussi e struttura dei pezzi
-  in `audio_dati.h`, serializzatore in `audio_dati.c`. Il generatore controlla
+  in `harness/audio_dati.h`, serializzatore in `harness/audio_dati.c`; il
+  codice del driver 0000-05C5 è in `tecmo/audio_driver.c` (`estrai_rom.py`,
+  brief 63). Il generatore controlla
   da sé che le macro espanse ridiano la ROM; rieseguirlo non cambia nulla.
 - 478 pezzi a indirizzi ROM fissi, uno per etichetta (inizio di tabella,
   elenco, flusso di un record, bersaglio di F4/F7). Nomi dei flussi
   `cmd_NN_bK_sS` (comando, blocco, strato), ingressi interni `_p2`, `_p3`...;
   un blocco ripetuto nello stesso elenco prende `_r2` (comando 0E). Il flusso
   `cmd_1A_b2_s1` è usato anche dal comando 13.
-- Prova: `harness/audio_immagine <file>` ricompone 05C6-3FFF (14906 byte)
-  uguale alla ROM; `AUDIO_DATI=estratti ./harness/audio_banco <nome>` legge
+- Prova: `harness/audio_immagine <file>` ricompone l'immagine intera
+  (16384 byte: driver 0000-05C5 e dati 05C6-3FFF), da confrontare con `cmp`
+  contro `1.3jk`; `AUDIO_DATI=estratti ./harness/audio_banco <nome>` legge
   la regione dalle tabelle (riga `dati: estratti` su stderr) e dà gli stessi
   risultati e gli stessi flussi `_ay.txt` della ROM su tutti gli oracoli;
   `AUDIO_DATI=vuoto` (regione tutta AA) li fa divergere. Il codice del driver

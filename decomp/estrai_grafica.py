@@ -3,7 +3,7 @@
 
 Uso (da decomp/): python3 -I estrai_grafica.py
 Legge da ../roms/ext/solomon/ (o relativo allo script) le otto ROM
-grafiche e scrive in harness/ dodici file video_dati_*.c da 16384 byte:
+grafiche e scrive in ../tecmo/ dodici file video_dati_*.c da 16384 byte:
   video_dati_car_{a,b,c,d}.c  caratteri FG  (12.3t, 11.3r)
   video_dati_fon_{a,b,c,d}.c  fondale BG    (10.3p, 9.3m)
   video_dati_spr_{a,b,c,d}.c  sprite        (2.5lm 3.6lm 4.7lm 5.8lm)
@@ -16,7 +16,7 @@ import re
 import sys
 
 QUI = os.path.dirname(os.path.abspath(__file__))
-HARNESS = os.path.join(QUI, 'harness')
+TECMO = os.path.join(QUI, '..', 'tecmo')
 CARTELLE = ['../roms/ext/solomon', '../../roms/ext/solomon',
             os.path.join(QUI, '../roms/ext/solomon')]
 PEZZO = 0x4000
@@ -72,7 +72,7 @@ def main():
             if riletti != dati:
                 print('ERRORE: andata e ritorno fallita per %s' % array, file=sys.stderr)
                 sys.exit(2)
-            percorso = os.path.join(HARNESS, 'video_dati_%s.c' % suff)
+            percorso = os.path.join(TECMO, 'video_dati_%s.c' % suff)
             vecchio = None
             if os.path.exists(percorso):
                 with open(percorso, encoding='utf-8') as f:

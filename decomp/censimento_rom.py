@@ -244,7 +244,7 @@ ALTRI = {
 
 # Siti di aud_leggi( (Z80 audio): V = tabelle, R = RAM 4000-47ff, D = definizione.
 AUD_SITI = {
-    'audio_piattaforma.c:104': ('D', ()),
+    'audio_piattaforma.c:75': ('D', ()),
     'audio_interprete.c:37': ('V', ('aud_gestori_03ce', 'aud_dati_05c6')),
     'audio_ossatura.c:74': ('R', ()),
     'audio_ossatura.c:76': ('R', ()),

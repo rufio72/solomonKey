@@ -559,3 +559,24 @@ una lettura fuori voce nel gioco vero si vede dall'avviso e si chiude con la
 stessa procedura (disassemblato, `VOCI`, `estrai_rom.py`). La tabella
 «Estrazione» sopra è la stima del brief 61 e non è aggiornata.
 
+## Esito del lotto 63
+
+- Il codice del driver del Z80 audio (0000-05C5 di `1.3jk`, 1478 byte) è un
+  blob C generato da `estrai_rom.py` in `tecmo/audio_driver.c`
+  (`aud_driver[1478]`, dichiarato in `tecmo/audio_driver.h`); il generatore
+  controlla che le voci `A` del censimento (`aud_gestori_03ce`,
+  `aud_dati_05c6`) cadano dentro e a ridosso del blob.
+- I dati audio (`audio_dati_tabelle.c`, `audio_dati_spartiti_a.c`-`_g.c`,
+  `audio_dati_indirizzi.h`, `audio_dati_gruppi.h`) e la grafica (12
+  `video_dati_*.c`) sono passati da `decomp/harness/` a `tecmo/` con rinomine
+  pure; `audio_dati.h`/`audio_dati.c` (macro e serializzatore) restano in
+  `harness/`. Gli estrattori scrivono ora in `tecmo/`.
+- `aud_carica_rom()` ricompone `aud_rom[]` da tabelle e blob: `1.3jk` non
+  viene più aperto, `gioca` non legge nessun file ROM.
+  `harness/audio_immagine` scrive i 16384 byte, uguali a `1.3jk` (`cmp`).
+- `make gioco` non dipende più dal bersaglio `rom`, che resta come strumento
+  di sviluppo (estrae `roms/solomon.zip`, costruisce `out/main64.bin` per
+  `rom_immagine` e gli estrattori).
+- Promemoria per il lotto 64: restano disallineati `README.md` r. 173-179
+  («four ROM files», `solomon.zip` richiesto per giocare) e `NOTICE.md` r.
+  9-11 (`decomp/harness/audio_dati*.c`, `decomp/harness/video_dati_*.c`).

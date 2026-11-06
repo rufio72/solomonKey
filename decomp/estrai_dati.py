@@ -3,13 +3,13 @@
 
 Uso (da decomp/): python3 estrai_dati.py
 Legge ../roms/ext/solomon/1.3jk (o ../../roms/..., come audio_piattaforma.c)
-e scrive in harness/:
+e scrive in ../tecmo/:
   audio_dati_indirizzi.h   un #define ADR_<nome> per ogni etichetta
   audio_dati_gruppi.h      dichiarazioni ed elenco dei gruppi di pezzi
   audio_dati_tabelle.c     riempimenti, toni, durate, inviluppi, tabella
                            dei comandi, residuo 3811
   audio_dati_spartiti_*.c  elenchi e flussi dei comandi 01-3F
-e SPARTITI.md (descrizione funzionale dei comandi).
+e, in decomp/, SPARTITI.md (descrizione funzionale dei comandi).
 
 Ogni etichetta (inizio di tabella, elenco di un comando, flusso puntato da
 un record, bersaglio di F4/F7) apre un pezzo che arriva all'etichetta
@@ -22,7 +22,7 @@ import re
 import sys
 
 QUI = os.path.dirname(os.path.abspath(__file__))
-HARNESS = os.path.join(QUI, 'harness')
+TECMO = os.path.join(QUI, '..', 'tecmo')
 ROM_PERCORSI = ['../roms/ext/solomon/1.3jk', '../../roms/ext/solomon/1.3jk',
                 os.path.join(QUI, '../roms/ext/solomon/1.3jk')]
 
@@ -499,7 +499,7 @@ def documento(rom, cmd, nomi):
     t = ['# Spartiti del Z80 audio: i comandi 01-3F',
          '',
          'Generato da `estrai_dati.py` dalla ROM `1.3jk` (brief 21): non modificare a',
-         'mano. I dati stessi stanno in `harness/audio_dati_*.c` come macro leggibili',
+         'mano. I dati stessi stanno in `tecmo/audio_dati_*.c` come macro leggibili',
          '(`NOTA`, `DUR`, `STRUM`, `SALTA`, `CHIAMA`, ...; definite in',
          '`harness/audio_dati.h`); la semantica dei byte è in `AUDIO-SEQUENZE.md`.',
          '',
@@ -630,7 +630,7 @@ def main():
     gr += ['', '#endif', '']
     file_gen['audio_dati_gruppi.h'] = '\n'.join(gr)
     for nome, testo in sorted(file_gen.items()):
-        scrivi(os.path.join(HARNESS, nome), testo)
+        scrivi(os.path.join(TECMO, nome), testo)
 
     scrivi(os.path.join(QUI, 'SPARTITI.md'), documento(rom, cmd, nomi))
     print('pezzi: %d, file di spartiti: %d, etichette: %d'

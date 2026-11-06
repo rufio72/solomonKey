@@ -1,5 +1,5 @@
-/* Piattaforma del Z80 audio: memoria, caricamento di 1.3jk, porte dei tre
- * YM2149 con la stessa semantica dell'oracolo audio.lua e scrittura del
+/* Piattaforma del Z80 audio: memoria, immagine di 1.3jk ricomposta da
+ * tecmo/, porte dei tre YM2149 con la stessa semantica dell'oracolo audio.lua e scrittura del
  * flusso dei cambi nello stesso formato di out/audio/<nome>_ay.txt.
  * Il flusso è un'interfaccia stabile: un lotto futuro lo darà a un
  * emulatore YM2149 per generare i .wav dei codici. */
@@ -7,9 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include "audio.h"
 #include "audio_dati.h"
+#include "audio_driver.h"
 
 uint8_t aud_ram[0x800];
 uint8_t aud_rom[0x4000];
@@ -26,51 +26,22 @@ static int ombra[4][256];
 static unsigned ignote[256];
 static FILE *flusso;
 
-/* Carica 1.3jk da ../roms/ext/solomon/ o ../../roms/ext/solomon/ (da
- * decomp/ o da decomp/harness/) e, in coda, da <cartella dell'eseguibile>/
- * ../../roms/ext/solomon/; 16384 byte o exit(2). */
-static const char *rom_vicino_exe(char *buf, size_t n)
-{
-    char exe[4096];
-    ssize_t k = readlink("/proc/self/exe", exe, sizeof exe - 1);
-    if (k <= 0) return NULL;
-    exe[k] = 0;
-    char *barra = strrchr(exe, '/');
-    if (!barra) return NULL;
-    *barra = 0;
-    if (snprintf(buf, n, "%s/../../roms/ext/solomon/1.3jk", exe) >= (int)n) return NULL;
-    return buf;
-}
+_Static_assert(sizeof aud_driver == AUD_DATI_INIZIO, "driver 0000-05C5");
 
+/* Ricompone l'immagine di 1.3jk senza leggerla: regione dati 05C6-3FFF
+ * dalle tabelle (audio_dati_*.c, che prima riempiono tutto di 0xAA) e
+ * codice del driver 0000-05C5 dal blob di tecmo/audio_driver.c. */
 void aud_carica_rom(void)
 {
-    char esterno[4200];
-    const char *nomi[3] = { "../roms/ext/solomon/1.3jk",
-                            "../../roms/ext/solomon/1.3jk", NULL };
-    nomi[2] = rom_vicino_exe(esterno, sizeof esterno);
-    for (unsigned i = 0; i < 3; i++) {
-        if (!nomi[i]) continue;
-        FILE *f = fopen(nomi[i], "rb");
-        if (!f) continue;
-        size_t n = fread(aud_rom, 1, sizeof aud_rom, f);
-        int in_piu = fgetc(f) != EOF;
-        fclose(f);
-        if (n != sizeof aud_rom || in_piu) {
-            fprintf(stderr, "%s: lunghezza sbagliata (attesi 16384 byte)\n", nomi[i]);
-            exit(2);
-        }
-        return;
-    }
-    fprintf(stderr, "1.3jk non trovato in ../roms/ext/solomon/ né in ../../roms/ext/solomon/\n"
-                    "Esegui: make -C decomp/harness gioco\n");
-    exit(2);
+    aud_dati_serializza(aud_rom);
+    memcpy(aud_rom, aud_driver, sizeof aud_driver);
 }
 
 /* Origine dei dati 05C6-3FFF (dopo aud_carica_rom): modo 1 = immagine
- * ricomposta dalle tabelle estratte (audio_dati_*.c), così ogni lettura
- * della regione passa dalle tabelle; modo 2 = controllo negativo, regione
- * tutta 0xAA; altrimenti la ROM resta com'è. Il codice del driver
- * (0000-05C5) resta sempre quello della ROM. */
+ * ricomposta dalle tabelle estratte (audio_dati_*.c), gli stessi byte che
+ * aud_carica_rom ha già messo; modo 2 = controllo negativo, regione tutta
+ * 0xAA; altrimenti la regione resta quella delle tabelle. Il codice del
+ * driver (0000-05C5) resta sempre quello del blob di tecmo/. */
 void aud_usa_dati_estratti(int modo)
 {
     static uint8_t img[0x4000];

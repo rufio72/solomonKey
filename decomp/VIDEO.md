@@ -40,7 +40,7 @@ Bonus»; il finale vero (stanza con il pentagramma) è finale2.
 
 Il renderizzatore `harness/video_rendi.c` (`rendi_frame`) rende i sette stati
 con 0 pixel diversi dal PNG di MAME (`sh rendi_video.sh`). Grafica ROM in C
-generato da `estrai_grafica.py` (`harness/video_dati_*.c`).
+generato da `estrai_grafica.py` (`tecmo/video_dati_*.c`).
 
 - Schermo: tilemap 32x32 celle 8x8 = 256x256, cella `i = riga*32 + colonna`,
   nessuno scorrimento. Il PNG è l'area visibile, righe 16-239: riga `y` del
